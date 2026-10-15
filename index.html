@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Audiolibri</title>
+<meta name="description" content="Strumenti personali per l'archivio di audiolibri e le citazioni dei libri. I file CSV vengono elaborati nel browser.">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121417" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Audiolibri">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/home.css">
+<script src="assets/js/apps.js" defer></script>
+<script src="assets/js/home.js" defer></script>
+</head>
+<body>
+<header class="home-header">
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2z"/><path d="M3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2z"/><path d="M9 20h6"/></svg>
+      </div>
+      <span class="brand-name">Dashboard Audiolibri</span>
+    </div>
+    <button class="btn-install" id="btn-install" type="button" hidden title="Installa come app su questo dispositivo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      Installa
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <section class="intro" aria-labelledby="home-title">
+      <p class="eyebrow">Archivio personale</p>
+      <h1 id="home-title">Dashboard Audiolibri</h1>
+      <p>Gli strumenti per il tuo archivio di ascolti e le citazioni dei libri. Scegli da dove iniziare.</p>
+    </section>
+
+    <section aria-labelledby="apps-title">
+      <div class="section-head">
+        <h2 id="apps-title">Strumenti</h2>
+        <span id="app-count"></span>
+      </div>
+      <nav class="app-grid" id="app-grid" aria-label="Applicativi disponibili"></nav>
+      <noscript><p>Per usare Dashboard Audiolibri è necessario attivare JavaScript.</p></noscript>
+    </section>
+  </div>
+</main>
+
+<footer class="home-footer">
+  <div class="wrap">
+    <span>I file CSV vengono elaborati localmente nel browser.</span>
+    <span>Dashboard Audiolibri</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Citazioni in Immagine</title>
+<meta name="theme-color" content="#eceff1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14181b" media="(prefers-color-scheme: dark)">
+<!-- Dashboard Audiolibri: PWA, icone e navigazione comune (percorsi relativi) -->
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../../assets/css/app-nav.css">
+<style>
+  :root {
+    --bg: #eceff1; --panel: #ffffff; --ink: #1b2126; --muted: #5d6a73; --line: #d3dade;
+    --accent: #0f6b66; --accent-ink: #ffffff; --field: #f6f8f9; --stage: #dfe4e7; --warn: #b45309;
+    --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181b; --panel: #1c2226; --ink: #e8eef1; --muted: #93a1aa; --line: #2e383e;
+      --accent: #4fb8b0; --accent-ink: #0c1415; --field: #11161a; --stage: #0f1316; --warn: #f59e0b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181b; --panel: #1c2226; --ink: #e8eef1; --muted: #93a1aa; --line: #2e383e;
+    --accent: #4fb8b0; --accent-ink: #0c1415; --field: #11161a; --stage: #0f1316; --warn: #f59e0b; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font-ui);
+    padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px)); }
+  header.top { max-width: 1500px; margin: 0 auto 16px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+  header.top .ttl { flex: 1; min-width: 220px; }
+  h1 { font-size: 20px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0; }
+  .app { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 1500px; margin: 0 auto; }
+  @media (min-width: 960px) { .app { grid-template-columns: 360px minmax(0, 1fr); align-items: start; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0; }
+  .controls { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
+  @media (min-width: 960px) { .controls { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; } }
+  details.sec { border-bottom: 1px solid var(--line); padding: 4px 6px 10px; }
+  details.sec:last-child { border-bottom: 0; }
+  details.sec > summary { cursor: pointer; list-style: none; font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); font-weight: 700; padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+  details.sec > summary::-webkit-details-marker { display: none; }
+  details.sec > summary::after { content: '▸'; font-size: 12px; transition: transform .15s; }
+  details.sec[open] > summary::after { transform: rotate(90deg); }
+  .sec-body { display: flex; flex-direction: column; gap: 11px; }
+  label.f { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 13px; }
+  label.f .v { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lbl { display: flex; justify-content: space-between; gap: 8px; }
+  select, input[type="text"], input[type="search"], input[type="number"], textarea {
+    font: inherit; font-weight: 400; color: var(--ink); background: var(--field);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; width: 100%; min-width: 0; }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.4; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="color"] { width: 100%; height: 34px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); cursor: pointer; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .check { display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 13px; }
+  .check input { accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+  .check.dis { opacity: .5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--field); color: var(--ink);
+    border-radius: 999px; padding: 4px 10px 4px 5px; font: inherit; font-size: 12px; cursor: pointer; }
+  .chip i { width: 18px; height: 18px; border-radius: 50%; display: inline-block; border: 1px solid rgba(128,128,128,.4); }
+  .chip.txt { padding: 5px 11px; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg button { flex: 1; border: 0; background: var(--field); color: var(--ink); padding: 6px 4px; font-size: 12px; border-right: 1px solid var(--line); }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, .item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn { border: 1px solid var(--line); background: var(--field); color: var(--ink); border-radius: 6px; padding: 7px 11px; font-weight: 600; font-size: 13px; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.sm { padding: 5px 9px; font-size: 12px; }
+  .btn:disabled { opacity: .55; cursor: progress; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .file input { width: 100%; font: inherit; font-size: 12px; }
+  .right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .stage { background: var(--stage); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+  .stage.drag { outline: 3px dashed var(--accent); outline-offset: -6px; }
+  .canvas-wrap { display: flex; justify-content: center; align-items: center; min-height: 200px; }
+  .stage canvas { display: block; max-width: 100%; max-height: 72vh; width: auto; height: auto; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,.25); }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .bar .grow { flex: 1; min-width: 80px; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .list-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .list-head input[type="search"] { flex: 1; min-width: 160px; }
+  .list { position: relative; display: flex; flex-direction: column; max-height: 420px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; }
+  .item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; padding: 9px 10px; border-bottom: 1px solid var(--line); cursor: pointer; align-items: start; }
+  .item:last-child { border-bottom: 0; }
+  .item.active { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .item .t { font-weight: 600; font-size: 13px; }
+  .item .a { color: var(--muted); font-weight: 400; }
+  .item .q { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .item input { margin-top: 3px; accent-color: var(--accent); }
+  .item img { width: 26px; height: 38px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .hint { color: var(--muted); font-size: 12px; margin: 0; }
+  .hint.warn { color: var(--warn); }
+  .msg { color: var(--muted); font-size: 12px; min-height: 16px; }
+  .cover-box { display: flex; gap: 10px; align-items: center; }
+  .cover-box .ph { width: 54px; height: 80px; border-radius: 3px; border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 10px; text-align: center; flex: none; overflow: hidden; background: var(--field); }
+  .cover-box .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-box .info { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .edit-grid .full { grid-column: 1 / -1; }
+  .kbd { font-size: 11px; color: var(--muted); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="ttl">
+    <a class="home-link" href="../../index.html" title="Torna alla home di Dashboard Audiolibri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg><span class="home-label">Dashboard Audiolibri</span></a>
+    <h1>Citazioni in Immagine</h1>
+    <p class="sub">Carica il CSV, scegli formato, font, colori e copertina, poi scarica le immagini.</p>
+  </div>
+  <button class="btn sm" id="themeBtn" type="button" title="Tema dell'interfaccia">Tema: auto</button>
+</header>
+
+<div class="app">
+  <aside class="panel controls" aria-label="Impostazioni">
+
+    <details class="sec" open>
+      <summary>Dati</summary>
+      <div class="sec-body">
+        <label class="f file">CSV (Titolo, Autore, Citazione)
+          <input type="file" id="csvFile" accept=".csv,text/csv,text/plain">
+        </label>
+        <div class="msg" id="csvMsg">Puoi anche trascinare il CSV sull'anteprima.</div>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Stili rapidi</summary>
+      <div class="sec-body">
+        <div class="chips" id="styles"></div>
+        <p class="hint">Impostano font, colori e composizione in un clic. Il formato non cambia.</p>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Formato</summary>
+      <div class="sec-body">
+        <label class="f">Dimensione immagine
+          <select id="size">
+            <optgroup label="Orizzontale">
+              <option value="2400x1080">2400 × 1080 · 20:9 smartphone</option>
+              <option value="2340x1080">2340 × 1080 · 19,5:9 iPhone</option>
+              <option value="1920x1080">1920 × 1080 · Full HD 16:9</option>
+              <option value="2560x1440">2560 × 1440 · QHD 16:9</option>
+              <option value="3840x2160">3840 × 2160 · 4K 16:9</option>
+              <option value="1280x720">1280 × 720 · HD leggera</option>
+              <option value="1200x630">1200 × 630 · anteprima link / Facebook</option>
+              <option value="1600x900">1600 × 900 · X / Twitter</option>
+            </optgroup>
+            <optgroup label="Verticale">
+              <option value="1080x1920">1080 × 1920 · Storie e Reel 9:16</option>
+              <option value="1080x1350">1080 × 1350 · Post Instagram 4:5</option>
+              <option value="1080x2400">1080 × 2400 · sfondo smartphone 20:9</option>
+              <option value="1170x2532">1170 × 2532 · sfondo iPhone</option>
+              <option value="1440x3200">1440 × 3200 · smartphone QHD+</option>
+              <option value="1264x1680">1264 × 1680 · Kobo Libra Colour</option>
+              <option value="1072x1448">1072 × 1448 · Kindle Paperwhite</option>
+              <option value="1000x1500">1000 × 1500 · Pinterest 2:3</option>
+              <option value="2480x3508">2480 × 3508 · A4 stampa 300 dpi</option>
+            </optgroup>
+            <optgroup label="Quadrato">
+              <option value="1080x1080">1080 × 1080 · post quadrato</option>
+              <option value="2048x2048">2048 × 2048 · alta risoluzione</option>
+            </optgroup>
+            <optgroup label="Altro">
+              <option value="custom">Personalizzata…</option>
+            </optgroup>
+          </select>
+        </label>
+        <div class="row3" id="customRow">
+          <label class="f">Larghezza <input type="number" id="cw" min="200" max="8000" step="10"></label>
+          <label class="f">Altezza <input type="number" id="ch" min="200" max="8000" step="10"></label>
+          <label class="f">&nbsp;<button class="btn" id="rotate" type="button" title="Scambia larghezza e altezza">↻ Ruota</button></label>
+        </div>
+        <div>
+          <label class="f">File
+            <select id="fmt"><option value="png">PNG (qualità massima)</option><option value="jpeg">JPG (più leggero)</option></select>
+          </label>
+          <label class="f" id="jqWrap" style="margin-top:11px"><span class="lbl">Qualità JPG <span class="v" id="jqV"></span></span>
+            <input type="range" id="jq" min="60" max="100" step="1">
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Tipografia</summary>
+      <div class="sec-body">
+        <label class="f">Font della citazione <select id="qFont"></select></label>
+        <label class="check" id="italicWrap"><input type="checkbox" id="italic"> <span>Citazione in corsivo <span id="italicNote" class="kbd"></span></span></label>
+        <label class="f">Font di autore e titolo <select id="mFont"></select></label>
+        <div class="row2">
+          <label class="check"><input type="checkbox" id="authorUpper"> Autore maiuscolo</label>
+          <label class="check" id="titleItalicWrap"><input type="checkbox" id="titleItalic"> Titolo in corsivo</label>
+        </div>
+        <label class="f"><span class="lbl">Dimensione massima citazione <span class="v" id="maxSizeV"></span></span>
+          <input type="range" id="maxSize" min="3" max="14" step="0.5"></label>
+        <label class="f"><span class="lbl">Interlinea <span class="v" id="lhV"></span></span>
+          <input type="range" id="lh" min="1.1" max="1.8" step="0.05"></label>
+        <label class="f"><span class="lbl">Dimensione autore e titolo <span class="v" id="metaScaleV"></span></span>
+          <input type="range" id="metaScale" min="60" max="180" step="5"></label>
+        <label class="check"><input type="checkbox" id="balance"> Righe bilanciate (evita parole orfane)</label>
+        <label class="check"><input type="checkbox" id="typo"> Tipografia curata (’ “ ” …)</label>
+        <label class="f">Citazione che inizia in minuscolo
+          <select id="startCase">
+            <option value="asis">Lascia com'è</option>
+            <option value="cap">Prima lettera maiuscola</option>
+            <option value="ellipsis">Aggiungi “…” all'inizio</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Colori e sfondo</summary>
+      <div class="sec-body">
+        <div class="chips" id="presets"></div>
+        <div class="row2">
+          <label class="f">Sfondo <input type="color" id="bg"></label>
+          <label class="f">Sfondo 2 <input type="color" id="bg2"></label>
+          <label class="f">Testo <input type="color" id="fg"></label>
+          <label class="f">Accento <input type="color" id="accent"></label>
+        </div>
+        <p class="hint" id="contrast"></p>
+        <label class="f">Sfumatura
+          <select id="grad">
+            <option value="none">Nessuna (tinta unita)</option>
+            <option value="diag">Diagonale</option>
+            <option value="vert">Verticale</option>
+            <option value="radial">Radiale (luce al centro)</option>
+          </select>
+        </label>
+        <div class="row2">
+          <label class="check"><input type="checkbox" id="grain"> Grana carta</label>
+          <label class="check"><input type="checkbox" id="vignette"> Vignettatura</label>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Composizione</summary>
+      <div class="sec-body">
+        <label class="f">Allineamento orizzontale
+          <div class="seg" data-key="align"><button type="button" data-v="left">Sinistra</button><button type="button" data-v="center">Centro</button><button type="button" data-v="right">Destra</button></div>
+        </label>
+        <label class="f">Posizione verticale
+          <div class="seg" data-key="valign"><button type="button" data-v="top">Alto</button><button type="button" data-v="center">Centro</button><button type="button" data-v="bottom">Basso</button></div>
+        </label>
+        <label class="f">Autore e titolo
+          <select id="footerMode">
+            <option value="bottom">Ancorati in fondo</option>
+            <option value="attached">Subito sotto la citazione</option>
+          </select>
+        </label>
+        <label class="f"><span class="lbl">Margini <span class="v" id="marginV"></span></span>
+          <input type="range" id="margin" min="3" max="16" step="0.5"></label>
+        <div class="row2">
+          <label class="f">Virgolette
+            <select id="markStyle">
+              <option value="big">Grandi, in accento</option>
+              <option value="watermark">Filigrana sullo sfondo</option>
+              <option value="inline">« » attorno al testo</option>
+              <option value="none">Nessuna</option>
+            </select>
+          </label>
+          <label class="f">Separatore
+            <select id="rule">
+              <option value="line">Filetto</option>
+              <option value="dash">Lineetta —</option>
+              <option value="dot">Punto ·</option>
+              <option value="none">Nessuno</option>
+            </select>
+          </label>
+        </div>
+        <label class="check"><input type="checkbox" id="frame"> Cornice sottile</label>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Copertina</summary>
+      <div class="sec-body">
+        <div class="cover-box">
+          <div class="ph" id="coverThumb">nessuna copertina</div>
+          <div class="info">
+            <span id="coverInfo">Libro corrente</span>
+            <div class="btns">
+              <label class="btn sm" style="cursor:pointer">Carica…<input type="file" id="coverFile" accept="image/*" class="hidden"></label>
+              <button class="btn sm" id="coverDel" type="button">Rimuovi</button>
+            </div>
+          </div>
+        </div>
+        <label class="f file">Carica più copertine (abbinate dal nome file al titolo)
+          <input type="file" id="coverMulti" accept="image/*" multiple>
+        </label>
+        <div class="msg" id="coverMsg">Puoi anche trascinare un'immagine sull'anteprima.</div>
+        <label class="check"><input type="checkbox" id="coverOn"> Mostra la copertina quando presente</label>
+        <label class="f">Disposizione
+          <select id="coverLayout">
+            <option value="side">Accanto al testo (sopra in verticale)</option>
+            <option value="thumb">Miniatura accanto ad autore e titolo</option>
+            <option value="bg">Sfondo sfocato</option>
+          </select>
+        </label>
+        <label class="f" id="coverSideWrap">Lato (formati orizzontali e quadrati)
+          <div class="seg" data-key="coverSide"><button type="button" data-v="left">Sinistra</button><button type="button" data-v="right">Destra</button></div>
+        </label>
+        <label class="f" id="coverScaleWrap"><span class="lbl">Dimensione copertina <span class="v" id="coverScaleV"></span></span>
+          <input type="range" id="coverScale" min="50" max="140" step="5"></label>
+        <label class="f" id="overlayWrap"><span class="lbl">Velatura sullo sfondo <span class="v" id="overlayV"></span></span>
+          <input type="range" id="overlay" min="30" max="95" step="1"></label>
+        <label class="f"><span class="lbl">Angoli arrotondati <span class="v" id="coverRadiusV"></span></span>
+          <input type="range" id="coverRadius" min="0" max="8" step="0.5"></label>
+        <label class="check"><input type="checkbox" id="coverShadow"> Ombra morbida</label>
+        <label class="check"><input type="checkbox" id="autoPal"> Colori ricavati dalla copertina</label>
+        <label class="f" id="palToneWrap">Tono palette
+          <div class="seg" data-key="palTone"><button type="button" data-v="dark">Scuro</button><button type="button" data-v="light">Chiaro</button></div>
+        </label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Firma</summary>
+      <div class="sec-body">
+        <label class="f">Testo facoltativo (es. profilo social)
+          <input type="text" id="extra" placeholder="es. @clubdellaudiolibro"></label>
+        <label class="f">Posizione
+          <select id="extraPos">
+            <option value="br">In basso a destra</option>
+            <option value="bc">In basso al centro</option>
+            <option value="bl">In basso a sinistra</option>
+            <option value="tr">In alto a destra</option>
+            <option value="tl">In alto a sinistra</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Template salvati</summary>
+      <div class="sec-body">
+        <select id="tplList"></select>
+        <div class="btns">
+          <button class="btn sm" id="tplApply" type="button">Applica</button>
+          <button class="btn sm" id="tplSave" type="button">Salva corrente…</button>
+          <button class="btn sm" id="tplDel" type="button">Elimina</button>
+        </div>
+        <div class="btns">
+          <button class="btn sm" id="tplExport" type="button">Esporta JSON</button>
+          <label class="btn sm" style="cursor:pointer">Importa JSON<input type="file" id="tplImport" accept=".json,application/json" class="hidden"></label>
+          <button class="btn sm" id="reset" type="button">Ripristina predefiniti</button>
+        </div>
+      </div>
+    </details>
+  </aside>
+
+  <main class="right">
+    <section class="stage" id="stage" aria-label="Anteprima">
+      <div class="canvas-wrap"><canvas id="preview" width="2400" height="1080"></canvas></div>
+      <div class="bar">
+        <button class="btn" id="prev" type="button" title="Freccia sinistra">← Precedente</button>
+        <button class="btn" id="next" type="button" title="Freccia destra">Successiva →</button>
+        <span class="grow" id="counter"></span>
+        <button class="btn" id="copy" type="button">Copia</button>
+        <button class="btn" id="dlOne" type="button">Scarica</button>
+        <button class="btn primary" id="dlZip" type="button">Scarica selezionate (ZIP)</button>
+      </div>
+      <p class="hint" id="status"></p>
+    </section>
+
+    <section class="panel">
+      <details class="sec" style="border:0;padding:0">
+        <summary>Modifica la citazione corrente</summary>
+        <div class="sec-body edit-grid">
+          <label class="f">Titolo <input type="text" id="eT"></label>
+          <label class="f">Autore <input type="text" id="eA"></label>
+          <label class="f full">Citazione <span class="kbd">(tre spazi consecutivi o una riga vuota = nuovo paragrafo)</span>
+            <textarea id="eQ"></textarea></label>
+          <div class="btns full">
+            <button class="btn sm" id="addItem" type="button">+ Nuova citazione</button>
+            <button class="btn sm" id="delItem" type="button">Elimina citazione</button>
+            <button class="btn sm" id="exportCsv" type="button">Esporta CSV aggiornato</button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <div class="list-head">
+        <input type="search" id="search" placeholder="Cerca per titolo, autore o testo">
+        <button class="btn" id="all" type="button">Tutte</button>
+        <button class="btn" id="none" type="button">Nessuna</button>
+      </div>
+      <div class="list" id="list" role="list"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const DATA = [{"t": "Espiazione", "a": "Ian McEwan", "q": "E finalmente lui pronunciò le due semplicissime parole che nemmeno una montagna di arte e ideali scadenti potrà mai screditare del tutto"}, {"t": "Espiazione", "a": "Ian McEwan", "q": "La guerra, come abbiamo affermato, è il nemico giurato della creatività."}, {"t": "La quarta versione di Giuda", "a": "Dario Ferrari", "q": "Dalla prima pagina di un romanzo si capiscono un sacco di cose, circa la stoffa di un narratore. Si può dire che vi sia già tutto,"}, {"t": "La quarta versione di Giuda", "a": "Dario Ferrari", "q": "un alibi va bene, ma troppo alibi è un po’ sospetto"}, {"t": "La quarta versione di Giuda", "a": "Dario Ferrari", "q": "Signore, chiamami a Te prima che faccia una strage; concedimi un infarto e fammi salire nei tuoi giardini dove scorrono maionese e SevenUp: se mi lasci qui ancora mezz’ora, Ti giuro che non rispondo di me, e poi faccio uno sproposito e finisco all’inferno. Salvami, Ti prego"}, {"t": "La quarta versione di Giuda", "a": "Dario Ferrari", "q": "Alla gente i problemi gli servono per tenersi occupati e restare sani di mente; e gli servono pure delle orecchie in cui riversarli periodicamente. Questo sì che è un servizio al prossimo: lasciare alla gente i loro problemi, ma permettergli di raccontarteli"}, {"t": "La quarta versione di Giuda", "a": "Dario Ferrari", "q": "aveva pregato il Signore di fare un miracolo e dare alla carota che stava mangiando una coscienza e una sensibilità, in modo da poterle dire quanto la odiava e da infliggerle con i suoi morsi un supplizio paragonabile a quello che lui provava nel mangiarle."}, {"t": "La quarta versione di Giuda", "a": "Dario Ferrari", "q": "Quella è una fantasia come la potrebbe elaborare un ragazzino di sette anni, o uno di dieci un po’ lento. Il mondo è complesso, e loro lo trattano con strumenti tragicamente grossolani.»"}, {"t": "Il banditore", "a": "Joan Samson", "q": "«Voglio che tu lo sappia, Red Mudgett», disse Ma’ sforzandosi di alzarsi con i bastoni. «Quando sarà giunta la mia ora, mi risveglierò dalla tomba e ti perseguiterò, e quelle giornate saranno le più lunghe della tua vita.»"}, {"t": "La famiglia Karnowski", "a": "Israel J. Singer", "q": "Se avessero idea di che macchina straordinaria sia l’uomo, di quale materia pregiata sia costituito il suo corpo, con quale immensa intelligenza e razionalità sia fatto ogni organo, quale meraviglia sia un cuore umano, un cervello, un occhio, non acconsentirebbero al massacro con tanta leggerezza"}, {"t": "La famiglia Karnowski", "a": "Israel J. Singer", "q": "Se gli sciocchi deformano le parole del saggio, ciò non fa di lui un imbecille"}, {"t": "La famiglia Karnowski", "a": "Israel J. Singer", "q": "E poi, come sempre succede in caso di calamità, ognuno pensava che se doveva arrivare una disgrazia avrebbe colpito il vicino, non lui."}, {"t": "Un romanzo russo", "a": "Emmanuel Carrère", "q": "troppo spesso trascuriamo quello che crediamo di possedere e che aspettiamo di perderlo per rimpiangerlo"}, {"t": "La vita di un ragazzo", "a": "Robert McCammon", "q": "È buffo, a volte, quando guardi le persone che ti hanno messo al mondo e ti rivedi così chiaramente in loro. Ti rendi conto che ogni persona al mondo è un compromesso della natura."}, {"t": "La vita di un ragazzo", "a": "Robert McCammon", "q": "Siamo abituati a credere di essere i padroni del nostro dominio e che Dio ci abbia dato la Terra per governarla. Abbiamo bisogno di questa illusione come di una buona luce notturna. La verità è più spaventosa: siamo fragili come giovani alberi sotto i tornado e le nostre amate case sono a un’inondazione di distanza dall’andare alla deriva. Piantiamo le nostre radici in una terra che trema, viviamo dove sono sorte e cadute montagne e dove i mari preistorici sono evaporati in nebbia. Noi e le città che abbiamo costruito non siamo permanenti; la terra stessa è un treno che passa."}, {"t": "La vita di un ragazzo", "a": "Robert McCammon", "q": "Nessuno» sussurrò la signora Neville «cresce mai davvero.»    Mi accigliai. Che razza di segreto era? Mio padre e mia madre erano adulti, no? Così come il signor Dollar, il capo Marchette, il dottor Parrish, il reverendo Lovoy, la signora e tutti gli altri maggiorenni.    «Possono sembrare adulti,» continuò «ma è un travestimento. È solo l’argilla del tempo. Uomini e donne sono ancora bambini nel profondo del cuore. Vorrebbero ancora saltare e giocare, ma la pesante argilla non glielo permette. Vorrebbero liberarsi da tutte le catene che il mondo ha messo loro addosso, togliersi gli orologi, le cravatte e le scarpe della domenica e tornare nudi alla piscina, anche solo per un giorno."}, {"t": "La vita di un ragazzo", "a": "Robert McCammon", "q": "«La vita non è tutta rose e fiori.» Papà posò il giornale. «Vorrei che lo fosse, dio sa se lo voglio. Ma la vita è tanto dolore e disordine quanto gioia e ordine. Probabilmente è anche molto più disordine che ordine. Credo che, quando te ne rendi conto,» fece un sorriso leggero, con gli occhi tristi, e mi guardò «cominci a crescere.»"}, {"t": "La vita di un ragazzo", "a": "Robert McCammon", "q": "I morti bianchi giacevano da un lato, quelli neri dall’altro. Era logico che persone che non potevano mangiare nello stesso bar, nuotare nella stessa piscina pubblica o fare acquisti negli stessi negozi non fossero felici di essere morte e sepolte a poca distanza l’una dall’altra. Mi venne voglia di chiedere al reverendo Lovoy se la Signora e l’Uomo Luna sarebbero andati nello stesso paradiso di Davy Ray. Se i neri occupano lo stesso paradiso dei bianchi, che senso ha mangiare in caffè diversi qui sulla Terra? Se i neri e i bianchi camminavano insieme in paradiso, voleva dire che siamo più intelligenti o più stupidi di Dio perché sulla Terra ci evitavamo"}, {"t": "La vita di un ragazzo", "a": "Robert McCammon", "q": "Le lancio un’occhiata e i miei occhi sono benedetti. Porta la luce del sole nei suoi capelli biondi come una distesa di fiori d’oro. C’è anche un po’ d’argento e mi piace, anche se lei se ne cruccia un po’. I suoi occhi sono grigio chiaro e il suo sguardo è calmo e costante. È una roccia quando ho bisogno di forza e un cuscino quando ho bisogno di conforto."}, {"t": "Il talento degli scomparsi", "a": "Claudio Bisio", "q": "Marco non aveva più alcun legame con Milano, nessuna necessità di incombenze quotidiane, nessun dovere morale. E questo, anziché regalargli serenità, gli creava ansia. Ora non aveva più scuse. Poteva fare quello che voleva. Aiuto! Perché sottintendeva che lui sapesse cosa voleva. E così non era."}, {"t": "Il talento degli scomparsi", "a": "Claudio Bisio", "q": "“Non esistono destinazioni sbagliate, solo percorsi tortuosi. Non è importante la meta, ma il viaggio,” si ripete tra sé. Fatalista lo è sempre stato, cocciuto lo è diventato, pirla è un’acquisizione recente"}, {"t": "Il diavolo e l'acqua scura", "a": "Stuart Turton", "q": "le persone spaventate farebbero qualsiasi cosa, per non avere più paura, e lo farebbero quasi a chiunque"}, {"t": "Il diavolo e l'acqua scura", "a": "Stuart Turton", "q": "Il lavoro di un soldato è finire morto lontano da casa, combattendo per un re che non gli darebbe le briciole della sua tavola"}, {"t": "Trilogia Nera", "a": "Léo Malet", "q": "Dacché lottiamo per un mondo migliore, ho la sensazione che quello in cui viviamo diventi sempre peggio"}, {"t": "Ho fatto la spia", "a": "Joyce Carol Oates", "q": "Molto tempo fa, quando mamma mi amava tanto quanto mi amava papà. Quando sapevo (senza bisogno che me lo dicesse nessuno) che mamma si sarebbe occupata di me e mi avrebbe protetta dal male anche se questo male fosse stato papà."}, {"t": "Ho fatto la spia", "a": "Joyce Carol Oates", "q": "È questo il nauseante, malinconico segreto della famiglia: ti ritrai terrorizzata dai colpi di un genitore eppure, se non sei tu il bersaglio dei colpi, ti gonfi di una specie di abietto orgoglio.    Mio fratello e non io. Lui, di conseguenza non io."}, {"t": "Ho fatto la spia", "a": "Joyce Carol Oates", "q": "Una famiglia somiglia a un albero gigantesco. Può anche essere gravemente danneggiato, magari sta cominciando a morire e marcire, ma le sue radici sono aggrovigliate sottoterra, inestricabilmente."}, {"t": "Rabbits. Gioca se ne hai il coraggio", "a": "Terry Miles", "q": "Il francobollo arriva dal paese di Thirland. Ora, se sapete qualcosina di geografia, sapete che il Thirland non esiste.Resta, comunque, un bellissimo francobollo. Io l’ho visto.C’è qualcosa in quel francobollo che ti fa sentire strano – come se sapessi di averlo già visto, come se sapessi della sua esistenza da sempre."}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "Avete mai provato a concentrarvi su qualcosa di difficile con una folla di gente che vi guarda?"}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "… O peggio ancora, con una folla di spettatori che magari vocalizza le sue speranze che non ci riusciate così che la loro favorita vi batta?"}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "Nei miei match juniores di livello relativamente basso, davanti a un pubblico che di rado arrivava ai due zeri, dovevo impiegare tutte le mie forze già solo per controllare lo sfintere."}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "Certo, la pratica diffusa di immergere la polpa di aragosta nel burro sciolto azzera tutti questi dati positivi sui grassi"}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "il modo più rapido per stroncare la vitalità di un autore agli occhi di potenziali lettori è presentarlo da subito come un «grande» o un «classico». Per gli studenti l’autore diventa cosí come una medicina o come le verdure, qualcosa che le autorità hanno dichiarato «salutare» e che «devono farsi piacere», e a quel punto le membrane nittitanti degli studenti si abbassano, e tutti percorrono semplicemente le mosse d’obbligo del criticismo e dello scrivere tesine senza trovarci niente di reale o rilevante. È come togliere tutto l’ossigeno da una stanza prima di cercare di accendere un fuoco."}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "avete tutto il diritto di stare a casa, se volete, ma non prendetevi in giro pensando di non votare. In realtà, non votare è impossibile: si può votare votando, oppure votare rimanendo a casa e raddoppiando tacitamente il valore del voto di un irriducibile."}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "sappiate però che chi crede in roba del genere di solito viene costretto a prendere degli psicofarmaci)"}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "È doloroso sapere che"}, {"t": "Considera l'aragosta", "a": "David Foster Wallace", "q": "la verità raramente è complicata"}, {"t": "Furore", "a": "John Steinbeck", "q": "Il bisogno fa da stimolo all’idea, l’idea all’azione."}, {"t": "Furore", "a": "John Steinbeck", "q": "la devi piantare di pararti la faccia se nessuno ti piglia a pugni."}, {"t": "Furore", "a": "John Steinbeck", "q": "Quando il coyote ti guarda tutto tenero e fa il giro largo come per dirti che lui è lì solo per giocare e non vuole fare niente di male… be’, vuol dire che vicino c’è un pollaio.”"}, {"t": "Furore", "a": "John Steinbeck", "q": "nei loro occhi cresce il furore. Nell’anima degli affamati i semi del furore sono diventati acini, e gli acini grappoli ormai pronti per la vendemmia."}, {"t": "Furore", "a": "John Steinbeck", "q": "Le donne guardavano gli uomini, li guardavano per capire se stavolta sarebbero crollati. Le donne guardavano e non dicevano niente. E quando gli uomini erano in gruppo, la paura spariva dai loro volti e la rabbia prendeva il suo posto. E le donne sospiravano di sollievo, perché capivano che andava tutto bene: il crollo non c’era stato; e non ci sarebbe mai stato nessun crollo finché la paura fosse riuscita a trasformarsi in furore."}, {"t": "Metafisica dei tubi", "a": "Amélie Nothomb", "q": "Che differenza c’è fra occhi che possiedono uno sguardo e occhi che ne sono sprovvisti? Questa differenza ha un nome: si chiama vita. La vita inizia laddove inizia lo sguardo."}, {"t": "Stato di sogno", "a": "Eric Puchner", "q": "Era quello il vero sacrificio: rinunciare alla tua felicità, a quello che amavi forse più di qualunque altra cosa al mondo, solo perché anche tuo figlio un giorno ne potesse godere. Potesse provare un po’ di quella gioia."}, {"t": "Le ombre del mondo", "a": "Michel Bussi", "q": "Credetemi, il progresso è una maledizione! Te lo dimentichi se ci vivi insieme, ma appena non ce l’hai lo maledici"}, {"t": "I baffi", "a": "Emmanuel Carrère", "q": "«Mi ama, la amo, e solo questo è vero»"}, {"t": "L'avversario", "a": "Emmanuel Carrère", "q": "Lui, d’altronde, era così poco abituato a farsi sentire che quello che ricorda non è il volume reale del proprio intervento – un balbettio, l’accenno sommesso di una riserva – ma il fragore indignato che gli ribolliva dentro, al quale ha tentato invano di dare voce. Ha sentito se stesso affermare con tutta l’enfasi necessaria quello che avrebbe voluto dire, e non quello che gli altri hanno sentito. Può anche darsi che non abbia detto assolutamente nulla, che abbia semplicemente pensato, sognato di dirlo, poi rimpianto di non averlo detto, e per finire si sia convinto di averlo detto sul serio"}, {"t": "Daisy Jones & The Six", "a": "Taylor Jenkins Reid", "q": "è quello che chiediamo all’arte, giusto? Esprimere qualcosa che ci sembra sia sempre vissuto dentro di noi? Prendere un pezzo del nostro cuore e mostrarcelo? È come se ti venisse presentata una parte di te stesso"}, {"t": "Il deserto dei Tartari", "a": "Dino Buzzati", "q": "gli uomini, per quanto possano volersi bene, rimangono sempre lontani; che se uno soffre il dolore è completamente suo, nessun altro può prenderne su di sé una minima parte; che se uno soffre, gli altri per questo non sentono male, anche se l'amore è grande, e questo provoca la solitudine della vita."}, {"t": "La passione secondo Thérèse", "a": "Daniel Pennac", "q": "Se c'è una circostanza della sua vita in cui il cane sembra pensare, un momento di pura introspezione, è quando spinge. Allora, e solo allora, l'occhio del cane sfiora l'umano. Addirittura lo trascende"}, {"t": "V13", "a": "Emmanuel Carrère", "q": "Il male immaginario è romantico, romanzesco, vario; il male reale incolore ... desertico, noioso. Il bene immaginario è noioso; il bene reale è sempre nuovo, meraviglioso, inebriante"}, {"t": "V13", "a": "Emmanuel Carrère", "q": "i soli rispettabili tra loro sono gli identitari di estrema destra, perfettamente d’accordo con i jihadisti nel riconoscere la radicale incompatibilità tra le loro civiltà"}, {"t": "La fata carabina", "a": "Daniel Pennac", "q": "Colui che se esiste"}, {"t": "Signor Malaussène", "a": "Daniel Pennac", "q": "\"L'ho sognato, dottore. L'ho sognato addormentandomi e mi sono svegliata che ce l'avevo\".\"Ma no, piccola, è il cancro che funziona così!\""}, {"t": "Dizionario dei nomi propri", "a": "Amélie Nothomb", "q": "Indubbiamente ciascun essere ha, nell’universo dei libri, un’opera che lo trasforma in lettore, posto che il destino favorisca il loro incontro."}, {"t": "La prosivendola", "a": "Daniel Pennac", "q": "Adoro i matrimoni, non perdo mai l'occasione di vedere a cosa sono scampato."}, {"t": "Annalisa e il passaggio a livello", "a": "Giorgio Scerbanenco", "q": "Si va da una donna, si domanda perché vuol fare un bambino e lei non lo sa, soltanto lo vuol fare. Ma quando mette il sale nella pentola della minestra, lei sa benissimo perché lo fa, per dare più sapore al brodo. Così può spiegare perché mette il sale nella pentola, ma non può spiegare perché vuole avere un bambino"}, {"t": "L'ultimo omicidio alla fine del mondo", "a": "Stuart Turton", "q": "È necessario dare uno scopo, o verrà cercato all’infinito."}, {"t": "L'estate che sciolse ogni cosa", "a": "Tiffany McDaniel", "q": "C’era qualcosa nei suoi occhi che mi fece comprendere che la sua morte era l’atto conclusivo. Non ci sarebbe stato nulla dopo, dicevano le sue lacrime. Era la fine. La morte di un animale fa quest’effetto"}, {"t": "L'estate che sciolse ogni cosa", "a": "Tiffany McDaniel", "q": "penso che i fratelli maggiori dovrebbero essere vietati. Ce ne innamoriamo troppo. Sono il nostro tutto, e loro intanto soffrono lontano dai nostri occhi per il nostro bene."}, {"t": "L'estate che sciolse ogni cosa", "a": "Tiffany McDaniel", "q": "Finocchio. Non è questo che significa la parola finocchio? Una parola che parlava della mia paura. Della mia incapacità di capire."}, {"t": "L'estate che sciolse ogni cosa", "a": "Tiffany McDaniel", "q": "La forza, l’energia di un abbraccio ci rivela una parte di noi stessi. Nella migliore delle speranze un miele si riversa dalla piega del gomito mentre chiediamo perdono e diciamo che erano tutte sciocchezze e che non è cambiato niente. Ma naturalmente è cambiato tutto, per sempre"}, {"t": "L'estate che sciolse ogni cosa", "a": "Tiffany McDaniel", "q": "Con l’argilla della sua solitudine modellò la sensazione di quel legame in una cosa cui diede il nome di amore."}, {"t": "Acido solforico", "a": "Amélie Nothomb", "q": "Non arrenderti: rischieresti di farlo un’ora prima del miracolo"}, {"t": "Acido solforico", "a": "Amélie Nothomb", "q": "Per questo tutti guardano le stesse cose: per non rimanere isolati e poter condividere qualcosa."}, {"t": "La paranza dei bambini", "a": "Roberto Saviano", "q": "E tutto era stato semplice. Come sono sempre più semplici le scelte importanti da cui non si può tornare indietro. È il paradosso di ogni generazione: le scelte reversibili sono quelle più ragionate, meditate e soppesate. Quelle irreversibili avvengono per decisione immediata, generate da un moto d’istinto, subite senza resistenza"}, {"t": "Intermezzo", "a": "Sally Rooney", "q": "Lento mal di testa dalla cima del cranio, neanche troppo doloroso. Piú un’idea di mal testa"}, {"t": "Il paradiso degli orchi", "a": "Daniel Pennac", "q": "Gratta quindi l'asfalto come un ossesso con le zampe posteriori. Né all'altezza del suo sterco né nella direzione giusta, ma se ne infischia."}, {"t": "Il paradiso degli orchi", "a": "Daniel Pennac", "q": "Il valium mi avvolge il corpo di nuvole"}, {"t": "Sessanta racconti", "a": "Dino Buzzati", "q": "nella vita l'attesa di un bene certo ci dà più gioia che il raggiungerlo (ed è saggio non approfittarne subito, ma conviene assaporare quella meravigliosa specie di desiderio che è il desiderio sicuro di essere appagato ma non ancora praticamente soddisfatto, l'attesa insomma che non ha più timori e dubbi e che rappresenta probabilmente l'unica forma di felicità concessa all'uomo)"}, {"t": "Un luogo chiamato libertà", "a": "Ken Follett", "q": "La legge non prende decisioni. Non ha volontà propria. È come un'arma o un utensile: funziona se c'è chi la impugna e la adopera"}, {"t": "L'uomo che scambiò sua moglie per un cappello", "a": "Oliver Sacks", "q": "Il piacere che traiamo dalla musica viene dal contare, ma da un contare inconscio. La musica non è altro che aritmetica inconscia"}];
+
+/* ================= font ================= */
+const FONTS = [
+  { n: 'Lora', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Playfair Display', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Cormorant Garamond', g: 'Serif', fb: 'Garamond, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'EB Garamond', g: 'Serif', fb: 'Garamond, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Libre Baskerville', g: 'Serif', fb: 'Baskerville, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Libre Caslon Text', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Merriweather', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Crimson Pro', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Spectral', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Newsreader', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Source Serif 4', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Fraunces', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Bodoni Moda', g: 'Serif', fb: 'Didot, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Cardo', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Instrument Serif', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital@0;1' },
+  { n: 'DM Serif Display', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital@0;1' },
+  { n: 'Montserrat', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Raleway', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Work Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Poppins', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Josefin Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Jost', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'DM Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Inter', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Manrope', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Outfit', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Space Grotesk', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Oswald', g: 'Sans', fb: 'Impact, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Courier Prime', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'IBM Plex Mono', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Special Elite', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: false, w: '' },
+  { n: 'Caveat', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: 'wght@400;700' },
+  { n: 'Dancing Script', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: 'wght@400;700' },
+  { n: 'Homemade Apple', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: '' }
+];
+function fontInfo(name) { return FONTS.find(f => f.n === name) || FONTS[0]; }
+function fam(name) { const f = fontInfo(name); return '"' + f.n + '", ' + f.fb; }
+// un <link> per famiglia: se una famiglia non si carica, le altre funzionano comunque
+const fontsReady = Promise.all(FONTS.map(f => new Promise(resolve => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=' + f.n.replace(/ /g, '+') + (f.w ? ':' + f.w : '') + '&display=swap';
+  link.onload = link.onerror = () => resolve();
+  document.head.appendChild(link);
+  setTimeout(resolve, 8000);
+})));
+async function ensureFonts(list) {
+  await fontsReady;
+  try { await Promise.all(list.map(f => document.fonts.load(f, 'Aa“«'))); } catch (e) {}
+}
+
+/* ================= preset ================= */
+const PRESETS = [
+  { n: 'Notte',      bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458' },
+  { n: 'Inchiostro', bg: '#0d2438', bg2: '#16466b', fg: '#eef4f8', accent: '#ffcf6b' },
+  { n: 'Ardesia',    bg: '#2b3036', bg2: '#3d454e', fg: '#eceff1', accent: '#8fb8d0' },
+  { n: 'Bosco',      bg: '#14281f', bg2: '#244a38', fg: '#edf3ec', accent: '#d9c36a' },
+  { n: 'Bordeaux',   bg: '#3a0f1b', bg2: '#6a1d33', fg: '#f7ece8', accent: '#f0b7a4' },
+  { n: 'Nero',       bg: '#0a0a0a', bg2: '#1c1c1c', fg: '#f5f5f5', accent: '#ffffff' },
+  { n: 'Carta',      bg: '#f3efe6', bg2: '#e4dccb', fg: '#25211c', accent: '#a23b2a' },
+  { n: 'Sabbia',     bg: '#ebe3d5', bg2: '#d9cbb3', fg: '#3b322a', accent: '#b5651d' },
+  { n: 'Salvia',     bg: '#e3e8de', bg2: '#cdd6c5', fg: '#26322a', accent: '#5f7a52' },
+  { n: 'Cipria',     bg: '#f6e8e4', bg2: '#ecd2cb', fg: '#3d2b2b', accent: '#b85c5c' },
+  { n: 'Lavanda',    bg: '#ece8f4', bg2: '#d8d0ea', fg: '#2c2540', accent: '#6d55b0' },
+  { n: 'Bianco',     bg: '#ffffff', bg2: '#eef1f4', fg: '#16191d', accent: '#1d4ed8' },
+  { n: 'E-ink',      bg: '#ffffff', bg2: '#ffffff', fg: '#000000', accent: '#4a4a4a' }
+];
+const DEFAULTS = {
+  size: '2400x1080', cw: 2400, ch: 1080, fmt: 'png', jq: 92,
+  qFont: 'Lora', italic: false, mFont: 'Montserrat', authorUpper: true, titleItalic: true,
+  maxSize: 8, lh: 1.32, metaScale: 100, balance: true, typo: true, startCase: 'asis',
+  bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458', grad: 'diag', grain: false, vignette: false,
+  align: 'left', valign: 'center', footerMode: 'bottom', margin: 7.5, markStyle: 'big', rule: 'line', frame: false,
+  coverOn: true, coverLayout: 'side', coverSide: 'left', coverScale: 100, overlay: 72, coverRadius: 1.5, coverShadow: true,
+  autoPal: false, palTone: 'dark',
+  extra: '', extraPos: 'br'
+};
+const STYLES = [
+  { n: 'Minimal scuro', s: { qFont: 'Lora', italic: false, mFont: 'Montserrat', authorUpper: true, titleItalic: true, bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458', grad: 'diag', grain: false, vignette: false, align: 'left', valign: 'center', footerMode: 'bottom', markStyle: 'big', rule: 'line', frame: false, autoPal: false, coverLayout: 'side' } },
+  { n: 'Editoriale', s: { qFont: 'EB Garamond', italic: true, mFont: 'Jost', authorUpper: true, titleItalic: false, bg: '#f3efe6', bg2: '#e4dccb', fg: '#25211c', accent: '#a23b2a', grad: 'none', grain: true, vignette: false, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'none', rule: 'line', frame: true, autoPal: false, coverLayout: 'thumb' } },
+  { n: 'Poster', s: { qFont: 'Playfair Display', italic: false, mFont: 'Space Grotesk', authorUpper: true, titleItalic: false, bg: '#0a0a0a', bg2: '#1c1c1c', fg: '#f5f5f5', accent: '#ffffff', grad: 'radial', grain: true, vignette: true, align: 'left', valign: 'bottom', footerMode: 'attached', markStyle: 'watermark', rule: 'line', frame: false, autoPal: false, maxSize: 11 } },
+  { n: 'Diario', s: { qFont: 'Courier Prime', italic: false, mFont: 'Courier Prime', authorUpper: true, titleItalic: true, bg: '#ebe3d5', bg2: '#d9cbb3', fg: '#3b322a', accent: '#b5651d', grad: 'vert', grain: true, vignette: true, align: 'left', valign: 'top', footerMode: 'attached', markStyle: 'none', rule: 'dash', frame: false, autoPal: false } },
+  { n: 'Galleria', s: { qFont: 'Cormorant Garamond', italic: true, mFont: 'Raleway', authorUpper: true, titleItalic: false, bg: '#ffffff', bg2: '#eef1f4', fg: '#16191d', accent: '#16191d', grad: 'none', grain: false, vignette: false, align: 'left', valign: 'center', footerMode: 'attached', markStyle: 'none', rule: 'line', frame: false, autoPal: false, coverOn: true, coverLayout: 'side', coverShadow: true } },
+  { n: 'Dalla copertina', s: { qFont: 'Fraunces', italic: true, mFont: 'Manrope', authorUpper: true, titleItalic: false, grad: 'diag', grain: true, vignette: true, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'big', rule: 'dot', frame: false, coverOn: true, coverLayout: 'bg', autoPal: true, palTone: 'dark', overlay: 70 } },
+  { n: 'E-reader', s: { qFont: 'Libre Baskerville', italic: false, mFont: 'Work Sans', authorUpper: true, titleItalic: true, bg: '#ffffff', bg2: '#ffffff', fg: '#000000', accent: '#4a4a4a', grad: 'none', grain: false, vignette: false, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'big', rule: 'line', frame: true, autoPal: false } }
+];
+
+/* ================= stato ================= */
+const $ = id => document.getElementById(id);
+const LS_KEY = 'citazioni-settings-v2', TPL_KEY = 'citazioni-templates-v2';
+let S = Object.assign({}, DEFAULTS);
+try {
+  const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+  if (saved) S = Object.assign(S, saved);
+  else { const old = JSON.parse(localStorage.getItem('citazioni-settings') || 'null'); if (old) { S = Object.assign(S, old); if (old.grad === true) S.grad = 'diag'; if (old.grad === false) S.grad = 'none'; if (old.mark === false) S.markStyle = 'none'; } }
+} catch (e) {}
+let items = DATA.slice();
+let checked = new Set(items.map((_, i) => i));
+let current = 0;
+let filter = '';
+let lastOverflow = false;
+
+/* ================= utilità ================= */
+function slugFull(s) {
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+function slug(s) { return slugFull(s).slice(0, 40) || 'citazione'; }
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function rgba(hex, a) { const [r, g, b] = hexToRgb(hex); return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'; }
+function lum(hex) {
+  return hexToRgb(hex).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); })
+    .reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+}
+function contrast(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) {
+    const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6;
+  }
+  return [h, s, l];
+}
+function hslToHex(h, s, l) {
+  const f = n => { const k = (n + h * 12) % 12; const a = s * Math.min(l, 1 - l);
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); };
+  return '#' + f(0) + f(8) + f(4);
+}
+function sizeOf(s) {
+  if (s.size === 'custom') return [Math.max(200, Math.min(8000, Math.round(+s.cw || 1080))), Math.max(200, Math.min(8000, Math.round(+s.ch || 1080)))];
+  return s.size.split('x').map(Number);
+}
+
+/* ================= copertine ================= */
+const covers = new Map();       // chiave libro -> canvas (immagine ridimensionata)
+const coverURLs = new Map();    // chiave libro -> objectURL per miniature UI
+const palCache = new Map();
+const bookKey = t => slugFull(t) || '_';
+const IDB = {
+  db: null,
+  open() {
+    return new Promise(res => {
+      try {
+        const r = indexedDB.open('citazioni-covers', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('covers');
+        r.onsuccess = () => { IDB.db = r.result; res(r.result); };
+        r.onerror = () => res(null);
+      } catch (e) { res(null); }
+    });
+  },
+  tx(mode) { return IDB.db.transaction('covers', mode).objectStore('covers'); },
+  put(k, blob) { if (!IDB.db) return; try { IDB.tx('readwrite').put(blob, k); } catch (e) {} },
+  del(k) { if (!IDB.db) return; try { IDB.tx('readwrite').delete(k); } catch (e) {} },
+  all() {
+    return new Promise(res => {
+      if (!IDB.db) return res([]);
+      const out = []; const req = IDB.tx('readonly').openCursor();
+      req.onsuccess = () => { const c = req.result; if (c) { out.push([c.key, c.value]); c.continue(); } else res(out); };
+      req.onerror = () => res(out);
+    });
+  }
+};
+function loadImage(blob) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(blob); const img = new Image();
+    img.onload = () => { res(img); setTimeout(() => URL.revokeObjectURL(url), 1000); };
+    img.onerror = rej; img.src = url;
+  });
+}
+async function setCover(key, blob, persist) {
+  const img = await loadImage(blob);
+  const max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, c.width, c.height);
+  covers.set(key, c); palCache.delete(key + ':dark'); palCache.delete(key + ':light');
+  if (coverURLs.has(key)) URL.revokeObjectURL(coverURLs.get(key));
+  const small = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+  coverURLs.set(key, URL.createObjectURL(small));
+  if (persist) IDB.put(key, small);
+}
+function removeCover(key) {
+  covers.delete(key); palCache.delete(key + ':dark'); palCache.delete(key + ':light');
+  if (coverURLs.has(key)) { URL.revokeObjectURL(coverURLs.get(key)); coverURLs.delete(key); }
+  IDB.del(key);
+}
+function coverPalette(key, img, tone) {
+  const ck = key + ':' + tone; if (palCache.has(ck)) return palCache.get(ck);
+  const n = 56, c = document.createElement('canvas'); c.width = n; c.height = n;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0, n, n);
+  const d = x.getImageData(0, 0, n, n).data; const buckets = new Map();
+  for (let i = 0; i < d.length; i += 4) {
+    const k = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4);
+    const b = buckets.get(k) || { n: 0, r: 0, g: 0, b: 0 };
+    b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2]; buckets.set(k, b);
+  }
+  const list = Array.from(buckets.values()).map(b => { const r = b.r / b.n, g = b.g / b.n, bl = b.b / b.n; return { n: b.n, hsl: rgbToHsl(r, g, bl) }; })
+    .sort((a, b) => b.n - a.n);
+  const dom = list[0].hsl;
+  let best = null, bestScore = -1;
+  list.slice(0, 40).forEach(c => {
+    const [h, s, l] = c.hsl; if (l < 0.18 || l > 0.88) return;
+    const score = s * Math.sqrt(c.n) * (1 - Math.abs(l - 0.55));
+    if (score > bestScore) { bestScore = score; best = c.hsl; }
+  });
+  const acc = best && best[1] > 0.18 ? best : [(dom[0] + 0.08) % 1, 0.5, 0.6];
+  const hs = Math.min(dom[1], 0.45);
+  const p = tone === 'light'
+    ? { bg: hslToHex(dom[0], Math.min(hs, 0.35), 0.93), bg2: hslToHex(dom[0], Math.min(hs, 0.35), 0.84), fg: hslToHex(dom[0], 0.3, 0.13), accent: hslToHex(acc[0], Math.max(acc[1], 0.45), 0.38) }
+    : { bg: hslToHex(dom[0], hs, 0.1), bg2: hslToHex(dom[0], hs, 0.2), fg: hslToHex(dom[0], 0.18, 0.93), accent: hslToHex(acc[0], Math.max(acc[1], 0.45), 0.7) };
+  palCache.set(ck, p); return p;
+}
+
+/* ================= disegno ================= */
+let grainCanvas = null;
+function grainPattern(ctx) {
+  if (!grainCanvas) {
+    grainCanvas = document.createElement('canvas'); grainCanvas.width = grainCanvas.height = 256;
+    const g = grainCanvas.getContext('2d'); const im = g.createImageData(256, 256);
+    for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    g.putImageData(im, 0, 0);
+  }
+  return ctx.createPattern(grainCanvas, 'repeat');
+}
+function roundRectPath(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function drawCover(ctx, img, x, y, w, h, s, col) {
+  const r = w * s.coverRadius / 100;
+  if (s.coverShadow) {
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.38)'; ctx.shadowBlur = w * 0.12; ctx.shadowOffsetY = w * 0.04;
+    roundRectPath(ctx, x, y, w, h, r); ctx.fillStyle = col.bg; ctx.fill(); ctx.restore();
+  }
+  ctx.save(); roundRectPath(ctx, x, y, w, h, r); ctx.clip(); ctx.drawImage(img, x, y, w, h);
+  // leggero riflesso sul dorso per un effetto libro
+  const g = ctx.createLinearGradient(x, 0, x + w * 0.08, 0);
+  g.addColorStop(0, 'rgba(0,0,0,0.18)'); g.addColorStop(0.5, 'rgba(255,255,255,0.08)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(x, y, w * 0.08, h);
+  ctx.restore();
+  ctx.save(); roundRectPath(ctx, x, y, w, h, r); ctx.strokeStyle = rgba(col.fg, 0.12); ctx.lineWidth = Math.max(1, w * 0.004); ctx.stroke(); ctx.restore();
+}
+function drawBlurredCover(ctx, img, W, H) {
+  const ar = img.width / img.height, car = W / H;
+  let sw, sh, sx, sy;
+  if (ar > car) { sh = img.height; sw = sh * car; sx = (img.width - sw) / 2; sy = 0; } else { sw = img.width; sh = sw / car; sx = 0; sy = (img.height - sh) / 2; }
+  const a = document.createElement('canvas'); a.width = Math.max(8, Math.round(W / 10)); a.height = Math.max(8, Math.round(H / 10));
+  const ax = a.getContext('2d'); ax.imageSmoothingQuality = 'high'; ax.drawImage(img, sx, sy, sw, sh, 0, 0, a.width, a.height);
+  const b = document.createElement('canvas'); b.width = Math.max(4, Math.round(W / 40)); b.height = Math.max(4, Math.round(H / 40));
+  const bx = b.getContext('2d'); bx.imageSmoothingQuality = 'high'; bx.drawImage(a, 0, 0, b.width, b.height);
+  ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  const pad = Math.max(W, H) * 0.04; ctx.drawImage(b, -pad, -pad, W + 2 * pad, H + 2 * pad); ctx.restore();
+}
+function wrapLines(ctx, text, maxW) {
+  const words = text.split(/\s+/).filter(Boolean); const lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (!cur || ctx.measureText(t).width <= maxW) cur = t; else { lines.push(cur); cur = w; } }
+  if (cur) lines.push(cur); return lines;
+}
+function drawSpaced(ctx, text, x, y, spacing, align) {
+  const chars = Array.from(text); const widths = chars.map(c => ctx.measureText(c).width);
+  const total = widths.reduce((a, b) => a + b, 0) + spacing * Math.max(0, chars.length - 1);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const prev = ctx.textAlign; ctx.textAlign = 'left';
+  chars.forEach((c, i) => { ctx.fillText(c, cx, y); cx += widths[i] + spacing; });
+  ctx.textAlign = prev; return total;
+}
+function spacedWidth(ctx, text, spacing) { const ch = Array.from(text); return ch.reduce((a, c) => a + ctx.measureText(c).width, 0) + spacing * Math.max(0, ch.length - 1); }
+function prepareText(q, s) {
+  let t = String(q).trim();
+  if (s.typo) {
+    t = t.replace(/\.\.\./g, '…').replace(/'/g, '’');
+    let open = true; t = t.replace(/"/g, () => { const c = open ? '“' : '”'; open = !open; return c; });
+    t = t.replace(/ - /g, ' – ');
+  }
+  const first = t.search(/\p{L}/u);
+  if (first >= 0 && /\p{Ll}/u.test(t[first]) && first === 0) {
+    if (s.startCase === 'cap') t = t[0].toUpperCase() + t.slice(1);
+    else if (s.startCase === 'ellipsis') t = '…' + t;
+  }
+  let paras = t.split(/\s{3,}|\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  if (s.markStyle === 'inline' && paras.length) {
+    if (!/^[«“"]/.test(paras[0])) paras[0] = '«' + paras[0];
+    const L = paras.length - 1; if (!/[»”"]$/.test(paras[L])) paras[L] = paras[L] + '»';
+  }
+  return paras;
+}
+
+async function renderCard(canvas, item, s, scale = 1) {
+  const [W0, H0] = sizeOf(s);
+  const W = Math.round(W0 * scale), H = Math.round(H0 * scale);
+  const m = Math.min(W, H), u = m / 1080;
+  const land = W / H > 1.12, port = H / W > 1.12;
+  const qf = fam(s.qFont), mf = fam(s.mFont);
+  const qStyle = s.italic && fontInfo(s.qFont).it ? 'italic ' : '';
+  const tStyle = s.titleItalic && fontInfo(s.mFont).it ? 'italic ' : '';
+  await ensureFonts([qStyle + '400 40px ' + qf, '400 40px ' + qf, '700 30px ' + mf, tStyle + '400 30px ' + mf, '400 30px ' + mf]);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const key = bookKey(item.t);
+  const cover = s.coverOn ? covers.get(key) : null;
+  const col = (cover && s.autoPal) ? coverPalette(key, cover, s.palTone) : { bg: s.bg, bg2: s.bg2, fg: s.fg, accent: s.accent };
+
+  /* --- sfondo --- */
+  ctx.fillStyle = col.bg; ctx.fillRect(0, 0, W, H);
+  if (cover && s.coverLayout === 'bg') {
+    drawBlurredCover(ctx, cover, W, H);
+    ctx.fillStyle = rgba(col.bg, s.overlay / 100); ctx.fillRect(0, 0, W, H);
+  }
+  if (s.grad !== 'none') {
+    let g;
+    if (s.grad === 'diag') g = ctx.createLinearGradient(0, 0, W, H);
+    else if (s.grad === 'vert') g = ctx.createLinearGradient(0, 0, 0, H);
+    else g = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H / 2, Math.hypot(W, H) / 2);
+    const a = (cover && s.coverLayout === 'bg') ? 0.35 : 1;
+    if (s.grad === 'radial') { g.addColorStop(0, rgba(col.bg2, a)); g.addColorStop(1, rgba(col.bg, a)); }
+    else { g.addColorStop(0, rgba(col.bg, a)); g.addColorStop(1, rgba(col.bg2, a)); }
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+  if (s.vignette) {
+    const g = ctx.createRadialGradient(W / 2, H / 2, m * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.62);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, lum(col.bg) > 0.4 ? 'rgba(60,40,20,0.16)' : 'rgba(0,0,0,0.42)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+  if (s.grain) {
+    ctx.save(); ctx.globalAlpha = lum(col.bg) > 0.4 ? 0.07 : 0.06; ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = grainPattern(ctx); ctx.scale(Math.max(1, u * 0.9), Math.max(1, u * 0.9));
+    ctx.fillRect(0, 0, W / Math.max(1, u * 0.9), H / Math.max(1, u * 0.9)); ctx.restore();
+  }
+  if (s.frame) {
+    ctx.strokeStyle = rgba(col.fg, 0.28); ctx.lineWidth = Math.max(1, 2 * u);
+    const f = m * 0.035; ctx.strokeRect(f, f, W - 2 * f, H - 2 * f);
+  }
+
+  /* --- area utile --- */
+  const pad = m * s.margin / 100;
+  let R = { x: pad, y: pad, w: W - 2 * pad, h: H - 2 * pad };
+  if (s.frame) { const ex = m * 0.02; R = { x: R.x + ex, y: R.y + ex, w: R.w - 2 * ex, h: R.h - 2 * ex }; }
+
+  /* --- copertina laterale --- */
+  if (cover && s.coverLayout === 'side') {
+    const ar = cover.width / cover.height, k = s.coverScale / 100, gap = m * 0.07;
+    if (port) {
+      let ch = R.h * 0.34 * k, cw = ch * ar;
+      if (cw > R.w * 0.6 * k) { cw = R.w * 0.6 * k; ch = cw / ar; }
+      const cx = s.align === 'center' ? R.x + (R.w - cw) / 2 : s.align === 'right' ? R.x + R.w - cw : R.x;
+      drawCover(ctx, cover, cx, R.y, cw, ch, s, col);
+      R = { x: R.x, y: R.y + ch + gap, w: R.w, h: R.h - ch - gap };
+    } else {
+      let ch = R.h * (land ? 0.86 : 0.62) * k, cw = ch * ar;
+      if (cw > R.w * (land ? 0.34 : 0.4) * k) { cw = R.w * (land ? 0.34 : 0.4) * k; ch = cw / ar; }
+      const cy = R.y + (R.h - ch) / 2;
+      if (s.coverSide === 'right') { drawCover(ctx, cover, R.x + R.w - cw, cy, cw, ch, s, col); R = { x: R.x, y: R.y, w: R.w - cw - gap, h: R.h }; }
+      else { drawCover(ctx, cover, R.x, cy, cw, ch, s, col); R = { x: R.x + cw + gap, y: R.y, w: R.w - cw - gap, h: R.h }; }
+    }
+  }
+
+  const align = s.align;
+  const xA = align === 'center' ? R.x + R.w / 2 : align === 'right' ? R.x + R.w : R.x;
+
+  /* --- piede: misure --- */
+  const metaSize = m * 0.028 * (s.metaScale / 100);
+  const titleSize = metaSize * 1.12;
+  const ruleH = Math.max(1, 3 * u);
+  const ruleBlock = s.rule === 'none' ? 0 : (s.rule === 'line' ? ruleH + metaSize * 0.9 : metaSize * 1.5);
+  const textFooterH = ruleBlock + metaSize + metaSize * 0.6 + titleSize;
+  const thumb = cover && s.coverLayout === 'thumb';
+  let thumbH = 0, thumbW = 0;
+  if (thumb) { thumbH = Math.max(textFooterH * 1.15, m * 0.12) * (s.coverScale / 100); thumbW = thumbH * cover.width / cover.height; }
+  const thumbInline = thumb && align !== 'center';
+  const footerH = thumb ? (thumbInline ? Math.max(textFooterH, thumbH) : textFooterH + thumbH + metaSize * 1.2) : textFooterH;
+  const footerGap = m * 0.06;
+  const metaMaxW = R.w - (thumbInline ? thumbW + metaSize * 1.4 : 0);
+
+  /* --- virgolette grandi --- */
+  let markH = 0, markMt = null, markSize = m * 0.26;
+  if (s.markStyle === 'big') {
+    ctx.font = '400 ' + markSize + 'px ' + qf; markMt = ctx.measureText('“');
+    markH = (markMt.actualBoundingBoxAscent + markMt.actualBoundingBoxDescent) || markSize * 0.35;
+    markH += m * 0.035;
+  }
+
+  /* --- adattamento del testo --- */
+  const paras = prepareText(item.q, s);
+  const lay = (size, maxW) => {
+    ctx.font = qStyle + '400 ' + size + 'px ' + qf;
+    const lh = size * s.lh, gap = size * 0.6;
+    const blocks = paras.map(p => wrapLines(ctx, p, maxW));
+    const n = blocks.reduce((a, b) => a + b.length, 0);
+    return { blocks, lh, gap, height: n * lh + (blocks.length - 1) * gap };
+  };
+  const attached = s.footerMode === 'attached';
+  const areaTop = R.y, areaBottom = attached ? R.y + R.h : R.y + R.h - footerH - footerGap;
+  const availQ = (areaBottom - areaTop) - markH - (attached ? footerH + footerGap : 0);
+  let lo = Math.max(8, Math.round(m * 0.018)), hi = Math.max(lo, Math.round(m * s.maxSize / 100));
+  while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); if (lay(mid, R.w).height <= availQ) lo = mid; else hi = mid - 1; }
+  const size = lo;
+  let L = lay(size, R.w);
+  const overflow = L.height > availQ + 1;
+  if (s.balance) {
+    ctx.font = qStyle + '400 ' + size + 'px ' + qf;
+    L.blocks = L.blocks.map((lines, i) => {
+      if (lines.length < 2) return lines;
+      const n = lines.length; let a = R.w * 0.45, b = R.w;
+      for (let k = 0; k < 14; k++) { const mid = (a + b) / 2; if (wrapLines(ctx, paras[i], mid).length <= n) b = mid; else a = mid; }
+      return wrapLines(ctx, paras[i], b);
+    });
+  }
+
+  /* --- posizionamento verticale del blocco --- */
+  const blockH = markH + L.height + (attached ? footerGap + footerH : 0);
+  const space = areaBottom - areaTop;
+  let y0 = s.valign === 'top' ? areaTop : s.valign === 'bottom' ? areaBottom - blockH : areaTop + (space - blockH) / 2;
+  y0 = Math.max(areaTop, y0);
+
+  /* --- filigrana --- */
+  if (s.markStyle === 'watermark') {
+    const ws = m * 0.9; ctx.font = '400 ' + ws + 'px ' + qf; const mt = ctx.measureText('“');
+    ctx.fillStyle = rgba(col.fg, 0.07); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    const wx = align === 'right' ? R.x + R.w - mt.width * 0.9 : R.x - ws * 0.06;
+    ctx.fillText('“', wx, y0 + (mt.actualBoundingBoxAscent || ws * 0.7) - ws * 0.08);
+  }
+  /* --- virgolette grandi --- */
+  if (s.markStyle === 'big') {
+    ctx.font = '400 ' + markSize + 'px ' + qf; ctx.fillStyle = col.accent; ctx.textBaseline = 'alphabetic';
+    const gw = (markMt.actualBoundingBoxLeft + markMt.actualBoundingBoxRight) || markMt.width;
+    ctx.textAlign = 'left';
+    const left = align === 'center' ? xA - gw / 2 : align === 'right' ? xA - gw : xA;
+    ctx.fillText('“', left + (markMt.actualBoundingBoxLeft || 0), y0 + (markMt.actualBoundingBoxAscent || markSize * 0.7));
+  }
+
+  /* --- citazione --- */
+  ctx.font = qStyle + '400 ' + size + 'px ' + qf;
+  ctx.fillStyle = col.fg; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  let y = y0 + markH;
+  L.blocks.forEach((lines, bi) => {
+    lines.forEach(line => { ctx.fillText(line, xA, y + L.lh / 2); y += L.lh; });
+    if (bi < L.blocks.length - 1) y += L.gap;
+  });
+
+  /* --- piede --- */
+  let fy = attached ? y + footerGap : R.y + R.h - footerH;
+  let mx = xA, mAlign = align;
+  if (thumb) {
+    if (thumbInline) {
+      const ty = fy + (footerH - thumbH) / 2;
+      if (align === 'left') { drawCover(ctx, cover, R.x, ty, thumbW, thumbH, s, col); mx = R.x + thumbW + metaSize * 1.4; }
+      else { drawCover(ctx, cover, R.x + R.w - thumbW, ty, thumbW, thumbH, s, col); mx = R.x + R.w - thumbW - metaSize * 1.4; }
+      fy += (footerH - textFooterH) / 2;
+    } else {
+      drawCover(ctx, cover, xA - thumbW / 2, fy, thumbW, thumbH, s, col);
+      fy += thumbH + metaSize * 1.2;
+    }
+  }
+  ctx.fillStyle = col.accent;
+  if (s.rule === 'line') {
+    const rw = m * 0.09; ctx.fillRect(mAlign === 'center' ? mx - rw / 2 : mAlign === 'right' ? mx - rw : mx, fy, rw, ruleH);
+    fy += ruleH + metaSize * 0.9;
+  } else if (s.rule === 'dash') {
+    ctx.font = '400 ' + metaSize * 1.3 + 'px ' + mf; ctx.textAlign = mAlign; ctx.textBaseline = 'middle';
+    ctx.fillText('—', mx, fy + metaSize * 0.5);
+    fy += metaSize * 1.5;
+  } else if (s.rule === 'dot') {
+    const r = Math.max(2, metaSize * 0.2);
+    const cx = mAlign === 'center' ? mx : mAlign === 'right' ? mx - r : mx + r;
+    ctx.beginPath(); ctx.arc(cx, fy + metaSize * 0.5, r, 0, Math.PI * 2); ctx.fill();
+    fy += metaSize * 1.5;
+  }
+  // autore
+  const author = s.authorUpper ? String(item.a).toUpperCase() : String(item.a);
+  let as = metaSize, sp = s.authorUpper ? as * 0.18 : as * 0.04;
+  ctx.font = '700 ' + as + 'px ' + mf;
+  while (spacedWidth(ctx, author, sp) > metaMaxW && as > 8) { as *= 0.95; sp = s.authorUpper ? as * 0.18 : as * 0.04; ctx.font = '700 ' + as + 'px ' + mf; }
+  ctx.fillStyle = col.accent === col.fg ? col.fg : col.accent; ctx.textBaseline = 'middle';
+  if (s.markStyle !== 'big' && s.rule === 'none') ctx.fillStyle = col.fg;
+  drawSpaced(ctx, author, mx, fy + metaSize / 2, sp, mAlign);
+  fy += metaSize + metaSize * 0.6;
+  // titolo
+  let ts = titleSize; ctx.font = tStyle + '400 ' + ts + 'px ' + mf;
+  while (ctx.measureText(item.t).width > metaMaxW && ts > 8) { ts *= 0.95; ctx.font = tStyle + '400 ' + ts + 'px ' + mf; }
+  ctx.fillStyle = rgba(col.fg, 0.78); ctx.textAlign = mAlign;
+  ctx.fillText(item.t, mx, fy + titleSize / 2);
+
+  /* --- firma nel margine --- */
+  if (s.extra && s.extra.trim()) {
+    const es = Math.min(metaSize * 0.85, pad * 0.32);
+    ctx.font = '400 ' + es + 'px ' + mf; ctx.fillStyle = rgba(col.fg, 0.55); ctx.textBaseline = 'middle';
+    const p = s.extraPos, top = p[0] === 't', h = p[1];
+    const ey = top ? pad / 2 : H - pad / 2;
+    const ex = h === 'r' ? W - pad : h === 'l' ? pad : W / 2;
+    drawSpaced(ctx, s.extra.trim(), ex, ey, es * 0.06, h === 'r' ? 'right' : h === 'l' ? 'left' : 'center');
+  }
+  return { overflow, W, H };
+}
+
+/* ================= anteprima ================= */
+let renderToken = 0, renderTimer = null;
+function schedulePreview() { clearTimeout(renderTimer); renderTimer = setTimeout(drawPreview, 70); }
+async function drawPreview() {
+  const token = ++renderToken;
+  if (!items.length) { $('counter').textContent = 'Nessuna citazione'; return; }
+  current = Math.min(current, items.length - 1);
+  const item = items[current];
+  const [W, H] = sizeOf(S);
+  const scale = Math.min(1, 1800 / Math.max(W, H));
+  const off = document.createElement('canvas');
+  const r = await renderCard(off, item, S, scale);
+  if (token !== renderToken) return;
+  const cv = $('preview'); cv.width = off.width; cv.height = off.height; cv.getContext('2d').drawImage(off, 0, 0);
+  $('counter').textContent = (current + 1) + ' di ' + items.length + ' · ' + W + ' × ' + H + ' px';
+  const st = $('status');
+  if (r.overflow) { st.textContent = 'Citazione molto lunga: il testo è al minimo e potrebbe uscire dall\'area. Prova un formato più grande, margini ridotti o interlinea minore.'; st.className = 'hint warn'; lastOverflow = true; }
+  else if (lastOverflow) { st.textContent = ''; st.className = 'hint'; lastOverflow = false; }
+  updateCoverUI();
+}
+
+/* ================= lista ================= */
+function visibleIndices() {
+  const f = filter.trim().toLowerCase(); const out = [];
+  items.forEach((it, i) => { if (!f || (it.t + ' ' + it.a + ' ' + it.q).toLowerCase().includes(f)) out.push(i); });
+  return out;
+}
+function renderList() {
+  const list = $('list'); list.textContent = '';
+  visibleIndices().forEach(i => {
+    const it = items[i];
+    const row = document.createElement('div'); row.className = 'item' + (i === current ? ' active' : '');
+    row.tabIndex = 0; row.setAttribute('role', 'listitem');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = checked.has(i);
+    cb.addEventListener('click', e => e.stopPropagation());
+    cb.addEventListener('change', () => { cb.checked ? checked.add(i) : checked.delete(i); updateZipLabel(); });
+    const body = document.createElement('div');
+    const head = document.createElement('div'); head.className = 't'; head.textContent = (it.t || '(senza titolo)') + ' ';
+    const au = document.createElement('span'); au.className = 'a'; au.textContent = '· ' + it.a; head.appendChild(au);
+    const q = document.createElement('div'); q.className = 'q'; q.textContent = it.q;
+    body.appendChild(head); body.appendChild(q);
+    row.appendChild(cb); row.appendChild(body);
+    const url = coverURLs.get(bookKey(it.t));
+    if (url) { const im = document.createElement('img'); im.src = url; im.alt = ''; row.appendChild(im); } else row.appendChild(document.createElement('span'));
+    const pick = () => { current = i; renderList(); syncEditor(); drawPreview(); };
+    row.addEventListener('click', pick);
+    row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    list.appendChild(row);
+    if (i === current) requestAnimationFrame(() => {
+      const lt = list.scrollTop, lh = list.clientHeight, rt = row.offsetTop, rh = row.offsetHeight;
+      if (rt < lt) list.scrollTop = rt; else if (rt + rh > lt + lh) list.scrollTop = rt + rh - lh;
+    });
+  });
+  updateZipLabel();
+}
+function updateZipLabel() { $('dlZip').textContent = 'Scarica selezionate (' + checked.size + ') in ZIP'; }
+
+/* ================= editor ================= */
+function syncEditor() {
+  const it = items[current] || { t: '', a: '', q: '' };
+  $('eT').value = it.t; $('eA').value = it.a; $('eQ').value = it.q.replace(/\s{3,}/g, '\n\n');
+}
+['eT', 'eA', 'eQ'].forEach(id => $(id).addEventListener('input', () => {
+  if (!items[current]) return;
+  const it = items[current];
+  it.t = $('eT').value; it.a = $('eA').value; it.q = $('eQ').value.replace(/\n\s*\n/g, '    ').replace(/\n/g, ' ');
+  renderList(); schedulePreview();
+}));
+$('addItem').addEventListener('click', () => {
+  const base = items[current] || { t: '', a: '' };
+  items.splice(current + 1, 0, { t: base.t, a: base.a, q: 'Nuova citazione' });
+  checked = new Set(Array.from(checked).map(i => i > current ? i + 1 : i)); current++; checked.add(current);
+  renderList(); syncEditor(); drawPreview(); $('eQ').focus(); $('eQ').select();
+});
+$('delItem').addEventListener('click', () => {
+  if (!items.length || !confirm('Eliminare la citazione corrente?')) return;
+  items.splice(current, 1);
+  checked = new Set(Array.from(checked).filter(i => i !== current).map(i => i > current ? i - 1 : i));
+  current = Math.max(0, Math.min(current, items.length - 1)); renderList(); syncEditor(); drawPreview();
+});
+$('exportCsv').addEventListener('click', () => {
+  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = 'Titolo,Autore,Citazione\n' + items.map(it => [it.t, it.a, it.q].map(esc).join(',')).join('\n');
+  saveBlob(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }), 'citazioni.csv');
+});
+
+/* ================= download ================= */
+function ext() { return S.fmt === 'jpeg' ? 'jpg' : 'png'; }
+function fileName(i) { return String(i + 1).padStart(2, '0') + '-' + slug(items[i].t) + '-' + slug(items[i].a).slice(0, 20) + '.' + ext(); }
+function saveBlob(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function toBlob(canvas, type, q) { return new Promise(res => canvas.toBlob(res, type || (S.fmt === 'jpeg' ? 'image/jpeg' : 'image/png'), q || S.jq / 100)); }
+const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(buf) { let c = 0xFFFFFFFF; for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(files) {
+  const enc = new TextEncoder(); const chunks = []; const central = []; let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name); const crc = crc32(f.data); const size = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true);
+    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(lh.buffer), name, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+    ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + size;
+  }
+  const cdSize = central.reduce((a, c) => a + c.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+}
+$('dlOne').addEventListener('click', async () => {
+  if (!items.length) return;
+  const c = document.createElement('canvas'); await renderCard(c, items[current], S);
+  saveBlob(await toBlob(c), fileName(current));
+});
+$('copy').addEventListener('click', async () => {
+  if (!items.length) return;
+  try {
+    const c = document.createElement('canvas'); await renderCard(c, items[current], S);
+    const blob = await toBlob(c, 'image/png');
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    $('status').textContent = 'Immagine copiata negli appunti.'; $('status').className = 'hint';
+  } catch (e) { $('status').textContent = 'Il browser non consente di copiare immagini: usa “Scarica”.'; $('status').className = 'hint warn'; }
+});
+$('dlZip').addEventListener('click', async () => {
+  const sel = Array.from(checked).filter(i => i < items.length).sort((a, b) => a - b);
+  if (!sel.length) { $('status').textContent = 'Seleziona almeno una citazione.'; return; }
+  const btn = $('dlZip'); btn.disabled = true; const files = []; const c = document.createElement('canvas'); let over = 0;
+  for (let k = 0; k < sel.length; k++) {
+    btn.textContent = 'Creo immagine ' + (k + 1) + ' di ' + sel.length + '…';
+    const r = await renderCard(c, items[sel[k]], S); if (r.overflow) over++;
+    const blob = await toBlob(c);
+    files.push({ name: fileName(sel[k]), data: new Uint8Array(await blob.arrayBuffer()) });
+  }
+  const [W, H] = sizeOf(S);
+  saveBlob(makeZip(files), 'citazioni-' + W + 'x' + H + '.zip');
+  btn.disabled = false; updateZipLabel();
+  $('status').textContent = 'ZIP scaricato: ' + sel.length + ' immagini' + (over ? ' (' + over + ' con testo al limite: controllale)' : '') + '.';
+  $('status').className = over ? 'hint warn' : 'hint';
+});
+
+/* ================= CSV ================= */
+function parseCSV(text) {
+  text = text.replace(/^\ufeff/, '');
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const counts = { ';': first.split(';').length, ',': first.split(',').length, '\t': first.split('\t').length };
+  const delim = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === delim) { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); f = ''; rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ''));
+}
+async function loadCSVFile(file) {
+  const rows = parseCSV(await file.text());
+  if (rows.length < 2) { $('csvMsg').textContent = 'Il file non contiene righe leggibili.'; return; }
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = (re, fb) => { const i = head.findIndex(h => re.test(h)); return i >= 0 ? i : fb; };
+  const ti = col(/titol|title|libro|book/, 0), ai = col(/autor|author/, 1), qi = col(/citaz|quote|testo|text/, 2);
+  const out = rows.slice(1).map(r => ({ t: (r[ti] || '').trim(), a: (r[ai] || '').trim(), q: (r[qi] || '').trim() })).filter(x => x.q);
+  if (!out.length) { $('csvMsg').textContent = 'Non ho trovato la colonna Citazione.'; return; }
+  items = out; checked = new Set(items.map((_, i) => i)); current = 0; filter = ''; $('search').value = '';
+  const books = new Set(items.map(i => bookKey(i.t)));
+  const withCover = Array.from(books).filter(k => covers.has(k)).length;
+  $('csvMsg').textContent = 'Caricate ' + out.length + ' citazioni (' + books.size + ' libri, ' + withCover + ' con copertina) da ' + file.name + '.';
+  renderList(); syncEditor(); drawPreview();
+}
+$('csvFile').addEventListener('change', e => { const f = e.target.files[0]; if (f) loadCSVFile(f); });
+
+/* ================= copertine: UI ================= */
+function updateCoverUI() {
+  const it = items[current]; const box = $('coverThumb');
+  if (!it) return;
+  const url = coverURLs.get(bookKey(it.t));
+  box.textContent = '';
+  if (url) { const im = document.createElement('img'); im.src = url; im.alt = 'Copertina'; box.appendChild(im); }
+  else box.textContent = 'nessuna copertina';
+  $('coverInfo').textContent = it.t ? '«' + it.t + '»' : 'Libro corrente';
+  $('coverDel').disabled = !url;
+}
+$('coverFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f || !items[current]) return;
+  await setCover(bookKey(items[current].t), f, true);
+  $('coverMsg').textContent = 'Copertina associata a «' + items[current].t + '» (vale per tutte le sue citazioni).';
+  renderList(); drawPreview();
+});
+$('coverDel').addEventListener('click', () => {
+  if (!items[current]) return; removeCover(bookKey(items[current].t)); renderList(); drawPreview();
+});
+$('coverMulti').addEventListener('change', async e => {
+  const files = Array.from(e.target.files); e.target.value = '';
+  const books = Array.from(new Set(items.map(i => i.t))).map(t => ({ t, k: bookKey(t) }));
+  let ok = 0; const miss = [];
+  for (const f of files) {
+    const fk = slugFull(f.name.replace(/\.[^.]+$/, ''));
+    let best = null;
+    books.forEach(b => {
+      if (b.k.length < 3) return;
+      if (fk === b.k || fk.includes(b.k) || (fk.length >= 5 && b.k.includes(fk))) { if (!best || b.k.length > best.k.length) best = b; }
+    });
+    if (best) { await setCover(best.k, f, true); ok++; } else miss.push(f.name);
+  }
+  $('coverMsg').textContent = ok + ' copertine abbinate' + (miss.length ? '. Non abbinate: ' + miss.join(', ') + ' (rinomina il file come il titolo del libro).' : '.');
+  renderList(); drawPreview();
+});
+// trascinamento su anteprima: CSV oppure immagine copertina
+const stage = $('stage');
+stage.addEventListener('dragover', e => { e.preventDefault(); stage.classList.add('drag'); });
+stage.addEventListener('dragleave', () => stage.classList.remove('drag'));
+stage.addEventListener('drop', async e => {
+  e.preventDefault(); stage.classList.remove('drag');
+  const f = e.dataTransfer.files[0]; if (!f) return;
+  if (f.type.startsWith('image/')) {
+    if (!items[current]) return;
+    await setCover(bookKey(items[current].t), f, true);
+    $('coverMsg').textContent = 'Copertina associata a «' + items[current].t + '».'; renderList(); drawPreview();
+  } else if (/\.(csv|txt|tsv)$/i.test(f.name) || f.type.includes('csv') || f.type.startsWith('text/')) loadCSVFile(f);
+});
+
+/* ================= comandi ================= */
+function fillFontSelect(sel) {
+  const groups = {};
+  FONTS.forEach(f => { (groups[f.g] = groups[f.g] || []).push(f); });
+  Object.keys(groups).forEach(g => {
+    const og = document.createElement('optgroup'); og.label = g;
+    groups[g].forEach(f => { const o = document.createElement('option'); o.value = f.n; o.textContent = f.n + (f.it ? '' : '  (senza corsivo)'); o.style.fontFamily = fam(f.n); og.appendChild(o); });
+    sel.appendChild(og);
+  });
+}
+fillFontSelect($('qFont')); fillFontSelect($('mFont'));
+const FIELDS = ['size', 'cw', 'ch', 'fmt', 'qFont', 'mFont', 'startCase', 'bg', 'bg2', 'fg', 'accent', 'grad', 'footerMode', 'markStyle', 'rule', 'coverLayout', 'extra', 'extraPos'];
+const CHECKS = ['italic', 'authorUpper', 'titleItalic', 'balance', 'typo', 'grain', 'vignette', 'frame', 'coverOn', 'coverShadow', 'autoPal'];
+const RANGES = ['jq', 'maxSize', 'lh', 'metaScale', 'margin', 'coverScale', 'overlay', 'coverRadius'];
+const SEGS = Array.from(document.querySelectorAll('.seg'));
+const FMT = { jq: v => v + '%', maxSize: v => v, lh: v => (+v).toFixed(2), metaScale: v => v + '%', margin: v => v + '%', coverScale: v => v + '%', overlay: v => v + '%', coverRadius: v => v };
+function syncInputs() {
+  FIELDS.forEach(k => { $(k).value = S[k]; });
+  CHECKS.forEach(k => { $(k).checked = !!S[k]; });
+  RANGES.forEach(k => { $(k).value = S[k]; });
+  SEGS.forEach(sg => sg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === S[sg.dataset.key])));
+  refreshUI();
+}
+function refreshUI() {
+  RANGES.forEach(k => { const el = $(k + 'V'); if (el) el.textContent = FMT[k](S[k]); });
+  const custom = S.size === 'custom';
+  const [W, H] = sizeOf(S);
+  if (!custom) { $('cw').value = W; $('ch').value = H; }
+  $('cw').disabled = $('ch').disabled = !custom;
+  $('jqWrap').classList.toggle('hidden', S.fmt !== 'jpeg');
+  const qi = fontInfo(S.qFont).it;
+  $('italic').disabled = !qi; $('italicWrap').classList.toggle('dis', !qi);
+  $('italicNote').textContent = qi ? '' : '(non disponibile per ' + S.qFont + ')';
+  const ti = fontInfo(S.mFont).it;
+  $('titleItalic').disabled = !ti; $('titleItalicWrap').classList.toggle('dis', !ti);
+  $('overlayWrap').classList.toggle('hidden', S.coverLayout !== 'bg');
+  $('coverSideWrap').classList.toggle('hidden', S.coverLayout !== 'side');
+  $('coverScaleWrap').classList.toggle('hidden', S.coverLayout === 'bg');
+  $('palToneWrap').classList.toggle('hidden', !S.autoPal);
+  const c = contrast(S.fg, S.bg);
+  $('contrast').textContent = 'Contrasto testo/sfondo: ' + c.toFixed(1) + ':1' + (c < 4.5 ? ' — basso, il testo può risultare poco leggibile' : c < 7 ? ' — buono' : ' — ottimo') + (S.autoPal ? ' (con palette dalla copertina i colori cambiano per libro)' : '');
+  $('contrast').className = c < 4.5 ? 'hint warn' : 'hint';
+}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+function onChange() {
+  FIELDS.forEach(k => { S[k] = $(k).value; });
+  CHECKS.forEach(k => { S[k] = $(k).checked; });
+  RANGES.forEach(k => { S[k] = parseFloat($(k).value); });
+  S.cw = parseInt(S.cw) || 1080; S.ch = parseInt(S.ch) || 1080;
+  save(); refreshUI(); schedulePreview();
+}
+FIELDS.concat(CHECKS, RANGES).forEach(k => { $(k).addEventListener('input', onChange); $(k).addEventListener('change', onChange); });
+SEGS.forEach(sg => sg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  S[sg.dataset.key] = b.dataset.v; sg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); save(); refreshUI(); schedulePreview();
+})));
+$('rotate').addEventListener('click', () => {
+  const [W, H] = sizeOf(S); const target = H + 'x' + W;
+  const opt = Array.from($('size').options).find(o => o.value === target);
+  if (opt) S.size = target; else { S.size = 'custom'; S.cw = H; S.ch = W; }
+  syncInputs(); save(); schedulePreview();
+});
+PRESETS.forEach(p => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip';
+  const sw = document.createElement('i'); sw.style.background = 'linear-gradient(135deg,' + p.bg + ' 50%,' + p.accent + ' 50%)';
+  b.appendChild(sw); b.appendChild(document.createTextNode(p.n));
+  b.addEventListener('click', () => { Object.assign(S, { bg: p.bg, bg2: p.bg2, fg: p.fg, accent: p.accent, autoPal: false }); syncInputs(); save(); schedulePreview(); });
+  $('presets').appendChild(b);
+});
+STYLES.forEach(st => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip txt'; b.textContent = st.n;
+  b.addEventListener('click', () => { Object.assign(S, st.s); syncInputs(); save(); schedulePreview(); });
+  $('styles').appendChild(b);
+});
+
+/* ================= template ================= */
+function getTpls() { try { return JSON.parse(localStorage.getItem(TPL_KEY) || '{}'); } catch (e) { return {}; } }
+function setTpls(t) { try { localStorage.setItem(TPL_KEY, JSON.stringify(t)); } catch (e) {} fillTpls(); }
+function fillTpls() {
+  const t = getTpls(), sel = $('tplList'); sel.textContent = '';
+  const names = Object.keys(t);
+  if (!names.length) { const o = document.createElement('option'); o.textContent = 'Nessun template salvato'; o.value = ''; sel.appendChild(o); }
+  names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+}
+$('tplSave').addEventListener('click', () => {
+  const n = prompt('Nome del template:'); if (!n) return;
+  const t = getTpls(); t[n.trim()] = Object.assign({}, S); setTpls(t); $('tplList').value = n.trim();
+});
+$('tplApply').addEventListener('click', () => { const t = getTpls()[$('tplList').value]; if (!t) return; S = Object.assign({}, DEFAULTS, t); syncInputs(); save(); schedulePreview(); });
+$('tplDel').addEventListener('click', () => { const n = $('tplList').value; if (!n || !confirm('Eliminare il template «' + n + '»?')) return; const t = getTpls(); delete t[n]; setTpls(t); });
+$('tplExport').addEventListener('click', () => {
+  const data = { current: S, templates: getTpls() };
+  saveBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'citazioni-template.json');
+});
+$('tplImport').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.templates) setTpls(Object.assign(getTpls(), d.templates));
+    if (d.current) { S = Object.assign({}, DEFAULTS, d.current); syncInputs(); save(); schedulePreview(); }
+  } catch (err) { alert('File JSON non valido.'); }
+});
+$('reset').addEventListener('click', () => { if (!confirm('Ripristinare tutte le impostazioni predefinite?')) return; S = Object.assign({}, DEFAULTS); syncInputs(); save(); schedulePreview(); });
+
+/* ================= navigazione, tema ================= */
+function go(d) { if (!items.length) return; current = (current + d + items.length) % items.length; renderList(); syncEditor(); drawPreview(); }
+$('prev').addEventListener('click', () => go(-1));
+$('next').addEventListener('click', () => go(1));
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (['input', 'textarea', 'select'].includes(tag)) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+});
+$('search').addEventListener('input', e => { filter = e.target.value; renderList(); });
+$('all').addEventListener('click', () => { visibleIndices().forEach(i => checked.add(i)); renderList(); });
+$('none').addEventListener('click', () => { visibleIndices().forEach(i => checked.delete(i)); renderList(); });
+const THEMES = ['auto', 'light', 'dark'];
+let theme = localStorage.getItem('citazioni-ui-theme') || 'auto';
+function applyTheme() {
+  if (theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', theme);
+  $('themeBtn').textContent = 'Tema: ' + { auto: 'auto', light: 'chiaro', dark: 'scuro' }[theme];
+}
+$('themeBtn').addEventListener('click', () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; localStorage.setItem('citazioni-ui-theme', theme); applyTheme(); });
+applyTheme();
+
+/* ================= avvio ================= */
+(async () => {
+  syncInputs(); fillTpls(); renderList(); syncEditor(); drawPreview();
+  await IDB.open();
+  const all = await IDB.all();
+  for (const [k, blob] of all) { try { await setCover(k, blob, false); } catch (e) {} }
+  if (all.length) { $('coverMsg').textContent = all.length + ' copertine recuperate dalla sessione precedente.'; renderList(); drawPreview(); }
+  fontsReady.then(() => schedulePreview());
+})();
+</script>
+</body>
+</html>
