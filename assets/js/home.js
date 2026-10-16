@@ -47,6 +47,15 @@
     if (c) c.textContent = list.length === 1 ? "1 strumento" : list.length + " strumenti";
   }
 
+  /* Diario degli Audiolibri: "Memorizza il CSV in questo browser" attiva di default.
+     Imposta la preferenza una sola volta (prefsRev 2); se poi l'utente la disattiva
+     dalle Impostazioni del Diario, la scelta viene rispettata. */
+  try {
+    const KEY = "adb.prefs.v1";
+    const prefs = JSON.parse(localStorage.getItem(KEY) || "{}") || {};
+    if (prefs.prefsRev !== 2) { prefs.saveData = true; prefs.prefsRev = 2; localStorage.setItem(KEY, JSON.stringify(prefs)); }
+  } catch (e) {}
+
   /* Pulsante "Installa" facoltativo: compare solo se il browser emette beforeinstallprompt.
      In ogni caso l'app resta installabile dal menu del browser / icona nella barra degli indirizzi. */
   let deferred = null;

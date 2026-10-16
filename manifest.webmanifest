@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Dashboard Audiolibri",
   "short_name": "Audiolibri",
-  "description": "Diario degli Audiolibri e Citazioni in Immagine: strumenti personali che elaborano i CSV direttamente nel browser.",
+  "description": "Diario degli Audiolibri e Citazioni in Immagine: strumenti personali che elaborano i file direttamente nel browser.",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./",

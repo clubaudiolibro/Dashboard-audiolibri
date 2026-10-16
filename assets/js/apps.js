@@ -21,7 +21,7 @@ const APPS = [
     title: "Citazioni in Immagine",
     description: "Trasforma le citazioni dei tuoi libri in immagini personalizzate pronte da condividere.",
     url: "./apps/citazioni/index.html",
-    tags: ["CSV", "PNG / JPG", "ZIP"],
+    tags: ["CSV / Excel", "PNG / JPG", "ZIP"],
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v6c0 2.5-1.5 4-4 4.5"/><path d="M19 11h-4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v6c0 2.5-1.5 4-4 4.5"/></svg>'
   }
 ];
