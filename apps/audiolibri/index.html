@@ -254,7 +254,7 @@ table.mini th{font-weight:650;color:var(--muted);font-size:.74rem;text-transform
 .barlist{display:flex;flex-direction:column;gap:7px}
 .barlist .row{display:grid;grid-template-columns:minmax(0,1.4fr) 2fr auto;gap:10px;align-items:center;font-size:.85rem}
 .barlist .track{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
-.barlist .fill{height:100%;border-radius:99px;background:var(--accent)}
+.barlist .fill{display:block;height:100%;border-radius:99px;background:var(--accent)}
 .barlist .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ---------- Tabella dati ---------- */
@@ -352,6 +352,14 @@ footer.app-footer{max-width:1440px;margin:0 auto;padding:24px;border-top:1px sol
   main{padding:0}
 }
 
+
+.favorite-btn[aria-pressed="true"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.favorite-btn svg{width:17px;height:17px}.kpi{position:relative}.kpi>.favorite-btn{position:absolute;right:8px;top:8px}.kpi .k-label{padding-right:23px}
+.column-filters th{padding:5px!important;position:static!important}.column-filters input{width:100%;min-width:80px;border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:6px;font-size:.78rem;text-transform:none;letter-spacing:normal}
+#grid-favorites>.kpi{grid-column:span 3}#grid-favorites>.favorite-archive{grid-column:span 12}
+.chart-values{margin-top:12px;max-height:210px}.chart-values table{font-size:.75rem}.chart-values th{font-size:.7rem}
+@media(max-width:1100px){#grid-favorites>.kpi{grid-column:span 6}}
+@media(max-width:680px){#grid-favorites>.kpi{grid-column:span 12}.card-head{flex-wrap:wrap}.card-tools{max-width:100%}.seg{flex-wrap:wrap}.kpi-list li b{white-space:normal}}
 </style>
 </head>
 <body>
@@ -382,7 +390,7 @@ footer.app-footer{max-width:1440px;margin:0 auto;padding:24px;border-top:1px sol
     <input type="file" id="file-input" accept=".csv,text/csv,text/plain" class="sr-only" aria-label="Seleziona file CSV">
   </div>
   <nav class="section-nav hidden" id="section-nav" aria-label="Sezioni della dashboard">
-    <a href="#sec-overview">Panoramica</a><a href="#sec-time">Andamento</a><a href="#sec-period">Periodo</a><a href="#sec-people">Generi e persone</a><a href="#sec-ratings">Voti e durate</a><a href="#sec-catalog">Serie e catalogo</a><a href="#sec-advanced">Approfondimenti</a><a href="#sec-table">Archivio</a><a href="#sec-quality">Qualità dati</a>
+    <a href="#sec-favorites" id="nav-favorites" class="hidden">Preferiti</a><a href="#sec-overview">Panoramica</a><a href="#sec-time">Andamento</a><a href="#sec-period">Periodo</a><a href="#sec-people">Generi e persone</a><a href="#sec-ratings">Voti e durate</a><a href="#sec-catalog">Serie e catalogo</a><a href="#sec-advanced">Approfondimenti</a><a href="#sec-table">Archivio</a><a href="#sec-quality">Qualità dati</a>
   </nav>
 </header>
 
@@ -421,7 +429,7 @@ footer.app-footer{max-width:1440px;margin:0 auto;padding:24px;border-top:1px sol
 
   <!-- Dashboard -->
   <div id="dashboard" class="hidden">
-    <div class="import-strip" id="import-strip" aria-live="polite"></div>
+
     <div id="import-notices"></div>
 
     <section class="filters" id="filters" aria-label="Filtri">
@@ -434,6 +442,7 @@ footer.app-footer{max-width:1440px;margin:0 auto;padding:24px;border-top:1px sol
       <div class="active-filters" id="active-filters"></div>
     </section>
 
+    <section class="section hidden" id="sec-favorites" aria-labelledby="h-favorites"><div class="section-head"><div><div class="eyebrow">La tua dashboard</div><h2 id="h-favorites">Preferiti</h2><p>Copie sincronizzate delle schede selezionate con la stellina.</p></div></div><div class="grid g-12" id="grid-favorites"></div></section>
     <section class="section" id="sec-overview" aria-labelledby="h-overview">
       <div class="section-head">
         <div><div class="eyebrow">Panoramica</div><h2 id="h-overview">Indicatori principali</h2>
@@ -491,6 +500,7 @@ footer.app-footer{max-width:1440px;margin:0 auto;padding:24px;border-top:1px sol
         <div class="card-tools no-print"><button class="btn sm" id="btn-mapping2" type="button">Mappatura colonne</button></div></div>
       <div class="grid g-12" id="grid-quality"></div>
     </section>
+    <div class="import-strip" id="import-strip" aria-live="polite" style="margin-top:38px"></div>
   </div>
 </main>
 
@@ -510,7 +520,7 @@ footer.app-footer{max-width:1440px;margin:0 auto;padding:24px;border-top:1px sol
    5. Stato applicazione, filtri, statistiche (calc rules centralizzate)
    6. UI: KPI, grafici, tabella, diagnostica, impostazioni
    ===================================================================== */
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
 const LS_KEYS = { prefs: "adb.prefs.v1", mapping: "adb.mapping.v1", filters: "adb.filters.v1", data: "adb.dataset.v1" };
 
 /* ---------------------------------------------------------------------
@@ -1110,12 +1120,10 @@ function pearson(xs, ys) {
 /* ---------------------------------------------------------------------
    FORMATTAZIONE DIPENDENTE DALLE PREFERENZE
    --------------------------------------------------------------------- */
-function fmtDur(min, short = false) {
-  if (min == null || !isFinite(min)) return "—";
-  if (S.prefs.durFmt === "dec") return fmt1(min / 60) + " h";
-  const h = Math.floor(min / 60), m = Math.round(min % 60);
-  if (short) return h ? `${fmtInt(h)} h ${pad2(m)}` : `${m} min`;
-  return h ? `${fmtInt(h)} h ${pad2(m)} min` : `${m} min`;
+function fmtDur(min, short=false){
+ if(min==null||!isFinite(min))return "—";
+ const total=Math.round(Math.abs(min)),h=Math.floor(total/60),m=total%60,sign=min<0?"−":"";
+ return sign+(S.prefs.durFmt==="clock"?h+":"+pad2(m):h?`${fmtInt(h)} h ${pad2(m)} min`:`${m} min`);
 }
 function fmtDate(d) {
   if (!d) return "—";
@@ -1221,6 +1229,7 @@ function titlesFooter(items, max = 6) { const t = items.slice(0, max).map(r => "
 
 /** Messaggio quando non ci sono dati per un grafico (il canvas resta nel DOM) */
 function setNoData(id, msg) {
+ if(msg)document.querySelector(`#card-${id} .chart-values`)?.remove();
   const box = document.querySelector(`#card-${id} .chart-box`); if (!box) return;
   let el = box.querySelector(".nodata");
   if (msg) {
@@ -1293,9 +1302,7 @@ const CARDS = [
     info: { how: "Media aritmetica dei voti validi per anno di completamento; il tooltip indica su quanti voti è calcolata.", incl: "Ascoltati con voto valido e anno.", excl: "Record senza voto valido o senza anno." } },
   { id: "dur-dist", grid: "ratings", span: 4, title: "Distribuzione delle durate", desc: "Ascoltati e possibili ascolti per fascia di durata. Clic per filtrare la fascia.", requires: ["duration"], filterKeys: ["duration"],
     info: { how: "Fasce: " + RULES.durationBuckets.map(b => b[2]).join(", ") + ". Estremo inferiore incluso.", incl: "Record con durata valida, separati per stato.", excl: "Durate mancanti o non riconosciute." } },
-  { id: "scatter", grid: "ratings", span: 8, title: "Durata e voto", desc: "Ogni punto è un audiolibro ascoltato; il colore indica l’anno. Clic su un punto per aprirne i dettagli.", requires: ["duration", "rating"], height: "tall",
-    info: { how: "Asse X: durata in ore; asse Y: voto. Il coefficiente r di Pearson misura l’associazione lineare (−1…+1): descrive i dati, non indica una relazione di causa‑effetto.", incl: "Ascoltati con durata e voto validi.", excl: "Record privi di uno dei due valori." } },
-  { id: "length", grid: "ratings", span: 4, title: "Brevi, medi e lunghi", desc: "Ripartizione degli ascoltati per lunghezza.", requires: ["duration"], body: '<div id="length-body"></div>',
+  { id: "length", grid: "ratings", span: 12, title: "Brevi, medi e lunghi", desc: "Ripartizione degli ascoltati per lunghezza.", requires: ["duration"], body: '<div id="length-body"></div>',
     info: { how: "Breve < 6 h; medio 6–15 h; lungo > 15 h. Il voto medio di ogni classe usa solo i voti validi.", incl: "Ascoltati con durata valida.", excl: "Durate mancanti o non valide." } },
   /* ---- Serie e catalogo ---- */
   { id: "status", grid: "catalog", span: 4, title: "Stato del catalogo", desc: "Clic su una voce per filtrare.", requires: ["status"], filterKeys: ["status"],
@@ -1338,7 +1345,7 @@ function cardHTML(c) {
   const isChart = c.body == null;
   return `<article class="card span-${c.span}" id="card-${c.id}" aria-labelledby="t-${c.id}">
     <div class="card-head"><div class="titles"><h3 id="t-${c.id}">${esc(c.title)} <span class="filter-badge" title="Questo grafico sta filtrando la dashboard">● filtro attivo <button class="icon-btn" style="width:20px;height:20px" type="button" data-clear="${c.id}" aria-label="Rimuovi il filtro applicato da questo grafico">${IC.x}</button></span></h3><p class="desc">${c.desc || ""}</p></div>
-      <div class="card-tools">${c.tools ? c.tools() : ""}${isChart ? `<button class="icon-btn" type="button" data-png="${c.id}" aria-label="Esporta PNG" title="Esporta come PNG">${IC.png}</button>` : ""}${info}</div></div>
+      <div class="card-tools">${c.tools ? c.tools() : ""}${favoriteButton(c.id)}${isChart ? `<button class="icon-btn" type="button" data-png="${c.id}" aria-label="Esporta PNG" title="Esporta come PNG">${IC.png}</button>` : ""}${info}</div></div>
     <div class="card-body">${body}</div>
     ${c.footless ? "" : `<div class="card-foot"><span id="base-${c.id}"></span></div>`}
   </article>`;
@@ -1507,10 +1514,10 @@ RENDER.period = ({}) => {
   }
   const cmp = (c, p, isDur) => P.compare ? (prev ? `<div class="c">${fmtDelta(delta(c, p), "", isDur)}</div>` : "") : "";
   res.innerHTML = `
-    <div class="pr"><div class="l">Ore ascoltate</div><div class="v num">${fmtDur(cur.min, true)}</div>${cmp(cur.min, prev && prev.min, true)}<div class="c">${fmt1(cur.min / 60)} h decimali · ${cur.nDur} durate valide</div></div>
+    <div class="pr"><div class="l">Ore ascoltate</div><div class="v num">${fmtDur(cur.min, true)}</div>${cmp(cur.min, prev && prev.min, true)}<div class="c">${cur.nDur} durate valide</div></div>
     <div class="pr"><div class="l">Libri completati</div><div class="v num">${fmtInt(cur.n)}</div>${cmp(cur.n, prev && prev.n)}</div>
     <div class="pr"><div class="l">Durata media</div><div class="v num">${fmtDur(cur.avg, true)}</div>${cmp(cur.avg, prev && prev.avg, true)}</div>
-    <div class="pr"><div class="l">Ore al giorno</div><div class="v num">${fmt2(cur.min / 60 / days)}</div><div class="c">media su ${fmtInt(days)} giorni</div></div>
+    <div class="pr"><div class="l">Ore al giorno</div><div class="v num">${fmtDur(cur.min / days)}</div><div class="c">media su ${fmtInt(days)} giorni</div></div>
     <div class="pr"><div class="l">Voto medio</div><div class="v num">${fmt2(cur.avgR)}</div><div class="c">${cur.nR} voti</div></div>
     ${P.compare ? `<div class="pr"><div class="l">Periodo precedente</div><div class="c" style="margin-top:6px">${prev ? `${prevNote}<br>${prev.n} libri · ${fmtDur(prev.min, true)}` : prevNote}</div></div>` : ""}`;
   const items = inRange(P.from, P.to).sort((a, b) => a.completion.date - b.completion.date);
@@ -1791,7 +1798,7 @@ RENDER.days = ({ L }) => {
   upsertChart("days", { type: "bar", data: { labels: B.map(b => b[2]), datasets: [{ label: "Audiolibri", data: B.map(b => D.filter(r => r.daysToComplete >= b[0] && r.daysToComplete <= b[1]).length), backgroundColor: a, borderRadius: 5 }] },
     options: baseOptions({ scales: { x: { grid: { display: false } }, y: { ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }) });
   const speed = D.filter(r => r.duration != null).map(r => r.duration / 60 / r.daysToComplete);
-  setSummary("days", `In sintesi: in media ${fmt1(mean(D.map(r => r.daysToComplete)))} giorni per audiolibro (mediana ${fmt1(median(D.map(r => r.daysToComplete)))}); ritmo medio ${speed.length ? fmt2(mean(speed)) + " h al giorno" : "n.d."}.`);
+  setSummary("days", `In sintesi: in media ${fmt1(mean(D.map(r => r.daysToComplete)))} giorni per audiolibro (mediana ${fmt1(median(D.map(r => r.daysToComplete)))}); ritmo medio ${speed.length ? fmtDur(mean(speed)*60) + " al giorno" : "n.d."}.`);
 };
 
 RENDER.discovery = ({ L }) => {
@@ -1860,7 +1867,7 @@ function renderKPIs({ F, L }) {
   const cards = [];
   cards.push(`<div class="kpi featured"><div class="k-label">Audiolibri ascoltati</div><div class="k-row"><div class="k-value">${fmtInt(L.length)}</div><canvas class="spark" id="spark-books" aria-hidden="true"></canvas></div><div class="k-sub">su ${fmtInt(F.length)} record nel catalogo filtrato</div></div>`);
   kpiText.push(`Audiolibri ascoltati: ${L.length} (su ${F.length} record)`);
-  if (hasField("duration")) { cards.push(`<div class="kpi"><div class="k-label">Ore ascoltate</div><div class="k-value">${fmtDur(totMin, true)}</div><div class="k-sub">${fmt1(totMin / 60)} h · ${LD.length} libri con durata valida</div></div>`); kpiText.push(`Ore ascoltate: ${fmtDur(totMin)} (${LD.length} libri con durata)`); }
+  if (hasField("duration")) { cards.push(`<div class="kpi"><div class="k-label">Ore ascoltate</div><div class="k-value">${fmtDur(totMin, true)}</div><div class="k-sub">${LD.length} libri con durata valida</div></div>`); kpiText.push(`Ore ascoltate: ${fmtDur(totMin)} (${LD.length} libri con durata)`); }
   if (Y) {
     cards.push(`<div class="kpi"><div class="k-label">Ascoltati nel ${Y}</div><div class="k-value">${fmtInt(cy ? cy.n : 0)}</div><div class="k-sub">${prevAvail ? fmtDelta(delta(cy ? cy.n : 0, py ? py.n : 0)) + ` vs ${Y - 1}` : "nessun anno precedente nei dati"}</div></div>`);
     kpiText.push(`Ascoltati nel ${Y}: ${cy ? cy.n : 0}`);
@@ -1869,7 +1876,7 @@ function renderKPIs({ F, L }) {
   if (hasField("rating")) { const m = mean(R.map(r => r.rating)); cards.push(`<div class="kpi"><div class="k-label">Voto medio</div><div class="k-value">${fmt2(m)}</div><div class="k-sub">su ${R.length} voti · mediana ${fmt1(median(R.map(r => r.rating)))}</div></div>`); kpiText.push(`Voto medio: ${fmt2(m)} (${R.length} voti)`); }
   if (hasField("duration")) { cards.push(`<div class="kpi"><div class="k-label">Durata media · mediana</div><div class="k-value sm">${fmtDur(mean(LD.map(r => r.duration)), true)} · ${fmtDur(median(LD.map(r => r.duration)), true)}</div><ul class="kpi-list"><li><span>Più lungo</span><b title="${esc(longest?.title)}">${longest ? esc(longest.title) + " · " + fmtDur(longest.duration, true) : "—"}</b></li><li><span>Più breve</span><b title="${esc(shortest?.title)}">${shortest ? esc(shortest.title) + " · " + fmtDur(shortest.duration, true) : "—"}</b></li></ul></div>`); kpiText.push(`Durata media: ${fmtDur(mean(LD.map(r => r.duration)))}`); }
   if (pace) { cards.push(`<div class="kpi"><div class="k-label">Ritmo medio</div><div class="k-value">${fmt1(pace.books)}<span class="small muted"> libri/mese</span></div><div class="k-sub">${hasField("duration") ? fmtDur(pace.min, true) + " al mese · " : ""}su ${pace.months} mesi (dal primo all’ultimo completamento datato)</div></div>`); kpiText.push(`Ritmo medio: ${fmt1(pace.books)} libri al mese`); }
-  if (hasField("status")) { cards.push(`<div class="kpi"><div class="k-label">Catalogo</div><ul class="kpi-list">${["listening", "possible", "discarded"].map(s => `<li><span><i class="dot" style="background:${statusColor(s)}"></i>${STATUS_DEF[s].label}</span><b>${fmtInt(cnt(s))}</b></li>`).join("")}${F.some(r => r.status && r.status.startsWith("other:")) ? `<li><span>Altri stati</span><b>${F.filter(r => r.status && r.status.startsWith("other:")).length}</b></li>` : ""}</ul></div>`); kpiText.push(`In ascolto: ${cnt("listening")} · Possibili: ${cnt("possible")} · Scartati: ${cnt("discarded")}`); }
+  if (hasField("status")) { cards.push(`<div class="kpi"><div class="k-label">Catalogo</div><ul class="kpi-list">${["listened", "listening", "possible", "discarded"].map(s => `<li><span><i class="dot" style="background:${statusColor(s)}"></i>${STATUS_DEF[s].label}</span><b>${fmtInt(cnt(s))}</b></li>`).join("")}${F.some(r => r.status && r.status.startsWith("other:")) ? `<li><span>Altri stati</span><b>${F.filter(r => r.status && r.status.startsWith("other:")).length}</b></li>` : ""}</ul></div>`); kpiText.push(`In ascolto: ${cnt("listening")} · Possibili: ${cnt("possible")} · Scartati: ${cnt("discarded")}`); }
   if (tg || ta || tn) { cards.push(`<div class="kpi"><div class="k-label">I più ascoltati</div><ul class="kpi-list">${tg ? `<li><span>Genere</span><b title="${esc(tg.label)}">${esc(tg.label)} (${tg.n})</b></li>` : ""}${ta ? `<li><span>Autore</span><b title="${esc(ta.label)}">${esc(ta.label)} (${ta.n})</b></li>` : ""}${tn ? `<li><span>Narratore</span><b title="${esc(tn.label)}">${esc(tn.label)} (${tn.n})</b></li>` : ""}</ul></div>`); if (tg) kpiText.push(`Genere più ascoltato: ${tg.label}`); if (ta) kpiText.push(`Autore più ascoltato: ${ta.label}`); if (tn) kpiText.push(`Narratore più ascoltato: ${tn.label}`); }
   if (hasField("series")) { cards.push(`<div class="kpi"><div class="k-label">Serie iniziate</div><div class="k-value">${fmtInt(seriesStarted)}</div><div class="k-sub">con almeno un volume ascoltato · dettagli in «Serie»</div></div>`); kpiText.push(`Serie iniziate: ${seriesStarted}`); }
   cards.push(`<div class="kpi"><div class="k-label">Record con dati completi</div><div class="k-value">${F.length ? fmtPct(complete / F.length * 100) : "—"}</div><div class="k-sub">${complete} di ${F.length} · campi chiave valorizzati</div></div>`);
@@ -1963,7 +1970,7 @@ const TABLE_COLS = [
   { key: "series", label: "Serie", field: "series", get: r => r.series ? r.series.toLowerCase() + String(r.volume ?? 0).padStart(4, "0") : null, show: r => r.series ? esc(r.series) + (r.volume != null ? ` <span class="faint">#${fmt1(r.volume)}</span>` : "") : null }
 ];
 function buildTable() {
-  $("#table-card").innerHTML = `<div class="table-tools">
+  $("#table-card").innerHTML = `<div class="table-tools">${favoriteButton("archive")}
      <div class="search">${IC.search}<input type="search" id="tbl-q" placeholder="Cerca titolo, autore, narratore, genere, serie…" aria-label="Cerca nella tabella"></div>
      <label class="small muted" for="tbl-size">Righe</label><select class="mini" id="tbl-size"><option>10</option><option>25</option><option>50</option><option>100</option></select>
      <span class="small muted" id="tbl-count" aria-live="polite"></span>
@@ -1979,6 +1986,7 @@ function buildTable() {
 function tableRows() {
   const q = groupKey(S.ui.tableQuery || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
   let rows = q ? S.filtered.filter(r => r.searchText.includes(q)) : [...S.filtered];
+  rows=rows.filter(r=>TABLE_COLS.every(c=>{const q=(S.ui.columnFilters?.[c.key]||"").trim();if(!q)return true;const el=document.createElement("span");el.innerHTML=c.show(r)??"";return normKey(el.textContent).includes(normKey(q));}));
   const col = TABLE_COLS.find(c => c.key === S.ui.tableSort.key) || TABLE_COLS[1]; const dir = S.ui.tableSort.dir;
   rows.sort((a, b) => { const x = col.get(a), y = col.get(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * dir; });
   return rows;
@@ -1987,6 +1995,9 @@ function renderTable() {
   if (!$("#tbl")) return;
   const cols = TABLE_COLS.filter(c => hasField(c.field) || c.key === "title");
   $("#tbl thead tr").innerHTML = cols.map(c => { const s = S.ui.tableSort.key === c.key; return `<th scope="col" aria-sort="${s ? (S.ui.tableSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-sort="${c.key}">${c.label}${s ? (S.ui.tableSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`; }).join("") + `<th scope="col"><span class="sr-only">Avvisi</span></th>`;
+  const filterRow=document.createElement("tr");filterRow.className="column-filters";
+  filterRow.innerHTML=cols.map(c=>`<th><input type="search" data-column-filter="${c.key}" aria-label="Filtra ${esc(c.label)}" placeholder="Filtra ${esc(c.label)}…" value="${esc(S.ui.columnFilters?.[c.key]||"")}"></th>`).join("")+`<th><button class="icon-btn" type="button" data-reset-columns title="Azzera filtri colonne" aria-label="Azzera filtri colonne">${IC.reset}</button></th>`;
+  $("#tbl thead").replaceChildren($("#tbl thead tr"),filterRow);
   const rows = tableRows(); const size = S.ui.tableSize; const pages = Math.max(1, Math.ceil(rows.length / size));
   S.ui.tablePage = Math.min(S.ui.tablePage, pages);
   const page = rows.slice((S.ui.tablePage - 1) * size, S.ui.tablePage * size);
@@ -2095,7 +2106,7 @@ function openSettings() {
       <div class="setting"><label class="lbl" for="s-theme">Tema</label><select id="s-theme">${opt("auto", "Automatico (sistema)", p.theme)}${opt("light", "Chiaro", p.theme)}${opt("dark", "Scuro", p.theme)}${opt("paper", "Carta", p.theme)}${opt("library", "Biblioteca", p.theme)}</select></div>
       <div class="setting"><span class="lbl">Colore principale</span><div class="swatches" role="group" aria-label="Colore principale">${ACCENTS.map(([c, n]) => `<button type="button" class="swatch" style="background:${c}" data-accent="${c}" aria-label="${n}" aria-pressed="${p.accent === c}"></button>`).join("")}<input type="color" id="s-accent" value="${p.accent}" aria-label="Colore personalizzato" style="width:34px;height:30px;border:0;background:none;padding:0"></div></div>
       <div class="setting"><label class="lbl" for="s-density">Densità</label><select id="s-density">${opt("comfortable", "Confortevole", p.density)}${opt("compact", "Compatta", p.density)}</select></div>
-      <div class="setting"><label class="lbl" for="s-dur">Formato durata</label><select id="s-dur">${opt("hm", "Ore e minuti (12 h 05 min)", p.durFmt)}${opt("dec", "Ore decimali (12,1 h)", p.durFmt)}</select></div>
+      <div class="setting"><label class="lbl" for="s-dur">Formato durata</label><select id="s-dur">${opt("hm", "Ore e minuti (12 h 05 min)", p.durFmt)}${opt("clock", "Ore e minuti (12:05)", p.durFmt)}</select></div>
       <div class="setting"><label class="lbl" for="s-date">Formato data</label><select id="s-date">${opt("dmy", "GG/MM/AAAA", p.dateFmt)}${opt("long", "15 ott 2026", p.dateFmt)}${opt("iso", "AAAA-MM-GG", p.dateFmt)}</select></div>
       <div class="setting"><label class="lbl" for="s-ref">Riferimento «Ultimi 12 mesi»</label><select id="s-ref">${opt("today", "Data odierna del browser", p.refDate)}${opt("max", "Data più recente nel dataset", p.refDate)}</select></div>
       <div class="setting"><label class="lbl" for="s-top">Voci nelle classifiche</label><select id="s-top">${[8, 12, 15, 20, 30].map(n => opt(n, n, p.topN)).join("")}</select></div>
@@ -2214,6 +2225,7 @@ function importText(text, name, when, extraNotes = [], restored = false) {
   S.parsed = p; S.fileName = name; S.importedAt = when; S.rawText = text; S.restored = restored;
   S.importNotes = [...extraNotes, ...p.notes];
   S.mappingInfo = autoMapColumns(p.headers, loadJSON(LS_KEYS.mapping, null));
+  S.ui.columnFilters={};S.ui.tableQuery="";if($("#tbl-q"))$("#tbl-q").value="";
   S.ui.kpiYear = null; S.ui.monthYears = null; S.ui.period = { from: null, to: null, compare: true }; S.ui.tablePage = 1;
   rebuild(false);
   if (S.prefs.saveData && !restored) persistDataset();
@@ -2388,6 +2400,61 @@ function init() {
     if (saved && saved.text) importText(saved.text, saved.name || "CSV memorizzato", saved.at ? new Date(saved.at) : new Date(), [{ level: "info", msg: "Dati ripristinati dalla memoria di questo browser." }], true);
   }
 }
+/* Etichette visibili, filtri per colonna e preferiti. */
+const FAVORITES_KEY="adb.favorites.v1",favorites=new Set(loadJSON(FAVORITES_KEY,[])),favoriteCharts=[];
+function favoriteButton(id){const on=favorites.has(id);return `<button class="icon-btn favorite-btn" type="button" data-favorite="${esc(id)}" aria-pressed="${on}" aria-label="${on?"Rimuovi dai":"Aggiungi ai"} preferiti" title="${on?"Rimuovi dai":"Aggiungi ai"} preferiti"><svg viewBox="0 0 24 24" fill="${on?"currentColor":"none"}" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.3.9-4.5 4.4 1.1 6.2L12 17.3l-5.7 2.9 1.1-6.2L3 9.6l6.2-.9Z"/></svg></button>`;}
+function markKPIs(){$$("#kpis>.kpi").forEach(el=>{const label=el.querySelector(".k-label").textContent.trim().replace(/\d{4}/g,"anno"),id="kpi-"+normKey(label).replace(/\s+/g,"-");el.dataset.favoriteSource=id;el.insertAdjacentHTML("afterbegin",favoriteButton(id));});}
+function syncFavorites(){
+ favoriteCharts.splice(0).forEach(c=>c.destroy());const grid=$("#grid-favorites");grid.replaceChildren();
+ const sources=[...CARDS.map(c=>[c.id,$("#card-"+c.id)]),...$$("#kpis>.kpi").map(el=>[el.dataset.favoriteSource,el]),["archive",$("#table-card")]];
+ for(const [id,src] of sources){
+  if(!src||!favorites.has(id))continue;const copy=src.cloneNode(true);copy.dataset.favoriteCopy=id;
+  if(id==="archive"){copy.classList.add("favorite-archive");copy.insertAdjacentHTML("afterbegin",'<h3 style="margin-bottom:12px">Tutti i record</h3>');}
+  const ids=new Map();[copy,...copy.querySelectorAll("[id]")].forEach(el=>{if(el.id){const old=el.id,renamed=old.startsWith("info-")?"info-fav-"+old.slice(5):"fav-"+old;ids.set(old,renamed);el.dataset.originalId=old;el.id=renamed;}});
+  [copy,...copy.querySelectorAll("*")].forEach(el=>{["aria-labelledby","aria-describedby","aria-controls","for"].forEach(a=>{if(el.hasAttribute(a))el.setAttribute(a,el.getAttribute(a).split(" ").map(v=>ids.get(v)||v).join(" "));});if(el.dataset.info)el.dataset.info="fav-"+el.dataset.info;});
+  grid.appendChild(copy);const originals=[...src.querySelectorAll("canvas")];
+  [...copy.querySelectorAll("canvas")].forEach((cv,i)=>{const orig=originals[i],chart=window.Chart&&Chart.getChart(orig);if(chart){favoriteCharts.push(new Chart(cv,{type:chart.config.type,data:chart.config.data,options:{...chart.config.options,animation:false}}));}else{cv.width=orig.width;cv.height=orig.height;cv.getContext("2d").drawImage(orig,0,0);}});
+ }
+ const empty=!grid.children.length;$("#sec-favorites").classList.toggle("hidden",empty);$("#nav-favorites").classList.toggle("hidden",empty);
+}
+const originalRefresh=refresh;refresh=function(){originalRefresh();if(S.data)syncFavorites();};
+const originalKPIs=renderKPIs;renderKPIs=function(ctx){originalKPIs(ctx);markKPIs();};
+const originalRenderTable=renderTable;renderTable=function(){originalRenderTable();if(S.data&&favorites.has("archive"))syncFavorites();};
+const originalPeriodRender=RENDER.period;RENDER.period=function(ctx){originalPeriodRender(ctx);if(favorites.has("period"))syncFavorites();};
+["input","change","click"].forEach(type=>document.addEventListener(type,e=>{
+ const root=e.target.closest("[data-favorite-copy]");if(!root)return;const control=e.target.closest("[data-original-id]");if(!control||!control.matches("input,select,button"))return;const original=document.getElementById(control.dataset.originalId);if(!original)return;e.stopImmediatePropagation();
+ if(type==="click"&&control.matches("button")){original.click();return;}if(type==="click")return;
+ original.value=control.value;if("checked" in control)original.checked=control.checked;original.dispatchEvent(new Event(type,{bubbles:true}));
+},true));
+document.addEventListener("click",e=>{const star=e.target.closest("[data-favorite]");if(star){const id=star.dataset.favorite;favorites.has(id)?favorites.delete(id):favorites.add(id);saveJSON(FAVORITES_KEY,[...favorites]);$$('[data-favorite="'+id+'"]').forEach(b=>b.outerHTML=favoriteButton(id));syncFavorites();return;}if(e.target.closest("[data-reset-columns]")){S.ui.columnFilters={};S.ui.tablePage=1;renderTable();}});
+document.addEventListener("input",e=>{const input=e.target.closest("[data-column-filter]");if(!input)return;const key=input.dataset.columnFilter;S.ui.columnFilters||={};S.ui.columnFilters[key]=input.value;S.ui.tablePage=1;const start=input.selectionStart,copy=!!input.closest("[data-favorite-copy]");renderTable();const next=document.querySelector((copy?'#fav-tbl':'#tbl')+' [data-column-filter="'+key+'"]');if(next){next.focus();next.setSelectionRange(start,start);}});
+function chartUsesHours(id){return id==="year"?S.ui.yearMetric==="hours":id==="month"?S.ui.monthMetric==="hours":id==="genres"?S.ui.genreMetric==="hours":id==="authors"?S.ui.authorMetric==="hours":id==="narrators"?S.ui.narratorMetric==="hours":false;}
+const originalUpsertChart=upsertChart;
+upsertChart=function(id,cfg){
+ cfg.options||={};cfg.options.plugins||={};cfg.options.plugins.visibleValues={hours:chartUsesHours(id),percent:id==="genre-evo"&&S.ui.evoMode==="pct"};
+ if(chartUsesHours(id)){const axis=cfg.options.indexAxis==="y"?"x":"y";cfg.options.scales[axis]||={};cfg.options.scales[axis].ticks||={};cfg.options.scales[axis].ticks.callback=v=>fmtDur(v*60);}
+ cfg.options.layout||={};cfg.options.layout.padding={top:22,right:58,bottom:4,left:4};
+ if(cfg.type==="bar"&&cfg.options.indexAxis!=="y"){const y=cfg.options.scales?.y;if(y&&y.max==null)y.grace="14%";}
+ if(cfg.type==="doughnut"){cfg.options.plugins.legend.labels.generateLabels=chart=>chart.data.labels.map((label,i)=>({text:label+": "+fmtInt(chart.data.datasets[0].data[i]),fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:chart.data.datasets[0].backgroundColor[i],hidden:!chart.getDataVisibility(i),index:i}));}
+ const card=document.getElementById("card-"+id);let values=card?.querySelector(".chart-values");
+ const stacked=cfg.type==="bar"&&Object.values(cfg.options.scales||{}).some(axis=>axis.stacked);
+ if(stacked&&card){if(!values){values=document.createElement("div");values.className="chart-values scroll-x";card.querySelector(".chart-box").after(values);}
+ const fmt=v=>chartUsesHours(id)?fmtDur(Number(v)*60):cfg.options.plugins.visibleValues.percent?fmt1(Number(v))+"%":fmt1(Number(v));
+ values.innerHTML=`<table class="mini"><caption class="sr-only">Valori del grafico ${esc(CARD[id].title)}</caption><thead><tr><th>Voce</th>${cfg.data.datasets.map(ds=>`<th>${esc(ds.label)}</th>`).join("")}</tr></thead><tbody>${cfg.data.labels.map((label,i)=>`<tr><th scope="row">${esc(label)}</th>${cfg.data.datasets.map(ds=>`<td>${fmt(ds.data[i]??0)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+ }else if(values)values.remove();return originalUpsertChart(id,cfg);
+};
+const visibleValuesPlugin={id:"visibleValues",afterDatasetsDraw(chart,args,opts){const ctx=chart.ctx;ctx.save();ctx.font="600 11px system-ui";ctx.textBaseline="middle";
+ chart.data.datasets.forEach((ds,di)=>{const meta=chart.getDatasetMeta(di);if(meta.hidden||!["bar","doughnut"].includes(meta.type))return;
+ meta.data.forEach((el,i)=>{const value=Number(ds.data[i]);if(!Number.isFinite(value)||(value===0&&(meta.type==="doughnut"||Object.values(chart.options.scales||{}).some(axis=>axis.stacked)))||(meta.type==="doughnut"&&!chart.getDataVisibility(i)))return;
+ const label=opts.hours?fmtDur(value*60):opts.percent?fmt1(value)+"%":fmt1(value);ctx.fillStyle=cssVar("--text");
+ if(meta.type==="doughnut"){const total=ds.data.reduce((a,b)=>a+Number(b||0),0);if(value/total<.045)return;const p=el.tooltipPosition();ctx.textAlign="center";ctx.lineWidth=4;ctx.strokeStyle=cssVar("--surface");ctx.strokeText(label,p.x,p.y);ctx.fillText(label,p.x,p.y);return;}
+ const horizontal=chart.options.indexAxis==="y",stacked=!!chart.options.scales?.[horizontal?"x":"y"]?.stacked;let x=el.x,y=el.y;
+ if(stacked){x=horizontal?(el.x+el.base)/2:el.x;y=horizontal?el.y:(el.y+el.base)/2;const available=horizontal?Math.abs(el.x-el.base):el.width;if(available<ctx.measureText(label).width+8||(!horizontal&&Math.abs(el.y-el.base)<16))return;const bg=el.options.backgroundColor;ctx.fillStyle=typeof bg==="string"&&/^#[0-9a-f]{6}$/i.test(bg)?inkFor(bg):cssVar("--text");ctx.textAlign="center";}
+ else if(horizontal){x+=7;ctx.textAlign="left";}else{y-=10;ctx.textAlign="center";}ctx.fillText(label,x,y);
+ });});ctx.restore();}};
+if(window.Chart)Chart.register(visibleValuesPlugin);
+if(S.prefs.durFmt==="dec")S.prefs.durFmt="hm";
+
 document.addEventListener("DOMContentLoaded", init);
 
 </script>
