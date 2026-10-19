@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postcard audiolibri</title>
+<meta name="theme-color" content="#eceff1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14181b" media="(prefers-color-scheme: dark)">
+<!-- Dashboard Audiolibri: PWA, icone e navigazione comune (percorsi relativi) -->
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../../assets/css/app-nav.css">
+<style>
+  :root {
+    --bg: #eceff1; --panel: #ffffff; --ink: #1b2126; --muted: #5d6a73; --line: #d3dade;
+    --accent: #0f6b66; --accent-ink: #ffffff; --field: #f6f8f9; --stage: #dfe4e7; --warn: #b45309;
+    --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181b; --panel: #1c2226; --ink: #e8eef1; --muted: #93a1aa; --line: #2e383e;
+      --accent: #4fb8b0; --accent-ink: #0c1415; --field: #11161a; --stage: #0f1316; --warn: #f59e0b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181b; --panel: #1c2226; --ink: #e8eef1; --muted: #93a1aa; --line: #2e383e;
+    --accent: #4fb8b0; --accent-ink: #0c1415; --field: #11161a; --stage: #0f1316; --warn: #f59e0b; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font-ui);
+    padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px)); }
+  header.top { max-width: 1500px; margin: 0 auto 16px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+  header.top .ttl { flex: 1; min-width: 220px; }
+  h1 { font-size: 20px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0; }
+  .app { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 1500px; margin: 0 auto; }
+  @media (min-width: 960px) { .app { grid-template-columns: 360px minmax(0, 1fr); align-items: start; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0; }
+  .controls { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
+  @media (min-width: 960px) { .controls { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; } }
+  details.sec { border-bottom: 1px solid var(--line); padding: 4px 6px 10px; }
+  details.sec:last-child { border-bottom: 0; }
+  details.sec > summary { cursor: pointer; list-style: none; font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); font-weight: 700; padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+  details.sec > summary::-webkit-details-marker { display: none; }
+  details.sec > summary::after { content: '▸'; font-size: 12px; transition: transform .15s; }
+  details.sec[open] > summary::after { transform: rotate(90deg); }
+  .sec-body { display: flex; flex-direction: column; gap: 11px; }
+  label.f { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 13px; }
+  label.f .v { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lbl { display: flex; justify-content: space-between; gap: 8px; }
+  select, input[type="text"], input[type="search"], input[type="number"], textarea {
+    font: inherit; font-weight: 400; color: var(--ink); background: var(--field);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; width: 100%; min-width: 0; }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.4; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="color"] { width: 100%; height: 34px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); cursor: pointer; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .check { display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 13px; }
+  .check input { accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+  .check.dis { opacity: .5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--field); color: var(--ink);
+    border-radius: 999px; padding: 4px 10px 4px 5px; font: inherit; font-size: 12px; cursor: pointer; }
+  .chip i { width: 18px; height: 18px; border-radius: 50%; display: inline-block; border: 1px solid rgba(128,128,128,.4); }
+  .chip.txt { padding: 5px 11px; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg button { flex: 1; border: 0; background: var(--field); color: var(--ink); padding: 6px 4px; font-size: 12px; border-right: 1px solid var(--line); }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, .item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn { border: 1px solid var(--line); background: var(--field); color: var(--ink); border-radius: 6px; padding: 7px 11px; font-weight: 600; font-size: 13px; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.sm { padding: 5px 9px; font-size: 12px; }
+  .btn:disabled { opacity: .55; cursor: progress; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .file input { width: 100%; font: inherit; font-size: 12px; }
+  .right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .stage { background: var(--stage); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+  .stage.drag { outline: 3px dashed var(--accent); outline-offset: -6px; }
+  .canvas-wrap { display: flex; justify-content: center; align-items: center; min-height: 200px; }
+  .stage canvas { display: block; max-width: 100%; max-height: 72vh; width: auto; height: auto; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,.25); }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .bar .grow { flex: 1; min-width: 80px; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .list-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .list-head input[type="search"] { flex: 1; min-width: 160px; }
+  .list { position: relative; display: flex; flex-direction: column; max-height: 420px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; }
+  .item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; padding: 9px 10px; border-bottom: 1px solid var(--line); cursor: pointer; align-items: start; }
+  .item:last-child { border-bottom: 0; }
+  .item.active { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .item .t { font-weight: 600; font-size: 13px; }
+  .item .a { color: var(--muted); font-weight: 400; }
+  .item .q { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .item input { margin-top: 3px; accent-color: var(--accent); }
+  .item img { width: 26px; height: 26px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .hint { color: var(--muted); font-size: 12px; margin: 0; }
+  .hint.warn { color: var(--warn); }
+  .msg { color: var(--muted); font-size: 12px; min-height: 16px; }
+  .cover-box { display: flex; gap: 10px; align-items: center; }
+  .cover-box .ph { width: 54px; height: 54px; border-radius: 3px; border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 10px; text-align: center; flex: none; overflow: hidden; background: var(--field); }
+  .cover-box .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-box .info { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .edit-grid .full { grid-column: 1 / -1; }
+  .kbd { font-size: 11px; color: var(--muted); }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center;
+    min-height: 260px; width: 100%; padding: 24px; border: 2px dashed var(--line); border-radius: 8px; color: var(--muted); }
+  .empty-state strong { color: var(--ink); font-size: 15px; }
+  .empty-state svg { width: 40px; height: 40px; color: var(--accent); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="ttl">
+    <a class="home-link" href="../../index.html" title="Torna alla home di Dashboard Audiolibri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg><span class="home-label">Dashboard Audiolibri</span></a>
+    <h1>Postcard audiolibri</h1>
+    <p class="sub">Il tuo ultimo ascolto, in una cartolina. Importa il CSV, aggiungi la copertina e personalizza lo stile.</p>
+  </div>
+  <button class="btn sm" id="themeBtn" type="button" title="Tema dell'interfaccia">Tema: auto</button>
+</header>
+
+<div class="app">
+  <aside class="panel controls" aria-label="Impostazioni">
+
+    <details class="sec" open>
+      <summary>Dati</summary>
+      <div class="sec-body">
+        <label class="f file">File CSV o Excel del diario degli audiolibri
+          <input type="file" id="csvFile" accept=".csv,.tsv,.txt,.xlsx,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        </label>
+        <div class="msg" id="csvMsg">Puoi anche trascinare il file sull'anteprima.</div>
+        <p class="hint">Colonne: Titolo, Autore, Narratore, Durata, N°. Nessun libro precaricato. I dati restano nel browser.</p>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Stili rapidi</summary>
+      <div class="sec-body">
+        <div class="chips" id="styles"></div>
+        <p class="hint">Impostano font, colori e composizione in un clic. Il formato non cambia.</p>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Formato</summary>
+      <div class="sec-body">
+        <label class="f">Dimensione immagine
+          <select id="size">
+            <option value="1080x1080">1080 × 1080 · Quadrato 1:1</option>
+            <option value="1080x1920">1080 × 1920 · Verticale 9:16</option>
+            <option value="1080x1440">1080 × 1440 · Verticale 3:4</option>
+          </select>
+        </label>
+        <div class="row3 hidden" id="customRow">
+          <label class="f">Larghezza <input type="number" id="cw" min="200" max="8000" step="10"></label>
+          <label class="f">Altezza <input type="number" id="ch" min="200" max="8000" step="10"></label>
+          <label class="f">&nbsp;<button class="btn" id="rotate" type="button" title="Scambia larghezza e altezza">↻ Ruota</button></label>
+        </div>
+        <div>
+          <label class="f">File
+            <select id="fmt"><option value="png">PNG (qualità massima)</option><option value="jpeg">JPG (più leggero)</option></select>
+          </label>
+          <label class="f" id="jqWrap" style="margin-top:11px"><span class="lbl">Qualità JPG <span class="v" id="jqV"></span></span>
+            <input type="range" id="jq" min="60" max="100" step="1">
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Tipografia</summary>
+      <div class="sec-body">
+        <label class="f">Font del titolo <select id="qFont"></select></label>
+        <label class="check" id="italicWrap"><input type="checkbox" id="italic"> <span>Titolo in corsivo <span id="italicNote" class="kbd"></span></span></label>
+        <label class="f">Font delle informazioni <select id="mFont"></select></label>
+        <div class="row2">
+          <label class="check"><input type="checkbox" id="authorUpper"> Autore maiuscolo</label>
+          <label class="check" id="titleItalicWrap"><input type="checkbox" id="titleItalic"> Autore in corsivo</label>
+        </div>
+        <label class="f"><span class="lbl">Dimensione massima titolo <span class="v" id="maxSizeV"></span></span>
+          <input type="range" id="maxSize" min="3" max="14" step="0.5"></label>
+        <label class="f"><span class="lbl">Interlinea <span class="v" id="lhV"></span></span>
+          <input type="range" id="lh" min="1.1" max="1.8" step="0.05"></label>
+        <label class="f"><span class="lbl">Dimensione informazioni <span class="v" id="metaScaleV"></span></span>
+          <input type="range" id="metaScale" min="60" max="180" step="5"></label>
+        <label class="check"><input type="checkbox" id="balance"> Righe bilanciate (evita parole orfane)</label>
+        <label class="check"><input type="checkbox" id="typo"> Tipografia curata (’ “ ” …)</label>
+        <label class="f">Titolo che inizia in minuscolo
+          <select id="startCase">
+            <option value="asis">Lascia com'è</option>
+            <option value="cap">Prima lettera maiuscola</option>
+            <option value="ellipsis">Aggiungi “…” all'inizio</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Colori e sfondo</summary>
+      <div class="sec-body">
+        <div class="chips" id="presets"></div>
+        <div class="row2">
+          <label class="f">Sfondo <input type="color" id="bg"></label>
+          <label class="f">Sfondo 2 <input type="color" id="bg2"></label>
+          <label class="f">Testo <input type="color" id="fg"></label>
+          <label class="f">Accento <input type="color" id="accent"></label>
+        </div>
+        <p class="hint" id="contrast"></p>
+        <label class="f">Sfumatura
+          <select id="grad">
+            <option value="none">Nessuna (tinta unita)</option>
+            <option value="diag">Diagonale</option>
+            <option value="vert">Verticale</option>
+            <option value="radial">Radiale (luce al centro)</option>
+          </select>
+        </label>
+        <div class="row2">
+          <label class="check"><input type="checkbox" id="grain"> Grana carta</label>
+          <label class="check"><input type="checkbox" id="vignette"> Vignettatura</label>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Composizione</summary>
+      <div class="sec-body">
+        <label class="f">Allineamento orizzontale
+          <div class="seg" data-key="align"><button type="button" data-v="left">Sinistra</button><button type="button" data-v="center">Centro</button><button type="button" data-v="right">Destra</button></div>
+        </label>
+        <label class="f">Posizione verticale
+          <div class="seg" data-key="valign"><button type="button" data-v="top">Alto</button><button type="button" data-v="center">Centro</button><button type="button" data-v="bottom">Basso</button></div>
+        </label>
+        <label class="f">Informazioni
+          <select id="footerMode">
+            <option value="bottom">Ancorati in fondo</option>
+            <option value="attached">Subito sotto il titolo</option>
+          </select>
+        </label>
+        <label class="f"><span class="lbl">Margini <span class="v" id="marginV"></span></span>
+          <input type="range" id="margin" min="3" max="16" step="0.5"></label>
+        <div class="row2">
+          <label class="f">Etichetta ascolto
+            <select id="markStyle">
+              <option value="big">Badge in accento</option>
+              <option value="watermark">Numero grande sullo sfondo</option>
+              <option value="inline">Testo semplice</option>
+              <option value="none">Nascosta</option>
+            </select>
+          </label>
+          <label class="f">Separatore
+            <select id="rule">
+              <option value="line">Filetto</option>
+              <option value="dash">Lineetta —</option>
+              <option value="dot">Punto ·</option>
+              <option value="none">Nessuno</option>
+            </select>
+          </label>
+        </div>
+        <label class="check"><input type="checkbox" id="frame"> Cornice sottile</label>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Copertina</summary>
+      <div class="sec-body">
+        <div class="cover-box">
+          <div class="ph" id="coverThumb">nessuna copertina</div>
+          <div class="info">
+            <span id="coverInfo">Libro corrente</span>
+            <div class="btns">
+              <label class="btn sm" style="cursor:pointer">Carica…<input type="file" id="coverFile" accept="image/*" class="hidden"></label>
+              <button class="btn sm" id="coverDel" type="button">Rimuovi</button>
+            </div>
+          </div>
+        </div>
+        <label class="f file">Carica più copertine (abbinate dal nome file al titolo)
+          <input type="file" id="coverMulti" accept="image/*" multiple>
+        </label>
+        <div class="msg" id="coverMsg">Puoi anche trascinare un'immagine sull'anteprima.</div>
+        <label class="check"><input type="checkbox" id="coverOn"> Mostra la copertina quando presente</label>
+        <label class="f">Disposizione
+          <select id="coverLayout">
+            <option value="side">Copertina protagonista (sopra in verticale)</option>
+            <option value="thumb">Copertina compatta accanto alle informazioni</option>
+            <option value="bg">Sfondo sfocato + copertina quadrata</option>
+          </select>
+        </label>
+        <label class="f" id="coverSideWrap">Lato (formato quadrato e copertina compatta)
+          <div class="seg" data-key="coverSide"><button type="button" data-v="left">Sinistra</button><button type="button" data-v="right">Destra</button></div>
+        </label>
+        <label class="f" id="coverScaleWrap"><span class="lbl">Dimensione copertina <span class="v" id="coverScaleV"></span></span>
+          <input type="range" id="coverScale" min="50" max="140" step="5"></label>
+        <label class="f" id="overlayWrap"><span class="lbl">Velatura sullo sfondo <span class="v" id="overlayV"></span></span>
+          <input type="range" id="overlay" min="30" max="95" step="1"></label>
+        <label class="f"><span class="lbl">Angoli arrotondati <span class="v" id="coverRadiusV"></span></span>
+          <input type="range" id="coverRadius" min="0" max="8" step="0.5"></label>
+        <label class="check"><input type="checkbox" id="coverShadow"> Ombra morbida</label>
+        <label class="check"><input type="checkbox" id="autoPal"> Colori ricavati dalla copertina</label>
+        <label class="f" id="palToneWrap">Tono palette
+          <div class="seg" data-key="palTone"><button type="button" data-v="dark">Scuro</button><button type="button" data-v="light">Chiaro</button></div>
+        </label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Firma</summary>
+      <div class="sec-body">
+        <label class="f">Testo facoltativo (es. profilo social)
+          <input type="text" id="extra" placeholder="es. @clubdellaudiolibro"></label>
+        <label class="f">Posizione
+          <select id="extraPos">
+            <option value="br">In basso a destra</option>
+            <option value="bc">In basso al centro</option>
+            <option value="bl">In basso a sinistra</option>
+            <option value="tr">In alto a destra</option>
+            <option value="tl">In alto a sinistra</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Template salvati</summary>
+      <div class="sec-body">
+        <select id="tplList"></select>
+        <div class="btns">
+          <button class="btn sm" id="tplApply" type="button">Applica</button>
+          <button class="btn sm" id="tplSave" type="button">Salva corrente…</button>
+          <button class="btn sm" id="tplDel" type="button">Elimina</button>
+        </div>
+        <div class="btns">
+          <button class="btn sm" id="tplExport" type="button">Esporta JSON</button>
+          <label class="btn sm" style="cursor:pointer">Importa JSON<input type="file" id="tplImport" accept=".json,application/json" class="hidden"></label>
+          <button class="btn sm" id="reset" type="button">Ripristina predefiniti</button>
+        </div>
+      </div>
+    </details>
+  </aside>
+
+  <main class="right">
+    <section class="stage" id="stage" aria-label="Anteprima">
+      <div class="canvas-wrap">
+        <div class="empty-state" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+          <strong>Nessun audiolibro caricato</strong>
+          <span>Carica un file CSV o Excel dal pannello «Dati», oppure trascinalo qui.<br>Il CSV del diario viene riconosciuto automaticamente.</span>
+        </div>
+        <canvas id="preview" class="hidden" width="2400" height="1080"></canvas>
+      </div>
+      <div class="bar">
+        <button class="btn" id="prev" type="button" title="Freccia sinistra">← Precedente</button>
+        <button class="btn" id="next" type="button" title="Freccia destra">Successiva →</button>
+        <span class="grow" id="counter"></span>
+        <button class="btn" id="copy" type="button">Copia</button>
+        <button class="btn" id="dlOne" type="button">Scarica</button>
+        <button class="btn primary" id="dlZip" type="button">Scarica selezionate (ZIP)</button>
+      </div>
+      <p class="hint" id="status"></p>
+    </section>
+
+    <section class="panel">
+      <details class="sec" style="border:0;padding:0">
+        <summary>Modifica la cartolina corrente</summary>
+        <div class="sec-body edit-grid">
+          <label class="f">Titolo <input type="text" id="eT"></label>
+          <label class="f">Autore <input type="text" id="eA"></label>
+          <label class="f">Narratore <input type="text" id="eN"></label>
+          <label class="f">Durata (ore:minuti) <input type="text" id="eD" placeholder="09:34"></label>
+          <label class="f">Numero ascolto <input type="number" id="eNum" min="0" max="999" step="1" placeholder="N° dal CSV"></label>
+          <p class="hint">Il numero viene mostrato con tre cifre. Se manca, non viene inventato.</p>
+          <div class="btns full">
+            <button class="btn sm" id="addItem" type="button">+ Nuova cartolina</button>
+            <button class="btn sm" id="delItem" type="button">Elimina cartolina</button>
+            <button class="btn sm" id="exportCsv" type="button">Esporta CSV aggiornato</button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <div class="list-head">
+        <input type="search" id="search" placeholder="Cerca per titolo, autore, narratore o numero">
+        <button class="btn" id="all" type="button">Tutte</button>
+        <button class="btn" id="none" type="button">Nessuna</button>
+      </div>
+      <div class="list" id="list" role="list"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const DATA = [];   // nessun audiolibro precaricato
+
+/* ================= font ================= */
+const FONTS = [
+  { n: 'Lora', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Playfair Display', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Cormorant Garamond', g: 'Serif', fb: 'Garamond, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'EB Garamond', g: 'Serif', fb: 'Garamond, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Libre Baskerville', g: 'Serif', fb: 'Baskerville, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Libre Caslon Text', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Merriweather', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Crimson Pro', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Spectral', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Newsreader', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Source Serif 4', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Fraunces', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Bodoni Moda', g: 'Serif', fb: 'Didot, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Cardo', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Instrument Serif', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital@0;1' },
+  { n: 'DM Serif Display', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital@0;1' },
+  { n: 'Montserrat', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Raleway', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Work Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Poppins', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Josefin Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Jost', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'DM Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Inter', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Manrope', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Outfit', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Space Grotesk', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Oswald', g: 'Sans', fb: 'Impact, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Courier Prime', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'IBM Plex Mono', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: true, w: 'ital,wght@0,400;0,700;1,400' },
+  { n: 'Special Elite', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: false, w: '' },
+  { n: 'Caveat', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: 'wght@400;700' },
+  { n: 'Dancing Script', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: 'wght@400;700' },
+  { n: 'Homemade Apple', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: '' }
+];
+function fontInfo(name) { return FONTS.find(f => f.n === name) || FONTS[0]; }
+function fam(name) { const f = fontInfo(name); return '"' + f.n + '", ' + f.fb; }
+// un <link> per famiglia: se una famiglia non si carica, le altre funzionano comunque
+const fontsReady = Promise.all(FONTS.map(f => new Promise(resolve => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=' + f.n.replace(/ /g, '+') + (f.w ? ':' + f.w : '') + '&display=swap';
+  link.onload = link.onerror = () => resolve();
+  document.head.appendChild(link);
+  setTimeout(resolve, 8000);
+})));
+async function ensureFonts(list) {
+  await fontsReady;
+  try { await Promise.all(list.map(f => document.fonts.load(f, 'Aa“«'))); } catch (e) {}
+}
+
+/* ================= preset ================= */
+const PRESETS = [
+  { n: 'Notte',      bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458' },
+  { n: 'Inchiostro', bg: '#0d2438', bg2: '#16466b', fg: '#eef4f8', accent: '#ffcf6b' },
+  { n: 'Ardesia',    bg: '#2b3036', bg2: '#3d454e', fg: '#eceff1', accent: '#8fb8d0' },
+  { n: 'Bosco',      bg: '#14281f', bg2: '#244a38', fg: '#edf3ec', accent: '#d9c36a' },
+  { n: 'Bordeaux',   bg: '#3a0f1b', bg2: '#6a1d33', fg: '#f7ece8', accent: '#f0b7a4' },
+  { n: 'Nero',       bg: '#0a0a0a', bg2: '#1c1c1c', fg: '#f5f5f5', accent: '#ffffff' },
+  { n: 'Carta',      bg: '#f3efe6', bg2: '#e4dccb', fg: '#25211c', accent: '#a23b2a' },
+  { n: 'Sabbia',     bg: '#ebe3d5', bg2: '#d9cbb3', fg: '#3b322a', accent: '#b5651d' },
+  { n: 'Salvia',     bg: '#e3e8de', bg2: '#cdd6c5', fg: '#26322a', accent: '#5f7a52' },
+  { n: 'Cipria',     bg: '#f6e8e4', bg2: '#ecd2cb', fg: '#3d2b2b', accent: '#b85c5c' },
+  { n: 'Lavanda',    bg: '#ece8f4', bg2: '#d8d0ea', fg: '#2c2540', accent: '#6d55b0' },
+  { n: 'Bianco',     bg: '#ffffff', bg2: '#eef1f4', fg: '#16191d', accent: '#1d4ed8' },
+  { n: 'E-ink',      bg: '#ffffff', bg2: '#ffffff', fg: '#000000', accent: '#4a4a4a' }
+];
+const DEFAULTS = {
+  size: '1080x1440', cw: 1080, ch: 1440, fmt: 'png', jq: 92,
+  qFont: 'Lora', italic: false, mFont: 'Montserrat', authorUpper: false, titleItalic: false,
+  maxSize: 6, lh: 1.32, metaScale: 100, balance: true, typo: true, startCase: 'asis',
+  bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458', grad: 'diag', grain: false, vignette: false,
+  align: 'center', valign: 'center', footerMode: 'attached', margin: 7.5, markStyle: 'big', rule: 'line', frame: false,
+  coverOn: true, coverLayout: 'side', coverSide: 'left', coverScale: 100, overlay: 72, coverRadius: 1.5, coverShadow: true,
+  autoPal: false, palTone: 'dark',
+  extra: '', extraPos: 'br'
+};
+const STYLES = [
+  { n: 'Minimal scuro', s: { qFont: 'Lora', italic: false, mFont: 'Montserrat', authorUpper: false, titleItalic: false, bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458', grad: 'diag', grain: false, vignette: false, align: 'left', valign: 'center', footerMode: 'bottom', markStyle: 'big', rule: 'line', frame: false, autoPal: false, coverLayout: 'side' } },
+  { n: 'Editoriale', s: { qFont: 'EB Garamond', italic: true, mFont: 'Jost', authorUpper: true, titleItalic: false, bg: '#f3efe6', bg2: '#e4dccb', fg: '#25211c', accent: '#a23b2a', grad: 'none', grain: true, vignette: false, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'none', rule: 'line', frame: true, autoPal: false, coverLayout: 'thumb' } },
+  { n: 'Poster', s: { qFont: 'Playfair Display', italic: false, mFont: 'Space Grotesk', authorUpper: true, titleItalic: false, bg: '#0a0a0a', bg2: '#1c1c1c', fg: '#f5f5f5', accent: '#ffffff', grad: 'radial', grain: true, vignette: true, align: 'left', valign: 'bottom', footerMode: 'attached', markStyle: 'watermark', rule: 'line', frame: false, autoPal: false, maxSize: 11 } },
+  { n: 'Diario', s: { qFont: 'Courier Prime', italic: false, mFont: 'Courier Prime', authorUpper: false, titleItalic: false, bg: '#ebe3d5', bg2: '#d9cbb3', fg: '#3b322a', accent: '#b5651d', grad: 'vert', grain: true, vignette: true, align: 'left', valign: 'top', footerMode: 'attached', markStyle: 'none', rule: 'dash', frame: false, autoPal: false } },
+  { n: 'Galleria', s: { qFont: 'Cormorant Garamond', italic: true, mFont: 'Raleway', authorUpper: true, titleItalic: false, bg: '#ffffff', bg2: '#eef1f4', fg: '#16191d', accent: '#16191d', grad: 'none', grain: false, vignette: false, align: 'left', valign: 'center', footerMode: 'attached', markStyle: 'none', rule: 'line', frame: false, autoPal: false, coverOn: true, coverLayout: 'side', coverShadow: true } },
+  { n: 'Dalla copertina', s: { qFont: 'Fraunces', italic: true, mFont: 'Manrope', authorUpper: true, titleItalic: false, grad: 'diag', grain: true, vignette: true, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'big', rule: 'dot', frame: false, coverOn: true, coverLayout: 'bg', autoPal: true, palTone: 'dark', overlay: 70 } },
+  { n: 'E-reader', s: { qFont: 'Libre Baskerville', italic: false, mFont: 'Work Sans', authorUpper: false, titleItalic: false, bg: '#ffffff', bg2: '#ffffff', fg: '#000000', accent: '#4a4a4a', grad: 'none', grain: false, vignette: false, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'big', rule: 'line', frame: true, autoPal: false } }
+];
+
+/* ================= stato ================= */
+const $ = id => document.getElementById(id);
+const LS_KEY = 'postcard-settings-v2', TPL_KEY = 'postcard-templates-v2';
+let S = Object.assign({}, DEFAULTS);
+try {
+  const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+  if (saved) S = Object.assign(S, saved);
+  if (!['1080x1080','1080x1920','1080x1440'].includes(S.size)) S.size='1080x1440';
+} catch (e) {}
+let items = DATA.slice();
+let checked = new Set(items.map((_, i) => i));
+let current = 0;
+let filter = '';
+let lastOverflow = false;
+
+/* ================= utilità ================= */
+function slugFull(s) {
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+function slug(s) { return slugFull(s).slice(0, 40) || 'citazione'; }
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function rgba(hex, a) { const [r, g, b] = hexToRgb(hex); return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'; }
+function lum(hex) {
+  return hexToRgb(hex).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); })
+    .reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+}
+function contrast(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) {
+    const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6;
+  }
+  return [h, s, l];
+}
+function hslToHex(h, s, l) {
+  const f = n => { const k = (n + h * 12) % 12; const a = s * Math.min(l, 1 - l);
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); };
+  return '#' + f(0) + f(8) + f(4);
+}
+function sizeOf(s) {
+  return ['1080x1080','1080x1920','1080x1440'].includes(s.size) ? s.size.split('x').map(Number) : [1080,1440];
+}
+/* ================= copertine ================= */
+const covers = new Map();       // chiave libro -> canvas (immagine ridimensionata)
+const coverURLs = new Map();    // chiave libro -> objectURL per miniature UI
+const palCache = new Map();
+const bookKey = t => slugFull(t) || '_';
+const IDB = {
+  db: null,
+  open() {
+    return new Promise(res => {
+      try {
+        const r = indexedDB.open('postcard-covers', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('covers');
+        r.onsuccess = () => { IDB.db = r.result; res(r.result); };
+        r.onerror = () => res(null);
+      } catch (e) { res(null); }
+    });
+  },
+  tx(mode) { return IDB.db.transaction('covers', mode).objectStore('covers'); },
+  put(k, blob) { if (!IDB.db) return; try { IDB.tx('readwrite').put(blob, k); } catch (e) {} },
+  del(k) { if (!IDB.db) return; try { IDB.tx('readwrite').delete(k); } catch (e) {} },
+  all() {
+    return new Promise(res => {
+      if (!IDB.db) return res([]);
+      const out = []; const req = IDB.tx('readonly').openCursor();
+      req.onsuccess = () => { const c = req.result; if (c) { out.push([c.key, c.value]); c.continue(); } else res(out); };
+      req.onerror = () => res(out);
+    });
+  }
+};
+function loadImage(blob) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(blob); const img = new Image();
+    img.onload = () => { res(img); setTimeout(() => URL.revokeObjectURL(url), 1000); };
+    img.onerror = rej; img.src = url;
+  });
+}
+async function setCover(key, blob, persist) {
+  const img = await loadImage(blob);
+  const max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, c.width, c.height);
+  covers.set(key, c); palCache.delete(key + ':dark'); palCache.delete(key + ':light');
+  if (coverURLs.has(key)) URL.revokeObjectURL(coverURLs.get(key));
+  const small = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+  coverURLs.set(key, URL.createObjectURL(small));
+  if (persist) IDB.put(key, small);
+}
+function removeCover(key) {
+  covers.delete(key); palCache.delete(key + ':dark'); palCache.delete(key + ':light');
+  if (coverURLs.has(key)) { URL.revokeObjectURL(coverURLs.get(key)); coverURLs.delete(key); }
+  IDB.del(key);
+}
+function coverPalette(key, img, tone) {
+  const ck = key + ':' + tone; if (palCache.has(ck)) return palCache.get(ck);
+  const n = 56, c = document.createElement('canvas'); c.width = n; c.height = n;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0, n, n);
+  const d = x.getImageData(0, 0, n, n).data; const buckets = new Map();
+  for (let i = 0; i < d.length; i += 4) {
+    const k = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4);
+    const b = buckets.get(k) || { n: 0, r: 0, g: 0, b: 0 };
+    b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2]; buckets.set(k, b);
+  }
+  const list = Array.from(buckets.values()).map(b => { const r = b.r / b.n, g = b.g / b.n, bl = b.b / b.n; return { n: b.n, hsl: rgbToHsl(r, g, bl) }; })
+    .sort((a, b) => b.n - a.n);
+  const dom = list[0].hsl;
+  let best = null, bestScore = -1;
+  list.slice(0, 40).forEach(c => {
+    const [h, s, l] = c.hsl; if (l < 0.18 || l > 0.88) return;
+    const score = s * Math.sqrt(c.n) * (1 - Math.abs(l - 0.55));
+    if (score > bestScore) { bestScore = score; best = c.hsl; }
+  });
+  const acc = best && best[1] > 0.18 ? best : [(dom[0] + 0.08) % 1, 0.5, 0.6];
+  const hs = Math.min(dom[1], 0.45);
+  const p = tone === 'light'
+    ? { bg: hslToHex(dom[0], Math.min(hs, 0.35), 0.93), bg2: hslToHex(dom[0], Math.min(hs, 0.35), 0.84), fg: hslToHex(dom[0], 0.3, 0.13), accent: hslToHex(acc[0], Math.max(acc[1], 0.45), 0.38) }
+    : { bg: hslToHex(dom[0], hs, 0.1), bg2: hslToHex(dom[0], hs, 0.2), fg: hslToHex(dom[0], 0.18, 0.93), accent: hslToHex(acc[0], Math.max(acc[1], 0.45), 0.7) };
+  palCache.set(ck, p); return p;
+}
+
+/* ================= disegno ================= */
+let grainCanvas = null;
+function grainPattern(ctx) {
+  if (!grainCanvas) {
+    grainCanvas = document.createElement('canvas'); grainCanvas.width = grainCanvas.height = 256;
+    const g = grainCanvas.getContext('2d'); const im = g.createImageData(256, 256);
+    for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    g.putImageData(im, 0, 0);
+  }
+  return ctx.createPattern(grainCanvas, 'repeat');
+}
+function roundRectPath(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function drawCover(ctx, img, x, y, w, h, s, col) {
+  const r = w * s.coverRadius / 100;
+  if (s.coverShadow) {
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.38)'; ctx.shadowBlur = w * 0.12; ctx.shadowOffsetY = w * 0.04;
+    roundRectPath(ctx, x, y, w, h, r); ctx.fillStyle = col.bg; ctx.fill(); ctx.restore();
+  }
+  ctx.save(); roundRectPath(ctx, x, y, w, h, r); ctx.clip(); const edge=Math.min(img.width,img.height); ctx.drawImage(img,(img.width-edge)/2,(img.height-edge)/2,edge,edge,x,y,w,h);
+  ctx.restore();
+  ctx.save(); roundRectPath(ctx, x, y, w, h, r); ctx.strokeStyle = rgba(col.fg, 0.12); ctx.lineWidth = Math.max(1, w * 0.004); ctx.stroke(); ctx.restore();
+}
+function drawBlurredCover(ctx, img, W, H) {
+  const ar = img.width / img.height, car = W / H;
+  let sw, sh, sx, sy;
+  if (ar > car) { sh = img.height; sw = sh * car; sx = (img.width - sw) / 2; sy = 0; } else { sw = img.width; sh = sw / car; sx = 0; sy = (img.height - sh) / 2; }
+  const a = document.createElement('canvas'); a.width = Math.max(8, Math.round(W / 10)); a.height = Math.max(8, Math.round(H / 10));
+  const ax = a.getContext('2d'); ax.imageSmoothingQuality = 'high'; ax.drawImage(img, sx, sy, sw, sh, 0, 0, a.width, a.height);
+  const b = document.createElement('canvas'); b.width = Math.max(4, Math.round(W / 40)); b.height = Math.max(4, Math.round(H / 40));
+  const bx = b.getContext('2d'); bx.imageSmoothingQuality = 'high'; bx.drawImage(a, 0, 0, b.width, b.height);
+  ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  const pad = Math.max(W, H) * 0.04; ctx.drawImage(b, -pad, -pad, W + 2 * pad, H + 2 * pad); ctx.restore();
+}
+function wrapLines(ctx, text, maxW) {
+  const words = text.split(/\s+/).filter(Boolean); const lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (!cur || ctx.measureText(t).width <= maxW) cur = t; else { lines.push(cur); cur = w; } }
+  if (cur) lines.push(cur); return lines;
+}
+function drawSpaced(ctx, text, x, y, spacing, align) {
+  const chars = Array.from(text); const widths = chars.map(c => ctx.measureText(c).width);
+  const total = widths.reduce((a, b) => a + b, 0) + spacing * Math.max(0, chars.length - 1);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const prev = ctx.textAlign; ctx.textAlign = 'left';
+  chars.forEach((c, i) => { ctx.fillText(c, cx, y); cx += widths[i] + spacing; });
+  ctx.textAlign = prev; return total;
+}
+function spacedWidth(ctx, text, spacing) { const ch = Array.from(text); return ch.reduce((a, c) => a + ctx.measureText(c).width, 0) + spacing * Math.max(0, ch.length - 1); }
+function prepareText(q, s) {
+  let t = String(q).trim();
+  if (s.typo) {
+    t = t.replace(/\.\.\./g, '…').replace(/'/g, '’');
+    let open = true; t = t.replace(/"/g, () => { const c = open ? '“' : '”'; open = !open; return c; });
+    t = t.replace(/ - /g, ' – ');
+  }
+  const first = t.search(/\p{L}/u);
+  if (first >= 0 && /\p{Ll}/u.test(t[first]) && first === 0) {
+    if (s.startCase === 'cap') t = t[0].toUpperCase() + t.slice(1);
+    else if (s.startCase === 'ellipsis') t = '…' + t;
+  }
+  let paras = t.split(/\s{3,}|\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  if (s.markStyle === 'inline' && paras.length) {
+    if (!/^[«“"]/.test(paras[0])) paras[0] = '«' + paras[0];
+    const L = paras.length - 1; if (!/[»”"]$/.test(paras[L])) paras[L] = paras[L] + '»';
+  }
+  return paras;
+}
+
+function numberLabel(value) {
+  const t = String(value ?? '').trim();
+  return /^\d{1,3}$/.test(t) ? t.padStart(3,'0') : '';
+}
+function durationLabel(value) {
+  const t = String(value || '').trim(), m = /^(\d+):(\d{2})$/.exec(t);
+  if (!m || +m[2] > 59) return t;
+  return +m[1] + ' h' + (+m[2] ? ' ' + +m[2] + ' min' : '');
+}
+function cardLines(ctx,text,width) {
+  const result=[];
+  for(const paragraph of String(text).split('\n')) {
+    let line='';
+    for(const word of paragraph.split(/\s+/).filter(Boolean)) {
+      if(ctx.measureText(word).width>width) {
+        if(line) {result.push(line);line='';}
+        for(const ch of word) { if(line && ctx.measureText(line+ch).width>width){result.push(line);line='';} line+=ch; }
+      } else if(line && ctx.measureText(line+' '+word).width>width) {result.push(line);line=word;}
+      else line+=(line?' ':'')+word;
+    }
+    if(line) result.push(line);
+  }
+  return result;
+}
+async function renderCard(canvas,item,s,scale=1) {
+  const [w,h]=sizeOf(s),W=Math.round(w*scale),H=Math.round(h*scale),u=W/1080;
+  const qf=fam(s.qFont),mf=fam(s.mFont),qs=s.italic&&fontInfo(s.qFont).it?'italic ':'';
+  await ensureFonts([qs+'700 50px '+qf,'400 30px '+mf,'700 30px '+mf]);
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d'),key=bookKey(item.t),cover=s.coverOn?covers.get(key):null;
+  const col=cover&&s.autoPal?coverPalette(key,cover,s.palTone):s;
+  ctx.fillStyle=col.bg;ctx.fillRect(0,0,W,H);
+  if(cover&&s.coverLayout==='bg'){drawBlurredCover(ctx,cover,W,H);ctx.fillStyle=rgba(col.bg,s.overlay/100);ctx.fillRect(0,0,W,H);}
+  if(s.grad!=='none'){
+    const g=s.grad==='radial'?ctx.createRadialGradient(W*.5,H*.35,0,W*.5,H*.5,Math.hypot(W,H)*.6):ctx.createLinearGradient(0,0,s.grad==='vert'?0:W,H);
+    const alpha=cover&&s.coverLayout==='bg'?.35:1;
+    g.addColorStop(0,rgba(s.grad==='radial'?col.bg2:col.bg,alpha));g.addColorStop(1,rgba(s.grad==='radial'?col.bg:col.bg2,alpha));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  if(s.grain){ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=grainPattern(ctx);ctx.fillRect(0,0,W,H);ctx.restore();}
+  if(s.vignette){const g=ctx.createRadialGradient(W/2,H/2,W*.3,W/2,H/2,Math.hypot(W,H)*.65);g.addColorStop(0,'transparent');g.addColorStop(1,'rgba(0,0,0,.32)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  if(s.frame){ctx.strokeStyle=rgba(col.fg,.3);ctx.lineWidth=2*u;ctx.strokeRect(30*u,30*u,W-60*u,H-60*u);}
+  const pad=W*Math.max(s.frame?5:3,+s.margin)/100,gap=38*u;
+  let R={x:pad,y:pad,w:W-2*pad,h:H-2*pad};
+  const align=s.align,anchor=r=>align==='center'?r.x+r.w/2:align==='right'?r.x+r.w:r.x;
+  const num=numberLabel(item.num),badge='Audiolibro ascoltato'+(num?' #'+num:'');
+  if(s.markStyle==='watermark'&&num){ctx.save();ctx.fillStyle=rgba(col.accent,.09);ctx.font='700 '+W*.38+'px '+mf;ctx.textAlign='right';ctx.fillText(num,W-pad,H-pad);ctx.restore();}
+  if(s.markStyle!=='none'){
+    let bs=25*u;ctx.font='700 '+bs+'px '+mf;
+    while(ctx.measureText(badge).width>R.w-32*u&&bs>10*u){bs-=u;ctx.font='700 '+bs+'px '+mf;}
+    const bw=ctx.measureText(badge).width+32*u,bh=bs+26*u;
+    const bx=align==='center'?R.x+(R.w-bw)/2:align==='right'?R.x+R.w-bw:R.x;
+    if(s.markStyle==='big'){roundRectPath(ctx,bx,R.y,bw,bh,10*u);ctx.fillStyle=rgba(col.accent,.15);ctx.fill();}
+    ctx.fillStyle=col.accent;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(badge,bx+16*u,R.y+bh/2);
+    R.y+=bh+gap;R.h-=bh+gap;
+  }
+  let textR={...R};
+  if(cover){
+    const side=H===W||s.coverLayout==='thumb';
+    let cw;
+    if(side){
+      cw=Math.min(R.w*(s.coverLayout==='thumb'?.25:.43)*s.coverScale/100,R.h*.8,R.w*.49);
+      const cy=s.valign==='top'?R.y:s.valign==='bottom'?R.y+R.h-cw:R.y+(R.h-cw)/2;
+      const right=s.coverSide==='right';drawCover(ctx,cover,right?R.x+R.w-cw:R.x,cy,cw,cw,s,col);
+      textR={x:right?R.x:R.x+cw+gap,y:R.y,w:R.w-cw-gap,h:R.h};
+    }else{
+      cw=Math.min(R.w*.78*s.coverScale/100,R.h*.54,R.w);
+      const cx=align==='left'?R.x:align==='right'?R.x+R.w-cw:R.x+(R.w-cw)/2;
+      drawCover(ctx,cover,cx,R.y,cw,cw,s,col);
+      textR={x:R.x,y:R.y+cw+gap,w:R.w,h:R.h-cw-gap};
+    }
+  }
+  const title=prepareText(item.t,{...s,markStyle:'none'}).join('\n');
+  const author=s.authorUpper?String(item.a).toUpperCase():String(item.a||'');
+  const metadata=[author,item.n?'Letto da '+item.n:'',item.d?'Durata: '+durationLabel(item.d):''].filter(Boolean);
+  const calc=(ts,ms)=>{
+    ctx.font=qs+'700 '+ts+'px '+qf;let lines=cardLines(ctx,title,textR.w);
+    if(s.balance&&lines.length>1){let low=textR.w*.5,high=textR.w;for(let k=0;k<12;k++){const mid=(low+high)/2;if(cardLines(ctx,title,mid).length<=lines.length)high=mid;else low=mid;}lines=cardLines(ctx,title,high);}
+    const ml=metadata.map((v,i)=>{ctx.font=(i===0&&s.titleItalic&&fontInfo(s.mFont).it?'italic ':'')+'400 '+ms+'px '+mf;return cardLines(ctx,v,textR.w);});
+    const titleH=lines.length*ts*s.lh,metaH=ml.reduce((a,l)=>a+l.length*ms*1.4,0)+Math.max(0,ml.length-1)*ms*.4;
+    const sep=s.rule==='none'?18*u:36*u;
+    return {lines,ml,titleH,metaH,sep,total:titleH+sep+metaH};
+  };
+  let ts=W*s.maxSize/100,ms=29*u*s.metaScale/100,L=calc(ts,ms);
+  while(L.total>textR.h&&ts>12*u){ts*=.95;ms*=.95;L=calc(ts,ms);}
+  const overflow=L.total>textR.h||textR.w<40*u;
+  let y=textR.y+(s.valign==='center'?(textR.h-L.total)/2:s.valign==='bottom'?textR.h-L.total:0);
+  y=Math.max(textR.y,y);ctx.textAlign=align;ctx.textBaseline='top';ctx.fillStyle=col.fg;ctx.font=qs+'700 '+ts+'px '+qf;
+  const x=anchor(textR);
+  L.lines.forEach(line=>{ctx.fillText(line,x,y);y+=ts*s.lh;});
+  if(s.footerMode==='bottom')y=Math.max(y,textR.y+textR.h-L.metaH-L.sep);
+  if(s.rule!=='none'){
+    const rw=64*u,rx=align==='center'?x-rw/2:align==='right'?x-rw:x;
+    ctx.fillStyle=col.accent;
+    if(s.rule==='dot'){ctx.beginPath();ctx.arc(align==='center'?x:align==='right'?x-4*u:x+4*u,y+L.sep/2,4*u,0,Math.PI*2);ctx.fill();}
+    else ctx.fillRect(rx,y+L.sep/2,s.rule==='dash'?rw*.5:rw,2*u);
+  }
+  y+=L.sep;
+  L.ml.forEach((lines,i)=>{
+    ctx.font=(i===0&&s.titleItalic&&fontInfo(s.mFont).it?'italic ':'')+'400 '+ms+'px '+mf;ctx.fillStyle=i===0?col.accent:rgba(col.fg,.85);
+    lines.forEach(line=>{ctx.fillText(line,x,y);y+=ms*1.4;});y+=ms*.4;
+  });
+  if(s.extra.trim()){
+    const p=s.extraPos,ex=p[1]==='r'?W-pad:p[1]==='l'?pad:W/2;
+    ctx.textAlign=p[1]==='r'?'right':p[1]==='l'?'left':'center';ctx.textBaseline='middle';
+    let fs=Math.min(20*u,pad*.32);ctx.font='400 '+fs+'px '+mf;
+    while(ctx.measureText(s.extra).width>W-2*pad&&fs>5*u){fs*=.95;ctx.font='400 '+fs+'px '+mf;}
+    ctx.fillStyle=rgba(col.fg,.6);ctx.fillText(s.extra,ex,p[0]==='t'?pad/2:H-pad/2);
+  }
+  return {overflow,W,H};
+}
+
+/* ================= anteprima ================= */
+let renderToken = 0, renderTimer = null;
+function schedulePreview() { clearTimeout(renderTimer); renderTimer = setTimeout(drawPreview, 70); }
+async function drawPreview() {
+  const token = ++renderToken;
+  if (!items.length) {
+    $('counter').textContent = 'Nessun audiolibro';
+    $('preview').classList.add('hidden'); $('emptyState').classList.remove('hidden');
+    $('status').textContent = ''; $('status').className = 'hint'; lastOverflow = false;
+    updateCoverUI(); return;
+  }
+  $('emptyState').classList.add('hidden'); $('preview').classList.remove('hidden');
+  current = Math.min(current, items.length - 1);
+  const item = items[current];
+  const [W, H] = sizeOf(S);
+  const scale = Math.min(1, 1800 / Math.max(W, H));
+  const off = document.createElement('canvas');
+  const r = await renderCard(off, item, S, scale);
+  if (token !== renderToken) return;
+  const cv = $('preview'); cv.width = off.width; cv.height = off.height; cv.getContext('2d').drawImage(off, 0, 0);
+  $('counter').textContent = (current + 1) + ' di ' + items.length + ' · ' + W + ' × ' + H + ' px';
+  const st = $('status');
+  if (r.overflow) { st.textContent = 'Testi al limite: riduci margini, dimensioni della copertina o interlinea e controlla l’anteprima.'; st.className = 'hint warn'; lastOverflow = true; }
+  else if (lastOverflow) { st.textContent = ''; st.className = 'hint'; lastOverflow = false; }
+  updateCoverUI();
+}
+
+/* ================= lista ================= */
+function visibleIndices() {
+  const f = filter.trim().toLowerCase(); const out = [];
+  items.forEach((it, i) => { if (!f || (it.t + ' ' + it.a + ' ' + it.q).toLowerCase().includes(f)) out.push(i); });
+  return out;
+}
+function renderList() {
+  const list = $('list'); list.textContent = '';
+  visibleIndices().forEach(i => {
+    const it = items[i];
+    const row = document.createElement('div'); row.className = 'item' + (i === current ? ' active' : '');
+    row.tabIndex = 0; row.setAttribute('role', 'listitem');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = checked.has(i);
+    cb.addEventListener('click', e => e.stopPropagation());
+    cb.addEventListener('change', () => { cb.checked ? checked.add(i) : checked.delete(i); updateZipLabel(); });
+    const body = document.createElement('div');
+    const head = document.createElement('div'); head.className = 't'; head.textContent = (it.t || '(senza titolo)') + ' ';
+    const au = document.createElement('span'); au.className = 'a'; au.textContent = '· ' + it.a; head.appendChild(au);
+    const q = document.createElement('div'); q.className = 'q'; q.textContent = it.q;
+    body.appendChild(head); body.appendChild(q);
+    row.appendChild(cb); row.appendChild(body);
+    const url = coverURLs.get(bookKey(it.t));
+    if (url) { const im = document.createElement('img'); im.src = url; im.alt = ''; row.appendChild(im); } else row.appendChild(document.createElement('span'));
+    const pick = () => { current = i; renderList(); syncEditor(); drawPreview(); };
+    row.addEventListener('click', pick);
+    row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    list.appendChild(row);
+    if (i === current) requestAnimationFrame(() => {
+      const lt = list.scrollTop, lh = list.clientHeight, rt = row.offsetTop, rh = row.offsetHeight;
+      if (rt < lt) list.scrollTop = rt; else if (rt + rh > lt + lh) list.scrollTop = rt + rh - lh;
+    });
+  });
+  updateZipLabel();
+}
+function updateZipLabel() { $('dlZip').textContent = 'Scarica selezionate (' + checked.size + ') in ZIP'; }
+
+/* ================= editor ================= */
+function syncEditor() {
+  const it=items[current]||{};
+  for(const [id,key] of [['eT','t'],['eA','a'],['eN','n'],['eD','d'],['eNum','num']]) $(id).value=it[key]||'';
+}
+['eT','eA','eN','eD','eNum'].forEach(id=>$(id).addEventListener('input',()=>{
+  if(!items[current])return;
+  const it=items[current],oldKey=bookKey(it.t);
+  Object.assign(it,{t:$('eT').value,a:$('eA').value,n:$('eN').value,d:$('eD').value,num:$('eNum').value});
+  it.q=[it.n,it.d,it.num].join(' · ');
+  if(oldKey!==bookKey(it.t)&&covers.has(oldKey)){const c=covers.get(oldKey);covers.set(bookKey(it.t),c);c.toBlob(blob=>{if(blob){IDB.put(bookKey(it.t),blob);coverURLs.set(bookKey(it.t),URL.createObjectURL(blob));}},'image/jpeg',.92);}
+  $('eNum').setCustomValidity(it.num&&!numberLabel(it.num)?'Inserisci un numero intero da 0 a 999.':'');
+  renderList();schedulePreview();
+}));
+$('addItem').addEventListener('click',()=>{
+  items.push({t:'Nuovo audiolibro',a:'',n:'',d:'',num:'',q:'',raw:{}});current=items.length-1;checked.add(current);
+  renderList();syncEditor();drawPreview();
+});
+$('delItem').addEventListener('click',()=>{
+  if(!items.length||!confirm('Eliminare la cartolina corrente?'))return;
+  items.splice(current,1);checked=new Set([...checked].filter(i=>i!==current).map(i=>i>current?i-1:i));current=Math.max(0,Math.min(current,items.length-1));renderList();syncEditor();drawPreview();
+});
+$('exportCsv').addEventListener('click',()=>{
+  const rows=items.map(it=>({...it.raw,Titolo:it.t,Autore:it.a,Narratore:it.n,Durata:it.d,'N°':it.num}));
+  const headers=[...new Set(rows.flatMap(Object.keys))],esc=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const csv=[headers.map(esc).join(','),...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\r\n');
+  saveBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'postcard-audiolibri.csv');
+});
+
+/* ================= download ================= */
+function ext() { return S.fmt === 'jpeg' ? 'jpg' : 'png'; }
+function fileName(i) { return (numberLabel(items[i].num)||String(i + 1).padStart(3, '0')) + '-' + slug(items[i].t) + '-' + slug(items[i].a).slice(0, 20) + '.' + ext(); }
+function saveBlob(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function toBlob(canvas, type, q) { return new Promise(res => canvas.toBlob(res, type || (S.fmt === 'jpeg' ? 'image/jpeg' : 'image/png'), q || S.jq / 100)); }
+const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(buf) { let c = 0xFFFFFFFF; for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(files) {
+  const enc = new TextEncoder(); const chunks = []; const central = []; let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name); const crc = crc32(f.data); const size = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true);
+    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(lh.buffer), name, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+    ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + size;
+  }
+  const cdSize = central.reduce((a, c) => a + c.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+}
+$('dlOne').addEventListener('click', async () => {
+  if (!items.length) return;
+  const c = document.createElement('canvas'); await renderCard(c, items[current], S);
+  saveBlob(await toBlob(c), fileName(current));
+});
+$('copy').addEventListener('click', async () => {
+  if (!items.length) return;
+  try {
+    const c = document.createElement('canvas'); await renderCard(c, items[current], S);
+    const blob = await toBlob(c, 'image/png');
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    $('status').textContent = 'Immagine copiata negli appunti.'; $('status').className = 'hint';
+  } catch (e) { $('status').textContent = 'Il browser non consente di copiare immagini: usa “Scarica”.'; $('status').className = 'hint warn'; }
+});
+$('dlZip').addEventListener('click', async () => {
+  const sel = Array.from(checked).filter(i => i < items.length).sort((a, b) => a - b);
+  if (!sel.length) { $('status').textContent = 'Seleziona almeno una cartolina.'; return; }
+  const btn = $('dlZip'); btn.disabled = true;
+  try { const files = []; const c = document.createElement('canvas'); let over = 0;
+  for (let k = 0; k < sel.length; k++) {
+    btn.textContent = 'Creo immagine ' + (k + 1) + ' di ' + sel.length + '…';
+    const r = await renderCard(c, items[sel[k]], S); if (r.overflow) over++;
+    const blob = await toBlob(c);
+    files.push({ name: fileName(sel[k]), data: new Uint8Array(await blob.arrayBuffer()) });
+  }
+  const [W, H] = sizeOf(S);
+  saveBlob(makeZip(files), 'postcard-' + W + 'x' + H + '.zip');
+  btn.disabled = false; updateZipLabel();
+  $('status').textContent = 'ZIP scaricato: ' + sel.length + ' immagini' + (over ? ' (' + over + ' con testo al limite: controllale)' : '') + '.';
+  $('status').className = over ? 'hint warn' : 'hint';
+  } catch(e) { $('status').textContent='Esportazione non riuscita: '+e.message; } finally { btn.disabled=false;updateZipLabel(); }
+});
+
+/* ================= CSV ================= */
+function parseCSV(text) {
+  text = text.replace(/^\ufeff/, '');
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const counts = { ';': first.split(';').length, ',': first.split(',').length, '\t': first.split('\t').length };
+  const delim = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === delim) { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); f = ''; rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ''));
+}
+/* Lettura file: CSV in UTF-8 (con ripiego su Windows-1252 per i CSV salvati da Excel in formato non UTF-8) */
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+  catch (e) { return new TextDecoder('windows-1252').decode(buf); }
+}
+/* Lettore XLSX minimale, senza librerie esterne: ZIP (DecompressionStream) + XML (DOMParser).
+   Legge il foglio «Citazioni» se presente, altrimenti il primo foglio. */
+async function readXlsxRows(file) {
+  const buf = new Uint8Array(await file.arrayBuffer()), dv = new DataView(buf.buffer);
+  let eocd = -1;
+  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('il file non è un .xlsx valido');
+  const entries = new Map(); let p = dv.getUint32(eocd + 16, true); const n = dv.getUint16(eocd + 10, true);
+  const dec = new TextDecoder();
+  for (let k = 0; k < n; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    entries.set(dec.decode(buf.subarray(p + 46, p + 46 + nl)), { method, csize, off });
+    p += 46 + nl + xl + cl;
+  }
+  const readEntry = async name => {
+    const e = entries.get(name); if (!e) return null;
+    const start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
+    const data = buf.subarray(start, start + e.csize);
+    if (e.method === 0) return dec.decode(data);
+    if (e.method !== 8 || typeof DecompressionStream === 'undefined') throw new Error('compressione non supportata da questo browser');
+    const out = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+    return dec.decode(out);
+  };
+  const xml = t => new DOMParser().parseFromString(t, 'application/xml');
+  const byTag = (node, tag) => Array.from(node.getElementsByTagNameNS('*', tag));
+  // stringhe condivise
+  const shared = [];
+  const sst = await readEntry('xl/sharedStrings.xml');
+  if (sst) byTag(xml(sst), 'si').forEach(si => shared.push(byTag(si, 't').filter(t => !t.closest || !t.parentNode || t.parentNode.localName !== 'rPh').map(t => t.textContent).join('')));
+  // scelta del foglio
+  let sheetPath = null;
+  const wbT = await readEntry('xl/workbook.xml'), relT = await readEntry('xl/_rels/workbook.xml.rels');
+  if (wbT && relT) {
+    const sheets = byTag(xml(wbT), 'sheet'); const rels = byTag(xml(relT), 'Relationship');
+    const pick = sheets.find(sh => /^citazioni$/i.test((sh.getAttribute('name') || '').trim())) || sheets[0];
+    if (pick) {
+      const rid = pick.getAttribute('r:id') || pick.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+      const rel = rels.find(r => r.getAttribute('Id') === rid);
+      if (rel) { const t = rel.getAttribute('Target'); sheetPath = t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, ''); }
+    }
+  }
+  if (!sheetPath || !entries.has(sheetPath)) sheetPath = Array.from(entries.keys()).filter(k => /^xl\/worksheets\/sheet\d+\.xml$/.test(k)).sort()[0];
+  if (!sheetPath) throw new Error('nessun foglio trovato');
+  const sheet = xml(await readEntry(sheetPath));
+  const colIdx = ref => { const m = /^([A-Z]+)/.exec(ref || ''); if (!m) return -1; let c = 0; for (const ch of m[1]) c = c * 26 + ch.charCodeAt(0) - 64; return c - 1; };
+  const rows = [];
+  byTag(sheet, 'row').forEach(r => {
+    const row = []; let next = 0;
+    byTag(r, 'c').forEach(c => {
+      let i = colIdx(c.getAttribute('r')); if (i < 0) i = next; next = i + 1;
+      const type = c.getAttribute('t'); const v = byTag(c, 'v')[0];
+      let val = '';
+      if (type === 's') val = v ? (shared[+v.textContent] || '') : '';
+      else if (type === 'inlineStr') val = byTag(c, 't').map(t => t.textContent).join('');
+      else val = v ? v.textContent : '';
+      row[i] = val;
+    });
+    for (let i = 0; i < row.length; i++) if (row[i] == null) row[i] = '';
+    rows.push(row);
+  });
+  return rows.map(r => r.map(x => String(x).replace(/\r\n?/g, '\n'))).filter(r => r.some(x => x.trim() !== ''));
+}
+const isXlsx = f => /\.xlsx$/i.test(f.name) || f.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+async function loadDataFile(file) {
+  if (/\.(xls|ods|numbers)$/i.test(file.name)) { $('csvMsg').textContent = 'Formato non supportato: salva il file come .xlsx oppure come «CSV UTF-8».'; return; }
+  if (isXlsx(file)) {
+    try { loadRows(await readXlsxRows(file), file.name); }
+    catch (e) { $('csvMsg').textContent = 'Impossibile leggere il file Excel (' + (e && e.message ? e.message : 'errore') + '). Prova a esportarlo come «CSV UTF-8».'; }
+  } else loadCSVFile(file);
+}
+async function loadCSVFile(file) {
+  loadRows(parseCSV(await readText(file)), file.name);
+}
+function loadRows(rows,fileName) {
+  if(rows.length<2){$('csvMsg').textContent='Il file non contiene righe leggibili.';return;}
+  const head=rows[0].map(h=>String(h).trim()),norm=h=>h.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const find=names=>head.findIndex(h=>names.includes(norm(h)));
+  const ti=find(['titolo','title']),ai=find(['autore','author']),ni=find(['narratore','narrator']),di=find(['durata','duration']),numi=find(['n°','nº','n.','numero','n','numero ascolto']);
+  if(ti<0){$('csvMsg').textContent='Colonna Titolo non trovata: il file precedente non è stato modificato.';return;}
+  const get=(r,i)=>i<0?'':String(r[i]??'').trim();
+  const out=rows.slice(1).filter(r=>get(r,ti)).map(r=>{
+    const it={t:get(r,ti),a:get(r,ai),n:get(r,ni),d:get(r,di),num:get(r,numi),raw:Object.fromEntries(head.map((h,i)=>[h,get(r,i)]))};
+    it.q=[it.n,it.d,it.num?('#'+(numberLabel(it.num)||it.num)):''].filter(Boolean).join(' · ');return it;
+  });
+  if(!out.length){$('csvMsg').textContent='Nessun titolo trovato.';return;}
+  items=out;current=0;filter='';$('search').value='';checked=new Set(items.map((it,i)=>numberLabel(it.num)?i:-1).filter(i=>i>=0));
+  if(checked.size)current=[...checked][0];
+  const missing=items.filter(it=>!numberLabel(it.num)).length;
+  $('csvMsg').textContent='Caricati '+out.length+' audiolibri da '+fileName+'. Selezionati per lo ZIP quelli con numero ascolto valido.'+(missing?' '+missing+' senza numero valido: etichetta senza numero.':'');
+  renderList();syncEditor();drawPreview();
+}
+$('csvFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadDataFile(f); });
+
+/* ================= copertine: UI ================= */
+function updateCoverUI() {
+  const it = items[current]; const box = $('coverThumb');
+  if (!it) { box.textContent = 'nessuna copertina'; $('coverInfo').textContent = 'Nessun libro selezionato'; $('coverDel').disabled = true; return; }
+  const url = coverURLs.get(bookKey(it.t));
+  box.textContent = '';
+  if (url) { const im = document.createElement('img'); im.src = url; im.alt = 'Copertina'; box.appendChild(im); }
+  else box.textContent = 'nessuna copertina';
+  $('coverInfo').textContent = it.t ? '«' + it.t + '»' : 'Libro corrente';
+  $('coverDel').disabled = !url;
+}
+$('coverFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f || !items[current]) return;
+  await setCover(bookKey(items[current].t), f, true);
+  $('coverMsg').textContent = 'Copertina associata a «' + items[current].t + '».';
+  renderList(); drawPreview();
+});
+$('coverDel').addEventListener('click', () => {
+  if (!items[current]) return; removeCover(bookKey(items[current].t)); renderList(); drawPreview();
+});
+$('coverMulti').addEventListener('change', async e => {
+  const files = Array.from(e.target.files); e.target.value = '';
+  const books = Array.from(new Set(items.map(i => i.t))).map(t => ({ t, k: bookKey(t) }));
+  let ok = 0; const miss = [];
+  for (const f of files) {
+    const fk = slugFull(f.name.replace(/\.[^.]+$/, ''));
+    let best = null;
+    books.forEach(b => {
+      if (b.k.length < 3) return;
+      if (fk === b.k || fk.includes(b.k) || (fk.length >= 5 && b.k.includes(fk))) { if (!best || b.k.length > best.k.length) best = b; }
+    });
+    const exact=books.filter(b=>b.k===fk); const candidates=books.filter(b=>b.k.length>=3&&(fk.includes(b.k)||(fk.length>=5&&b.k.includes(fk)))); best=exact.length===1?exact[0]:candidates.length===1?candidates[0]:null;
+    if (best) { await setCover(best.k, f, true); ok++; } else miss.push(f.name);
+  }
+  $('coverMsg').textContent = ok + ' copertine abbinate' + (miss.length ? '. Non abbinate: ' + miss.join(', ') + ' (rinomina il file come il titolo del libro).' : '.');
+  renderList(); drawPreview();
+});
+// trascinamento su anteprima: CSV oppure immagine copertina
+const stage = $('stage');
+stage.addEventListener('dragover', e => { e.preventDefault(); stage.classList.add('drag'); });
+stage.addEventListener('dragleave', () => stage.classList.remove('drag'));
+stage.addEventListener('drop', async e => {
+  e.preventDefault(); stage.classList.remove('drag');
+  const f = e.dataTransfer.files[0]; if (!f) return;
+  if (f.type.startsWith('image/')) {
+    if (!items[current]) return;
+    await setCover(bookKey(items[current].t), f, true);
+    $('coverMsg').textContent = 'Copertina associata a «' + items[current].t + '».'; renderList(); drawPreview();
+  } else if (isXlsx(f) || /\.(csv|txt|tsv|xls|ods)$/i.test(f.name) || f.type.includes('csv') || f.type.startsWith('text/')) loadDataFile(f);
+});
+
+/* ================= comandi ================= */
+function fillFontSelect(sel) {
+  const groups = {};
+  FONTS.forEach(f => { (groups[f.g] = groups[f.g] || []).push(f); });
+  Object.keys(groups).forEach(g => {
+    const og = document.createElement('optgroup'); og.label = g;
+    groups[g].forEach(f => { const o = document.createElement('option'); o.value = f.n; o.textContent = f.n + (f.it ? '' : '  (senza corsivo)'); o.style.fontFamily = fam(f.n); og.appendChild(o); });
+    sel.appendChild(og);
+  });
+}
+fillFontSelect($('qFont')); fillFontSelect($('mFont'));
+const FIELDS = ['size', 'cw', 'ch', 'fmt', 'qFont', 'mFont', 'startCase', 'bg', 'bg2', 'fg', 'accent', 'grad', 'footerMode', 'markStyle', 'rule', 'coverLayout', 'extra', 'extraPos'];
+const CHECKS = ['italic', 'authorUpper', 'titleItalic', 'balance', 'typo', 'grain', 'vignette', 'frame', 'coverOn', 'coverShadow', 'autoPal'];
+const RANGES = ['jq', 'maxSize', 'lh', 'metaScale', 'margin', 'coverScale', 'overlay', 'coverRadius'];
+const SEGS = Array.from(document.querySelectorAll('.seg'));
+const FMT = { jq: v => v + '%', maxSize: v => v, lh: v => (+v).toFixed(2), metaScale: v => v + '%', margin: v => v + '%', coverScale: v => v + '%', overlay: v => v + '%', coverRadius: v => v };
+function syncInputs() {
+  if (!['1080x1080','1080x1920','1080x1440'].includes(S.size)) S.size='1080x1440';
+  FIELDS.forEach(k => { $(k).value = S[k]; });
+  CHECKS.forEach(k => { $(k).checked = !!S[k]; });
+  RANGES.forEach(k => { $(k).value = S[k]; });
+  SEGS.forEach(sg => sg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === S[sg.dataset.key])));
+  refreshUI();
+}
+function refreshUI() {
+  RANGES.forEach(k => { const el = $(k + 'V'); if (el) el.textContent = FMT[k](S[k]); });
+  const custom = S.size === 'custom';
+  const [W, H] = sizeOf(S);
+  if (!custom) { $('cw').value = W; $('ch').value = H; }
+  $('cw').disabled = $('ch').disabled = true;
+  $('jqWrap').classList.toggle('hidden', S.fmt !== 'jpeg');
+  const qi = fontInfo(S.qFont).it;
+  $('italic').disabled = !qi; $('italicWrap').classList.toggle('dis', !qi);
+  $('italicNote').textContent = qi ? '' : '(non disponibile per ' + S.qFont + ')';
+  const ti = fontInfo(S.mFont).it;
+  $('titleItalic').disabled = !ti; $('titleItalicWrap').classList.toggle('dis', !ti);
+  $('overlayWrap').classList.toggle('hidden', S.coverLayout !== 'bg');
+  $('coverSideWrap').classList.toggle('hidden', S.coverLayout !== 'side' && S.coverLayout !== 'thumb');
+  $('coverScaleWrap').classList.toggle('hidden', false);
+  $('palToneWrap').classList.toggle('hidden', !S.autoPal);
+  const c = contrast(S.fg, S.bg);
+  $('contrast').textContent = 'Contrasto testo/sfondo: ' + c.toFixed(1) + ':1' + (c < 4.5 ? ' — basso, il testo può risultare poco leggibile' : c < 7 ? ' — buono' : ' — ottimo') + (S.autoPal ? ' (con palette dalla copertina i colori cambiano per libro)' : '');
+  $('contrast').className = c < 4.5 ? 'hint warn' : 'hint';
+}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+function onChange() {
+  FIELDS.forEach(k => { S[k] = $(k).value; });
+  CHECKS.forEach(k => { S[k] = $(k).checked; });
+  RANGES.forEach(k => { S[k] = parseFloat($(k).value); });
+  S.cw = parseInt(S.cw) || 1080; S.ch = parseInt(S.ch) || 1080;
+  save(); refreshUI(); schedulePreview();
+}
+FIELDS.concat(CHECKS, RANGES).forEach(k => { $(k).addEventListener('input', onChange); $(k).addEventListener('change', onChange); });
+SEGS.forEach(sg => sg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  S[sg.dataset.key] = b.dataset.v; sg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); save(); refreshUI(); schedulePreview();
+})));
+$('rotate').addEventListener('click', () => {
+  const [W, H] = sizeOf(S); const target = H + 'x' + W;
+  const opt = Array.from($('size').options).find(o => o.value === target);
+  if (opt) S.size = target; else { S.size = 'custom'; S.cw = H; S.ch = W; }
+  syncInputs(); save(); schedulePreview();
+});
+PRESETS.forEach(p => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip';
+  const sw = document.createElement('i'); sw.style.background = 'linear-gradient(135deg,' + p.bg + ' 50%,' + p.accent + ' 50%)';
+  b.appendChild(sw); b.appendChild(document.createTextNode(p.n));
+  b.addEventListener('click', () => { Object.assign(S, { bg: p.bg, bg2: p.bg2, fg: p.fg, accent: p.accent, autoPal: false }); syncInputs(); save(); schedulePreview(); });
+  $('presets').appendChild(b);
+});
+STYLES.forEach(st => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip txt'; b.textContent = st.n;
+  b.addEventListener('click', () => { Object.assign(S, st.s); syncInputs(); save(); schedulePreview(); });
+  $('styles').appendChild(b);
+});
+
+/* ================= template ================= */
+function getTpls() { try { return JSON.parse(localStorage.getItem(TPL_KEY) || '{}'); } catch (e) { return {}; } }
+function setTpls(t) { try { localStorage.setItem(TPL_KEY, JSON.stringify(t)); } catch (e) {} fillTpls(); }
+function fillTpls() {
+  const t = getTpls(), sel = $('tplList'); sel.textContent = '';
+  const names = Object.keys(t);
+  if (!names.length) { const o = document.createElement('option'); o.textContent = 'Nessun template salvato'; o.value = ''; sel.appendChild(o); }
+  names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+}
+$('tplSave').addEventListener('click', () => {
+  const n = prompt('Nome del template:'); if (!n) return;
+  const t = getTpls(); t[n.trim()] = Object.assign({}, S); setTpls(t); $('tplList').value = n.trim();
+});
+$('tplApply').addEventListener('click', () => { const t = getTpls()[$('tplList').value]; if (!t) return; S = Object.assign({}, DEFAULTS, t); syncInputs(); save(); schedulePreview(); });
+$('tplDel').addEventListener('click', () => { const n = $('tplList').value; if (!n || !confirm('Eliminare il template «' + n + '»?')) return; const t = getTpls(); delete t[n]; setTpls(t); });
+$('tplExport').addEventListener('click', () => {
+  const data = { current: S, templates: getTpls() };
+  saveBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'postcard-template.json');
+});
+$('tplImport').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.templates) setTpls(Object.assign(getTpls(), d.templates));
+    if (d.current) { S = Object.assign({}, DEFAULTS, d.current); syncInputs(); save(); schedulePreview(); }
+  } catch (err) { alert('File JSON non valido.'); }
+});
+$('reset').addEventListener('click', () => { if (!confirm('Ripristinare tutte le impostazioni predefinite?')) return; S = Object.assign({}, DEFAULTS); syncInputs(); save(); schedulePreview(); });
+
+/* ================= navigazione, tema ================= */
+function go(d) { const v=visibleIndices();if(!v.length)return;current=v[(Math.max(0,v.indexOf(current))+d+v.length)%v.length];renderList();syncEditor();drawPreview(); }
+$('prev').addEventListener('click', () => go(-1));
+$('next').addEventListener('click', () => go(1));
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (['input', 'textarea', 'select'].includes(tag)) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+});
+$('search').addEventListener('input', e => { filter = e.target.value; renderList(); });
+$('all').addEventListener('click', () => { visibleIndices().forEach(i => checked.add(i)); renderList(); });
+$('none').addEventListener('click', () => { visibleIndices().forEach(i => checked.delete(i)); renderList(); });
+const THEMES = ['auto', 'light', 'dark'];
+let theme = localStorage.getItem('postcard-ui-theme') || 'auto';
+function applyTheme() {
+  if (theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', theme);
+  $('themeBtn').textContent = 'Tema: ' + { auto: 'auto', light: 'chiaro', dark: 'scuro' }[theme];
+}
+$('themeBtn').addEventListener('click', () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; localStorage.setItem('postcard-ui-theme', theme); applyTheme(); });
+applyTheme();
+
+/* ================= avvio ================= */
+(async () => {
+  syncInputs(); fillTpls(); renderList(); syncEditor(); drawPreview();
+  await IDB.open();
+  const all = await IDB.all();
+  for (const [k, blob] of all) { try { await setCover(k, blob, false); } catch (e) {} }
+  if (all.length) { $('coverMsg').textContent = all.length + ' copertine recuperate dalla sessione precedente.'; renderList(); drawPreview(); }
+  fontsReady.then(() => schedulePreview());
+})();
+</script>
+</body>
+</html>
