@@ -94,6 +94,8 @@
   .item.active { background: color-mix(in srgb, var(--accent) 14%, transparent); }
   .item .t { font-weight: 600; font-size: 13px; }
   .item .a { color: var(--muted); font-weight: 400; }
+  .item.done .q, .item.done .t { opacity: .55; }
+  .item .tag { font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0 6px; margin-left: 4px; white-space: nowrap; }
   .item .q { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .item input { margin-top: 3px; accent-color: var(--accent); }
   .item img { width: 26px; height: 38px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
@@ -131,14 +133,14 @@
     <details class="sec" open>
       <summary>Dati</summary>
       <div class="sec-body">
-        <label class="f file">File CSV o Excel (Titolo, Autore, Citazione)
+        <label class="f file">File CSV o Excel (Titolo, Autore, Citazione, Creato)
           <input type="file" id="csvFile" accept=".csv,.tsv,.txt,.xlsx,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
         </label>
         <div class="msg" id="csvMsg">Puoi anche trascinare il file sull'anteprima.</div>
         <div class="btns">
           <a class="btn sm" href="template-citazioni.xlsx" download="template-citazioni.xlsx" style="text-decoration:none">Scarica template Excel</a>
         </div>
-        <p class="hint">Compila il template e caricalo così com'è (.xlsx) oppure esportato come «CSV UTF-8».</p>
+        <p class="hint">Compila il template e caricalo così com'è (.xlsx) oppure esportato come «CSV UTF-8». Colonna «Creato»: SI = immagine già creata, NO (o vuoto) = ancora da creare.</p>
       </div>
     </details>
 
@@ -376,8 +378,8 @@
       <div class="canvas-wrap">
         <div class="empty-state" id="emptyState">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
-          <strong>Nessuna citazione caricata</strong>
-          <span>Carica un file CSV o Excel dal pannello «Dati», oppure trascinalo qui.<br>Puoi partire dal template Excel già impostato.</span>
+          <strong id="emptyTitle">Nessuna citazione caricata</strong>
+          <span id="emptyText">Carica un file CSV o Excel dal pannello «Dati», oppure trascinalo qui.<br>Puoi partire dal template Excel già impostato.</span>
         </div>
         <canvas id="preview" class="hidden" width="2400" height="1080"></canvas>
       </div>
@@ -415,6 +417,7 @@
         <button class="btn" id="all" type="button">Tutte</button>
         <button class="btn" id="none" type="button">Nessuna</button>
       </div>
+      <label class="check" style="margin-bottom:10px"><input type="checkbox" id="showCreated"> <span>Mostra anche citazioni già create <span class="kbd" id="createdNote"></span></span></label>
       <div class="list" id="list" role="list"></div>
     </section>
   </main>
@@ -525,6 +528,17 @@ let items = DATA.slice();
 let checked = new Set(items.map((_, i) => i));
 let current = 0;
 let filter = '';
+let showCreated = false;   // di default si mostrano solo le citazioni con Creato = NO
+const isVisible = it => !!it && (showCreated || !it.c);
+function pool() { const o = []; items.forEach((it, i) => { if (isVisible(it)) o.push(i); }); return o; }
+function fixCurrent() {
+  const p = pool(); if (!p.length) { current = 0; return; }
+  if (!isVisible(items[current])) { const nx = p.find(i => i > current); current = nx !== undefined ? nx : p[p.length - 1]; }
+}
+function updateCreatedNote() {
+  const n = items.filter(it => it.c).length;
+  $('createdNote').textContent = items.length ? '(' + n + ' già create su ' + items.length + ')' : '';
+}
 let lastOverflow = false;
 
 /* ================= utilità ================= */
@@ -930,14 +944,18 @@ let renderToken = 0, renderTimer = null;
 function schedulePreview() { clearTimeout(renderTimer); renderTimer = setTimeout(drawPreview, 70); }
 async function drawPreview() {
   const token = ++renderToken;
-  if (!items.length) {
-    $('counter').textContent = 'Nessuna citazione';
+  fixCurrent(); updateCreatedNote();
+  const pl = pool();
+  if (!pl.length) {
+    const allDone = items.length > 0;
+    $('emptyTitle').textContent = allDone ? 'Tutte le citazioni risultano già create' : 'Nessuna citazione caricata';
+    $('emptyText').innerHTML = allDone ? 'Attiva «Mostra anche citazioni già create» per vederle.' : 'Carica un file CSV o Excel dal pannello «Dati», oppure trascinalo qui.<br>Puoi partire dal template Excel già impostato.';
+    $('counter').textContent = allDone ? 'Nessuna citazione da creare' : 'Nessuna citazione';
     $('preview').classList.add('hidden'); $('emptyState').classList.remove('hidden');
     $('status').textContent = ''; $('status').className = 'hint'; lastOverflow = false;
     updateCoverUI(); return;
   }
   $('emptyState').classList.add('hidden'); $('preview').classList.remove('hidden');
-  current = Math.min(current, items.length - 1);
   const item = items[current];
   const [W, H] = sizeOf(S);
   const scale = Math.min(1, 1800 / Math.max(W, H));
@@ -945,7 +963,7 @@ async function drawPreview() {
   const r = await renderCard(off, item, S, scale);
   if (token !== renderToken) return;
   const cv = $('preview'); cv.width = off.width; cv.height = off.height; cv.getContext('2d').drawImage(off, 0, 0);
-  $('counter').textContent = (current + 1) + ' di ' + items.length + ' · ' + W + ' × ' + H + ' px';
+  $('counter').textContent = (pl.indexOf(current) + 1) + ' di ' + pl.length + ' · ' + W + ' × ' + H + ' px';
   const st = $('status');
   if (r.overflow) { st.textContent = 'Citazione molto lunga: il testo è al minimo e potrebbe uscire dall\'area. Prova un formato più grande, margini ridotti o interlinea minore.'; st.className = 'hint warn'; lastOverflow = true; }
   else if (lastOverflow) { st.textContent = ''; st.className = 'hint'; lastOverflow = false; }
@@ -955,14 +973,14 @@ async function drawPreview() {
 /* ================= lista ================= */
 function visibleIndices() {
   const f = filter.trim().toLowerCase(); const out = [];
-  items.forEach((it, i) => { if (!f || (it.t + ' ' + it.a + ' ' + it.q).toLowerCase().includes(f)) out.push(i); });
+  items.forEach((it, i) => { if (isVisible(it) && (!f || (it.t + ' ' + it.a + ' ' + it.q).toLowerCase().includes(f))) out.push(i); });
   return out;
 }
 function renderList() {
   const list = $('list'); list.textContent = '';
   visibleIndices().forEach(i => {
     const it = items[i];
-    const row = document.createElement('div'); row.className = 'item' + (i === current ? ' active' : '');
+    const row = document.createElement('div'); row.className = 'item' + (i === current ? ' active' : '') + (it.c ? ' done' : '');
     row.tabIndex = 0; row.setAttribute('role', 'listitem');
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = checked.has(i);
     cb.addEventListener('click', e => e.stopPropagation());
@@ -970,6 +988,7 @@ function renderList() {
     const body = document.createElement('div');
     const head = document.createElement('div'); head.className = 't'; head.textContent = (it.t || '(senza titolo)') + ' ';
     const au = document.createElement('span'); au.className = 'a'; au.textContent = '· ' + it.a; head.appendChild(au);
+    if (it.c) { const tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = 'già creata'; head.appendChild(tg); }
     const q = document.createElement('div'); q.className = 'q'; q.textContent = it.q;
     body.appendChild(head); body.appendChild(q);
     row.appendChild(cb); row.appendChild(body);
@@ -1001,9 +1020,9 @@ function syncEditor() {
 }));
 $('addItem').addEventListener('click', () => {
   const base = items[current] || { t: '', a: '' };
-  if (!items.length) { items.push({ t: base.t, a: base.a, q: 'Nuova citazione' }); current = 0; checked = new Set([0]); }
+  if (!items.length) { items.push({ t: base.t, a: base.a, q: 'Nuova citazione', c: false }); current = 0; checked = new Set([0]); }
   else {
-    items.splice(current + 1, 0, { t: base.t, a: base.a, q: 'Nuova citazione' });
+    items.splice(current + 1, 0, { t: base.t, a: base.a, q: 'Nuova citazione', c: false });
     checked = new Set(Array.from(checked).map(i => i > current ? i + 1 : i)); current++; checked.add(current);
   }
   renderList(); syncEditor(); drawPreview(); $('eQ').focus(); $('eQ').select();
@@ -1012,11 +1031,11 @@ $('delItem').addEventListener('click', () => {
   if (!items.length || !confirm('Eliminare la citazione corrente?')) return;
   items.splice(current, 1);
   checked = new Set(Array.from(checked).filter(i => i !== current).map(i => i > current ? i - 1 : i));
-  current = Math.max(0, Math.min(current, items.length - 1)); renderList(); syncEditor(); drawPreview();
+  current = Math.max(0, Math.min(current, items.length - 1)); fixCurrent(); renderList(); syncEditor(); drawPreview();
 });
 $('exportCsv').addEventListener('click', () => {
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
-  const csv = 'Titolo,Autore,Citazione\n' + items.map(it => [it.t, it.a, it.q].map(esc).join(',')).join('\n');
+  const csv = 'Titolo,Autore,Citazione,Creato\n' + items.map(it => [it.t, it.a, it.q, it.c ? 'SI' : 'NO'].map(esc).join(',')).join('\n');
   saveBlob(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }), 'citazioni.csv');
 });
 
@@ -1055,12 +1074,12 @@ function makeZip(files) {
   return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
 }
 $('dlOne').addEventListener('click', async () => {
-  if (!items.length) return;
+  if (!isVisible(items[current])) return;
   const c = document.createElement('canvas'); await renderCard(c, items[current], S);
   saveBlob(await toBlob(c), fileName(current));
 });
 $('copy').addEventListener('click', async () => {
-  if (!items.length) return;
+  if (!isVisible(items[current])) return;
   try {
     const c = document.createElement('canvas'); await renderCard(c, items[current], S);
     const blob = await toBlob(c, 'image/png');
@@ -1069,7 +1088,7 @@ $('copy').addEventListener('click', async () => {
   } catch (e) { $('status').textContent = 'Il browser non consente di copiare immagini: usa “Scarica”.'; $('status').className = 'hint warn'; }
 });
 $('dlZip').addEventListener('click', async () => {
-  const sel = Array.from(checked).filter(i => i < items.length).sort((a, b) => a - b);
+  const sel = Array.from(checked).filter(i => i < items.length && isVisible(items[i])).sort((a, b) => a - b);
   if (!sel.length) { $('status').textContent = 'Seleziona almeno una citazione.'; return; }
   const btn = $('dlZip'); btn.disabled = true; const files = []; const c = document.createElement('canvas'); let over = 0;
   for (let k = 0; k < sel.length; k++) {
@@ -1189,12 +1208,15 @@ function loadRows(rows, fileName) {
   const head = rows[0].map(h => h.trim().toLowerCase());
   const col = (re, fb) => { const i = head.findIndex(h => re.test(h)); return i >= 0 ? i : fb; };
   const ti = col(/titol|title|libro|book/, 0), ai = col(/autor|author/, 1), qi = col(/citaz|quote|testo|text/, 2);
-  const out = rows.slice(1).map(r => ({ t: (r[ti] || '').trim(), a: (r[ai] || '').trim(), q: (r[qi] || '').trim() })).filter(x => x.q);
+  const ci = head.findIndex(h => /creat|fatt|done/.test(h));   // colonna facoltativa: se manca, tutte da creare
+  const isDone = v => /^(si|sì|s|yes|y|true|vero|1|x)$/i.test(String(v || '').trim());
+  const out = rows.slice(1).map(r => ({ t: (r[ti] || '').trim(), a: (r[ai] || '').trim(), q: (r[qi] || '').trim(), c: ci >= 0 && isDone(r[ci]) })).filter(x => x.q);
   if (!out.length) { $('csvMsg').textContent = 'Non ho trovato la colonna Citazione.'; return; }
-  items = out; checked = new Set(items.map((_, i) => i)); current = 0; filter = ''; $('search').value = '';
+  items = out; checked = new Set(); items.forEach((it, i) => { if (!it.c) checked.add(i); }); current = 0; fixCurrent(); filter = ''; $('search').value = '';
   const books = new Set(items.map(i => bookKey(i.t)));
   const withCover = Array.from(books).filter(k => covers.has(k)).length;
-  $('csvMsg').textContent = 'Caricate ' + out.length + ' citazioni (' + books.size + ' libri, ' + withCover + ' con copertina) da ' + fileName + '.';
+  const nDone = out.filter(x => x.c).length;
+  $('csvMsg').textContent = 'Caricate ' + out.length + ' citazioni (' + books.size + ' libri, ' + withCover + ' con copertina) da ' + fileName + ': ' + (out.length - nDone) + ' da creare, ' + nDone + ' già create' + (nDone && !showCreated ? ' (nascoste)' : '') + '.';
   renderList(); syncEditor(); drawPreview();
 }
 $('csvFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadDataFile(f); });
@@ -1353,7 +1375,7 @@ $('tplImport').addEventListener('change', async e => {
 $('reset').addEventListener('click', () => { if (!confirm('Ripristinare tutte le impostazioni predefinite?')) return; S = Object.assign({}, DEFAULTS); syncInputs(); save(); schedulePreview(); });
 
 /* ================= navigazione, tema ================= */
-function go(d) { if (!items.length) return; current = (current + d + items.length) % items.length; renderList(); syncEditor(); drawPreview(); }
+function go(d) { const p = pool(); if (!p.length) return; const k = p.indexOf(current); current = p[((k < 0 ? 0 : k) + d + p.length) % p.length]; renderList(); syncEditor(); drawPreview(); }
 $('prev').addEventListener('click', () => go(-1));
 $('next').addEventListener('click', () => go(1));
 document.addEventListener('keydown', e => {
@@ -1361,6 +1383,11 @@ document.addEventListener('keydown', e => {
   if (['input', 'textarea', 'select'].includes(tag)) return;
   if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
   if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+});
+$('showCreated').addEventListener('change', e => {
+  showCreated = e.target.checked;
+  if (!showCreated) items.forEach((it, i) => { if (it.c) checked.delete(i); });   // le già create non finiscono nello ZIP
+  fixCurrent(); renderList(); syncEditor(); drawPreview();
 });
 $('search').addEventListener('input', e => { filter = e.target.value; renderList(); });
 $('all').addEventListener('click', () => { visibleIndices().forEach(i => checked.add(i)); renderList(); });
