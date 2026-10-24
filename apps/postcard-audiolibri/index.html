@@ -120,7 +120,7 @@
   <div class="ttl">
     <a class="home-link" href="../../index.html" title="Torna alla home di Dashboard Audiolibri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg><span class="home-label">Dashboard Audiolibri</span></a>
     <h1>Postcard audiolibri</h1>
-    <p class="sub">Il tuo ultimo ascolto, in una cartolina. Importa il CSV, aggiungi la copertina e personalizza lo stile.</p>
+    <p class="sub">Il tuo ultimo ascolto, in una cartolina. Importa il CSV e aggiungi la copertina: sfondo e colori si adattano da soli.</p>
   </div>
   <button class="btn sm" id="themeBtn" type="button" title="Tema dell'interfaccia">Tema: auto</button>
 </header>
@@ -135,15 +135,7 @@
           <input type="file" id="csvFile" accept=".csv,.tsv,.txt,.xlsx,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
         </label>
         <div class="msg" id="csvMsg">Puoi anche trascinare il file sull'anteprima.</div>
-        <p class="hint">Colonne: Titolo, Autore, Narratore, Durata, N°. Nessun libro precaricato. I dati restano nel browser.</p>
-      </div>
-    </details>
-
-    <details class="sec" open>
-      <summary>Stili rapidi</summary>
-      <div class="sec-body">
-        <div class="chips" id="styles"></div>
-        <p class="hint">Impostano font, colori e composizione in un clic. Il formato non cambia.</p>
+        <p class="hint">Colonne lette: Titolo, Autore, Narratore, Durata, N°, Genere, Voto, Serie, Volume, Inizio Ascolto, Fine Ascolto. I dati restano nel browser.</p>
       </div>
     </details>
 
@@ -152,117 +144,43 @@
       <div class="sec-body">
         <label class="f">Dimensione immagine
           <select id="size">
-            <option value="1080x1080">1080 × 1080 · Quadrato 1:1</option>
-            <option value="1080x1920">1080 × 1920 · Verticale 9:16</option>
-            <option value="1080x1440">1080 × 1440 · Verticale 3:4</option>
+            <option value="1080x1350">1080 × 1350 · Verticale 4:5</option>
+            <option value="1080x1920">1080 × 1920 · Story 9:16</option>
           </select>
         </label>
-        <div class="row3 hidden" id="customRow">
-          <label class="f">Larghezza <input type="number" id="cw" min="200" max="8000" step="10"></label>
-          <label class="f">Altezza <input type="number" id="ch" min="200" max="8000" step="10"></label>
-          <label class="f">&nbsp;<button class="btn" id="rotate" type="button" title="Scambia larghezza e altezza">↻ Ruota</button></label>
-        </div>
-        <div>
-          <label class="f">File
-            <select id="fmt"><option value="png">PNG (qualità massima)</option><option value="jpeg">JPG (più leggero)</option></select>
-          </label>
-          <label class="f" id="jqWrap" style="margin-top:11px"><span class="lbl">Qualità JPG <span class="v" id="jqV"></span></span>
-            <input type="range" id="jq" min="60" max="100" step="1">
-          </label>
-        </div>
-      </div>
-    </details>
-
-    <details class="sec" open>
-      <summary>Tipografia</summary>
-      <div class="sec-body">
-        <label class="f">Font del titolo <select id="qFont"></select></label>
-        <label class="check" id="italicWrap"><input type="checkbox" id="italic"> <span>Titolo in corsivo <span id="italicNote" class="kbd"></span></span></label>
-        <label class="f">Font delle informazioni <select id="mFont"></select></label>
-        <div class="row2">
-          <label class="check"><input type="checkbox" id="authorUpper"> Autore maiuscolo</label>
-          <label class="check" id="titleItalicWrap"><input type="checkbox" id="titleItalic"> Autore in corsivo</label>
-        </div>
-        <label class="f"><span class="lbl">Dimensione massima titolo <span class="v" id="maxSizeV"></span></span>
-          <input type="range" id="maxSize" min="3" max="14" step="0.5"></label>
-        <label class="f"><span class="lbl">Interlinea <span class="v" id="lhV"></span></span>
-          <input type="range" id="lh" min="1.1" max="1.8" step="0.05"></label>
-        <label class="f"><span class="lbl">Dimensione informazioni <span class="v" id="metaScaleV"></span></span>
-          <input type="range" id="metaScale" min="60" max="180" step="5"></label>
-        <label class="check"><input type="checkbox" id="balance"> Righe bilanciate (evita parole orfane)</label>
-        <label class="check"><input type="checkbox" id="typo"> Tipografia curata (’ “ ” …)</label>
-        <label class="f">Titolo che inizia in minuscolo
-          <select id="startCase">
-            <option value="asis">Lascia com'è</option>
-            <option value="cap">Prima lettera maiuscola</option>
-            <option value="ellipsis">Aggiungi “…” all'inizio</option>
-          </select>
+        <label class="f">File
+          <select id="fmt"><option value="png">PNG (qualità massima)</option><option value="jpeg">JPG (più leggero)</option></select>
+        </label>
+        <label class="f" id="jqWrap"><span class="lbl">Qualità JPG <span class="v" id="jqV"></span></span>
+          <input type="range" id="jq" min="60" max="100" step="1">
         </label>
       </div>
     </details>
 
     <details class="sec" open>
-      <summary>Colori e sfondo</summary>
+      <summary>Aspetto</summary>
       <div class="sec-body">
-        <div class="chips" id="presets"></div>
-        <div class="row2">
-          <label class="f">Sfondo <input type="color" id="bg"></label>
-          <label class="f">Sfondo 2 <input type="color" id="bg2"></label>
-          <label class="f">Testo <input type="color" id="fg"></label>
-          <label class="f">Accento <input type="color" id="accent"></label>
-        </div>
-        <p class="hint" id="contrast"></p>
-        <label class="f">Sfumatura
-          <select id="grad">
-            <option value="none">Nessuna (tinta unita)</option>
-            <option value="diag">Diagonale</option>
-            <option value="vert">Verticale</option>
-            <option value="radial">Radiale (luce al centro)</option>
+        <label class="f">Font <select id="font"></select></label>
+        <label class="check"><input type="checkbox" id="titleUpper"> Titolo in maiuscolo</label>
+        <label class="f">Generi mostrati
+          <select id="genreMode">
+            <option value="first">Solo il primo</option>
+            <option value="all">Tutti</option>
           </select>
         </label>
-        <div class="row2">
-          <label class="check"><input type="checkbox" id="grain"> Grana carta</label>
-          <label class="check"><input type="checkbox" id="vignette"> Vignettatura</label>
-        </div>
-      </div>
-    </details>
-
-    <details class="sec" open>
-      <summary>Composizione</summary>
-      <div class="sec-body">
-        <label class="f">Allineamento orizzontale
-          <div class="seg" data-key="align"><button type="button" data-v="left">Sinistra</button><button type="button" data-v="center">Centro</button><button type="button" data-v="right">Destra</button></div>
-        </label>
-        <label class="f">Posizione verticale
-          <div class="seg" data-key="valign"><button type="button" data-v="top">Alto</button><button type="button" data-v="center">Centro</button><button type="button" data-v="bottom">Basso</button></div>
-        </label>
-        <label class="f">Informazioni
-          <select id="footerMode">
-            <option value="bottom">Ancorati in fondo</option>
-            <option value="attached">Subito sotto il titolo</option>
+        <label class="f">Formato date
+          <select id="dateFmt">
+            <option value="num">GG.MM.AAAA (es. 07.03.2022)</option>
+            <option value="mon">GG.MMM.AAAA (es. 07.MAR.2022)</option>
           </select>
         </label>
-        <label class="f"><span class="lbl">Margini <span class="v" id="marginV"></span></span>
-          <input type="range" id="margin" min="3" max="16" step="0.5"></label>
-        <div class="row2">
-          <label class="f">Etichetta ascolto
-            <select id="markStyle">
-              <option value="big">Badge in accento</option>
-              <option value="watermark">Numero grande sullo sfondo</option>
-              <option value="inline">Testo semplice</option>
-              <option value="none">Nascosta</option>
-            </select>
-          </label>
-          <label class="f">Separatore
-            <select id="rule">
-              <option value="line">Filetto</option>
-              <option value="dash">Lineetta —</option>
-              <option value="dot">Punto ·</option>
-              <option value="none">Nessuno</option>
-            </select>
-          </label>
-        </div>
-        <label class="check"><input type="checkbox" id="frame"> Cornice sottile</label>
+        <label class="f"><span class="lbl">Sfocatura sfondo <span class="v" id="blurV"></span></span>
+          <input type="range" id="blur" min="1" max="10" step="0.5"></label>
+        <label class="f"><span class="lbl">Scurimento sfondo <span class="v" id="veilV"></span></span>
+          <input type="range" id="veil" min="0" max="80" step="1"></label>
+        <label class="check"><input type="checkbox" id="autoPal"> Colori ricavati dalla copertina</label>
+        <label class="f">Colore base (se non ricavato dalla copertina, o senza copertina)
+          <input type="color" id="accent"></label>
       </div>
     </details>
 
@@ -283,28 +201,7 @@
           <input type="file" id="coverMulti" accept="image/*" multiple>
         </label>
         <div class="msg" id="coverMsg">Puoi anche trascinare un'immagine sull'anteprima.</div>
-        <label class="check"><input type="checkbox" id="coverOn"> Mostra la copertina quando presente</label>
-        <label class="f">Disposizione
-          <select id="coverLayout">
-            <option value="side">Copertina protagonista (sopra in verticale)</option>
-            <option value="thumb">Copertina compatta accanto alle informazioni</option>
-            <option value="bg">Sfondo sfocato + copertina quadrata</option>
-          </select>
-        </label>
-        <label class="f" id="coverSideWrap">Lato (formato quadrato e copertina compatta)
-          <div class="seg" data-key="coverSide"><button type="button" data-v="left">Sinistra</button><button type="button" data-v="right">Destra</button></div>
-        </label>
-        <label class="f" id="coverScaleWrap"><span class="lbl">Dimensione copertina <span class="v" id="coverScaleV"></span></span>
-          <input type="range" id="coverScale" min="50" max="140" step="5"></label>
-        <label class="f" id="overlayWrap"><span class="lbl">Velatura sullo sfondo <span class="v" id="overlayV"></span></span>
-          <input type="range" id="overlay" min="30" max="95" step="1"></label>
-        <label class="f"><span class="lbl">Angoli arrotondati <span class="v" id="coverRadiusV"></span></span>
-          <input type="range" id="coverRadius" min="0" max="8" step="0.5"></label>
-        <label class="check"><input type="checkbox" id="coverShadow"> Ombra morbida</label>
-        <label class="check"><input type="checkbox" id="autoPal"> Colori ricavati dalla copertina</label>
-        <label class="f" id="palToneWrap">Tono palette
-          <div class="seg" data-key="palTone"><button type="button" data-v="dark">Scuro</button><button type="button" data-v="light">Chiaro</button></div>
-        </label>
+        <label class="check"><input type="checkbox" id="coverOn"> Mostra copertina e sfondo sfocato</label>
       </div>
     </details>
 
@@ -351,7 +248,7 @@
           <strong>Nessun audiolibro caricato</strong>
           <span>Carica un file CSV o Excel dal pannello «Dati», oppure trascinalo qui.<br>Il CSV del diario viene riconosciuto automaticamente.</span>
         </div>
-        <canvas id="preview" class="hidden" width="2400" height="1080"></canvas>
+        <canvas id="preview" class="hidden" width="1080" height="1350"></canvas>
       </div>
       <div class="bar">
         <button class="btn" id="prev" type="button" title="Freccia sinistra">← Precedente</button>
@@ -372,8 +269,14 @@
           <label class="f">Autore <input type="text" id="eA"></label>
           <label class="f">Narratore <input type="text" id="eN"></label>
           <label class="f">Durata (ore:minuti) <input type="text" id="eD" placeholder="09:34"></label>
+          <label class="f">Genere <input type="text" id="eG" placeholder="Thriller, Psicologico"></label>
+          <label class="f">Voto (0–5, anche 3.5) <input type="text" id="eV" placeholder="3.5"></label>
+          <label class="f">Serie <input type="text" id="eS" placeholder="vuoto o / se assente"></label>
+          <label class="f">Volume <input type="text" id="eVol" placeholder="2"></label>
+          <label class="f">Inizio ascolto <input type="text" id="eI" placeholder="2025-02-10"></label>
+          <label class="f">Fine ascolto <input type="text" id="eF" placeholder="2025-02-20"></label>
           <label class="f">Numero ascolto <input type="number" id="eNum" min="0" max="999" step="1" placeholder="N° dal CSV"></label>
-          <p class="hint">Il numero viene mostrato con tre cifre. Se manca, non viene inventato.</p>
+          <p class="hint">Le sezioni senza dati (voto, serie, date) vengono nascoste e il resto si ricompone.</p>
           <div class="btns full">
             <button class="btn sm" id="addItem" type="button">+ Nuova cartolina</button>
             <button class="btn sm" id="delItem" type="button">Elimina cartolina</button>
@@ -389,50 +292,28 @@
         <button class="btn" id="all" type="button">Tutte</button>
         <button class="btn" id="none" type="button">Nessuna</button>
       </div>
+      <label class="check" style="margin-bottom:10px"><input type="checkbox" id="onlyNum" checked> Mostra solo i libri con numero d'ascolto</label>
       <div class="list" id="list" role="list"></div>
     </section>
   </main>
 </div>
-
 <script>
 const DATA = [];   // nessun audiolibro precaricato
 
 /* ================= font ================= */
 const FONTS = [
-  { n: 'Lora', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Playfair Display', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Cormorant Garamond', g: 'Serif', fb: 'Garamond, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'EB Garamond', g: 'Serif', fb: 'Garamond, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Libre Baskerville', g: 'Serif', fb: 'Baskerville, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Libre Caslon Text', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Merriweather', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Crimson Pro', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Spectral', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Newsreader', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Source Serif 4', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Fraunces', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Bodoni Moda', g: 'Serif', fb: 'Didot, Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Cardo', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Instrument Serif', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital@0;1' },
-  { n: 'DM Serif Display', g: 'Serif', fb: 'Georgia, serif', it: true, w: 'ital@0;1' },
-  { n: 'Montserrat', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Raleway', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Work Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Poppins', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Josefin Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Jost', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'DM Sans', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Inter', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
-  { n: 'Manrope', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
-  { n: 'Outfit', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
-  { n: 'Space Grotesk', g: 'Sans', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
-  { n: 'Oswald', g: 'Sans', fb: 'Impact, Arial, sans-serif', it: false, w: 'wght@400;700' },
-  { n: 'Courier Prime', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'IBM Plex Mono', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: true, w: 'ital,wght@0,400;0,700;1,400' },
-  { n: 'Special Elite', g: 'Macchina da scrivere e mano', fb: '"Courier New", monospace', it: false, w: '' },
-  { n: 'Caveat', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: 'wght@400;700' },
-  { n: 'Dancing Script', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: 'wght@400;700' },
-  { n: 'Homemade Apple', g: 'Macchina da scrivere e mano', fb: 'cursive', it: false, w: '' }
+  { n: 'Poppins', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Montserrat', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'DM Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Work Sans', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Raleway', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Jost', fb: 'Helvetica, Arial, sans-serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Inter', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Manrope', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Outfit', fb: 'Helvetica, Arial, sans-serif', it: false, w: 'wght@400;700' },
+  { n: 'Lora', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Playfair Display', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' },
+  { n: 'Merriweather', fb: 'Georgia, serif', it: true, w: 'ital,wght@0,400;0,700;1,400;1,700' }
 ];
 function fontInfo(name) { return FONTS.find(f => f.n === name) || FONTS[0]; }
 function fam(name) { const f = fontInfo(name); return '"' + f.n + '", ' + f.fb; }
@@ -447,53 +328,23 @@ const fontsReady = Promise.all(FONTS.map(f => new Promise(resolve => {
 })));
 async function ensureFonts(list) {
   await fontsReady;
-  try { await Promise.all(list.map(f => document.fonts.load(f, 'Aa“«'))); } catch (e) {}
+  try { await Promise.all(list.map(f => document.fonts.load(f, 'Aa•'))); } catch (e) {}
 }
 
-/* ================= preset ================= */
-const PRESETS = [
-  { n: 'Notte',      bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458' },
-  { n: 'Inchiostro', bg: '#0d2438', bg2: '#16466b', fg: '#eef4f8', accent: '#ffcf6b' },
-  { n: 'Ardesia',    bg: '#2b3036', bg2: '#3d454e', fg: '#eceff1', accent: '#8fb8d0' },
-  { n: 'Bosco',      bg: '#14281f', bg2: '#244a38', fg: '#edf3ec', accent: '#d9c36a' },
-  { n: 'Bordeaux',   bg: '#3a0f1b', bg2: '#6a1d33', fg: '#f7ece8', accent: '#f0b7a4' },
-  { n: 'Nero',       bg: '#0a0a0a', bg2: '#1c1c1c', fg: '#f5f5f5', accent: '#ffffff' },
-  { n: 'Carta',      bg: '#f3efe6', bg2: '#e4dccb', fg: '#25211c', accent: '#a23b2a' },
-  { n: 'Sabbia',     bg: '#ebe3d5', bg2: '#d9cbb3', fg: '#3b322a', accent: '#b5651d' },
-  { n: 'Salvia',     bg: '#e3e8de', bg2: '#cdd6c5', fg: '#26322a', accent: '#5f7a52' },
-  { n: 'Cipria',     bg: '#f6e8e4', bg2: '#ecd2cb', fg: '#3d2b2b', accent: '#b85c5c' },
-  { n: 'Lavanda',    bg: '#ece8f4', bg2: '#d8d0ea', fg: '#2c2540', accent: '#6d55b0' },
-  { n: 'Bianco',     bg: '#ffffff', bg2: '#eef1f4', fg: '#16191d', accent: '#1d4ed8' },
-  { n: 'E-ink',      bg: '#ffffff', bg2: '#ffffff', fg: '#000000', accent: '#4a4a4a' }
-];
+/* ================= stato ================= */
 const DEFAULTS = {
-  size: '1080x1440', cw: 1080, ch: 1440, fmt: 'png', jq: 92,
-  qFont: 'Lora', italic: false, mFont: 'Montserrat', authorUpper: false, titleItalic: false,
-  maxSize: 6, lh: 1.32, metaScale: 100, balance: true, typo: true, startCase: 'asis',
-  bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458', grad: 'diag', grain: false, vignette: false,
-  align: 'center', valign: 'center', footerMode: 'attached', margin: 7.5, markStyle: 'big', rule: 'line', frame: false,
-  coverOn: true, coverLayout: 'side', coverSide: 'left', coverScale: 100, overlay: 72, coverRadius: 1.5, coverShadow: true,
-  autoPal: false, palTone: 'dark',
+  size: '1080x1350', fmt: 'png', jq: 92,
+  font: 'Poppins', titleUpper: true, genreMode: 'first', dateFmt: 'num',
+  blur: 5.5, veil: 30, autoPal: true, accent: '#8a2a18', coverOn: true,
   extra: '', extraPos: 'br'
 };
-const STYLES = [
-  { n: 'Minimal scuro', s: { qFont: 'Lora', italic: false, mFont: 'Montserrat', authorUpper: false, titleItalic: false, bg: '#12151c', bg2: '#242a3a', fg: '#f1eee6', accent: '#e0a458', grad: 'diag', grain: false, vignette: false, align: 'left', valign: 'center', footerMode: 'bottom', markStyle: 'big', rule: 'line', frame: false, autoPal: false, coverLayout: 'side' } },
-  { n: 'Editoriale', s: { qFont: 'EB Garamond', italic: true, mFont: 'Jost', authorUpper: true, titleItalic: false, bg: '#f3efe6', bg2: '#e4dccb', fg: '#25211c', accent: '#a23b2a', grad: 'none', grain: true, vignette: false, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'none', rule: 'line', frame: true, autoPal: false, coverLayout: 'thumb' } },
-  { n: 'Poster', s: { qFont: 'Playfair Display', italic: false, mFont: 'Space Grotesk', authorUpper: true, titleItalic: false, bg: '#0a0a0a', bg2: '#1c1c1c', fg: '#f5f5f5', accent: '#ffffff', grad: 'radial', grain: true, vignette: true, align: 'left', valign: 'bottom', footerMode: 'attached', markStyle: 'watermark', rule: 'line', frame: false, autoPal: false, maxSize: 11 } },
-  { n: 'Diario', s: { qFont: 'Courier Prime', italic: false, mFont: 'Courier Prime', authorUpper: false, titleItalic: false, bg: '#ebe3d5', bg2: '#d9cbb3', fg: '#3b322a', accent: '#b5651d', grad: 'vert', grain: true, vignette: true, align: 'left', valign: 'top', footerMode: 'attached', markStyle: 'none', rule: 'dash', frame: false, autoPal: false } },
-  { n: 'Galleria', s: { qFont: 'Cormorant Garamond', italic: true, mFont: 'Raleway', authorUpper: true, titleItalic: false, bg: '#ffffff', bg2: '#eef1f4', fg: '#16191d', accent: '#16191d', grad: 'none', grain: false, vignette: false, align: 'left', valign: 'center', footerMode: 'attached', markStyle: 'none', rule: 'line', frame: false, autoPal: false, coverOn: true, coverLayout: 'side', coverShadow: true } },
-  { n: 'Dalla copertina', s: { qFont: 'Fraunces', italic: true, mFont: 'Manrope', authorUpper: true, titleItalic: false, grad: 'diag', grain: true, vignette: true, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'big', rule: 'dot', frame: false, coverOn: true, coverLayout: 'bg', autoPal: true, palTone: 'dark', overlay: 70 } },
-  { n: 'E-reader', s: { qFont: 'Libre Baskerville', italic: false, mFont: 'Work Sans', authorUpper: false, titleItalic: false, bg: '#ffffff', bg2: '#ffffff', fg: '#000000', accent: '#4a4a4a', grad: 'none', grain: false, vignette: false, align: 'center', valign: 'center', footerMode: 'attached', markStyle: 'big', rule: 'line', frame: true, autoPal: false } }
-];
-
-/* ================= stato ================= */
 const $ = id => document.getElementById(id);
-const LS_KEY = 'postcard-settings-v2', TPL_KEY = 'postcard-templates-v2';
+const LS_KEY = 'postcard-settings-v3', TPL_KEY = 'postcard-templates-v3';
 let S = Object.assign({}, DEFAULTS);
 try {
   const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
   if (saved) S = Object.assign(S, saved);
-  if (!['1080x1080','1080x1920','1080x1440'].includes(S.size)) S.size='1080x1440';
+  if (!['1080x1350', '1080x1920'].includes(S.size)) S.size = '1080x1350';
 } catch (e) {}
 let items = DATA.slice();
 let checked = new Set(items.map((_, i) => i));
@@ -532,7 +383,7 @@ function hslToHex(h, s, l) {
   return '#' + f(0) + f(8) + f(4);
 }
 function sizeOf(s) {
-  return ['1080x1080','1080x1920','1080x1440'].includes(s.size) ? s.size.split('x').map(Number) : [1080,1440];
+  return ['1080x1350','1080x1920'].includes(s.size) ? s.size.split('x').map(Number) : [1080,1350];
 }
 /* ================= copertine ================= */
 const covers = new Map();       // chiave libro -> canvas (immagine ridimensionata)
@@ -576,42 +427,16 @@ async function setCover(key, blob, persist) {
   const c = document.createElement('canvas');
   c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
   const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, c.width, c.height);
-  covers.set(key, c); palCache.delete(key + ':dark'); palCache.delete(key + ':light');
+  covers.set(key, c); palCache.delete(key);
   if (coverURLs.has(key)) URL.revokeObjectURL(coverURLs.get(key));
   const small = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
   coverURLs.set(key, URL.createObjectURL(small));
   if (persist) IDB.put(key, small);
 }
 function removeCover(key) {
-  covers.delete(key); palCache.delete(key + ':dark'); palCache.delete(key + ':light');
+  covers.delete(key); palCache.delete(key);
   if (coverURLs.has(key)) { URL.revokeObjectURL(coverURLs.get(key)); coverURLs.delete(key); }
   IDB.del(key);
-}
-function coverPalette(key, img, tone) {
-  const ck = key + ':' + tone; if (palCache.has(ck)) return palCache.get(ck);
-  const n = 56, c = document.createElement('canvas'); c.width = n; c.height = n;
-  const x = c.getContext('2d'); x.drawImage(img, 0, 0, n, n);
-  const d = x.getImageData(0, 0, n, n).data; const buckets = new Map();
-  for (let i = 0; i < d.length; i += 4) {
-    const k = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4);
-    const b = buckets.get(k) || { n: 0, r: 0, g: 0, b: 0 };
-    b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2]; buckets.set(k, b);
-  }
-  const list = Array.from(buckets.values()).map(b => { const r = b.r / b.n, g = b.g / b.n, bl = b.b / b.n; return { n: b.n, hsl: rgbToHsl(r, g, bl) }; })
-    .sort((a, b) => b.n - a.n);
-  const dom = list[0].hsl;
-  let best = null, bestScore = -1;
-  list.slice(0, 40).forEach(c => {
-    const [h, s, l] = c.hsl; if (l < 0.18 || l > 0.88) return;
-    const score = s * Math.sqrt(c.n) * (1 - Math.abs(l - 0.55));
-    if (score > bestScore) { bestScore = score; best = c.hsl; }
-  });
-  const acc = best && best[1] > 0.18 ? best : [(dom[0] + 0.08) % 1, 0.5, 0.6];
-  const hs = Math.min(dom[1], 0.45);
-  const p = tone === 'light'
-    ? { bg: hslToHex(dom[0], Math.min(hs, 0.35), 0.93), bg2: hslToHex(dom[0], Math.min(hs, 0.35), 0.84), fg: hslToHex(dom[0], 0.3, 0.13), accent: hslToHex(acc[0], Math.max(acc[1], 0.45), 0.38) }
-    : { bg: hslToHex(dom[0], hs, 0.1), bg2: hslToHex(dom[0], hs, 0.2), fg: hslToHex(dom[0], 0.18, 0.93), accent: hslToHex(acc[0], Math.max(acc[1], 0.45), 0.7) };
-  palCache.set(ck, p); return p;
 }
 
 /* ================= disegno ================= */
@@ -710,91 +535,319 @@ function cardLines(ctx,text,width) {
   }
   return result;
 }
-async function renderCard(canvas,item,s,scale=1) {
-  const [w,h]=sizeOf(s),W=Math.round(w*scale),H=Math.round(h*scale),u=W/1080;
-  const qf=fam(s.qFont),mf=fam(s.mFont),qs=s.italic&&fontInfo(s.qFont).it?'italic ':'';
-  await ensureFonts([qs+'700 50px '+qf,'400 30px '+mf,'700 30px '+mf]);
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d'),key=bookKey(item.t),cover=s.coverOn?covers.get(key):null;
-  const col=cover&&s.autoPal?coverPalette(key,cover,s.palTone):s;
-  ctx.fillStyle=col.bg;ctx.fillRect(0,0,W,H);
-  if(cover&&s.coverLayout==='bg'){drawBlurredCover(ctx,cover,W,H);ctx.fillStyle=rgba(col.bg,s.overlay/100);ctx.fillRect(0,0,W,H);}
-  if(s.grad!=='none'){
-    const g=s.grad==='radial'?ctx.createRadialGradient(W*.5,H*.35,0,W*.5,H*.5,Math.hypot(W,H)*.6):ctx.createLinearGradient(0,0,s.grad==='vert'?0:W,H);
-    const alpha=cover&&s.coverLayout==='bg'?.35:1;
-    g.addColorStop(0,rgba(s.grad==='radial'?col.bg2:col.bg,alpha));g.addColorStop(1,rgba(s.grad==='radial'?col.bg:col.bg2,alpha));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+/* ================= palette dalla copertina ================= */
+function hsFromHex(hex) { const [r, g, b] = hexToRgb(hex); const [h, s] = rgbToHsl(r, g, b); return [h, s]; }
+// tinta dominante (tonalità + saturazione) della copertina, ignorando grigi, bianchi e neri
+function coverHS(key, img) {
+  if (palCache.has(key)) return palCache.get(key);
+  const n = 64, c = document.createElement('canvas'); c.width = n; c.height = n;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0, n, n);
+  const d = x.getImageData(0, 0, n, n).data;
+  const bins = Array.from({ length: 36 }, () => ({ w: 0, sx: 0, sy: 0, ss: 0 }));
+  let colorful = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    const [h, s, l] = rgbToHsl(d[i], d[i + 1], d[i + 2]);
+    if (s < 0.15 || l < 0.08 || l > 0.94) continue;
+    const w = s * (1 - Math.abs(l - 0.5) * 1.3); if (w <= 0) continue;
+    colorful++;
+    const b = bins[Math.floor(h * 36) % 36];
+    b.w += w; b.sx += Math.cos(h * 2 * Math.PI) * w; b.sy += Math.sin(h * 2 * Math.PI) * w; b.ss += s * w;
   }
-  if(s.grain){ctx.save();ctx.globalAlpha=.055;ctx.fillStyle=grainPattern(ctx);ctx.fillRect(0,0,W,H);ctx.restore();}
-  if(s.vignette){const g=ctx.createRadialGradient(W/2,H/2,W*.3,W/2,H/2,Math.hypot(W,H)*.65);g.addColorStop(0,'transparent');g.addColorStop(1,'rgba(0,0,0,.32)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-  if(s.frame){ctx.strokeStyle=rgba(col.fg,.3);ctx.lineWidth=2*u;ctx.strokeRect(30*u,30*u,W-60*u,H-60*u);}
-  const pad=W*Math.max(s.frame?5:3,+s.margin)/100,gap=38*u;
-  let R={x:pad,y:pad,w:W-2*pad,h:H-2*pad};
-  const align=s.align,anchor=r=>align==='center'?r.x+r.w/2:align==='right'?r.x+r.w:r.x;
-  const num=numberLabel(item.num),badge='Audiolibro ascoltato'+(num?' #'+num:'');
-  if(s.markStyle==='watermark'&&num){ctx.save();ctx.fillStyle=rgba(col.accent,.09);ctx.font='700 '+W*.38+'px '+mf;ctx.textAlign='right';ctx.fillText(num,W-pad,H-pad);ctx.restore();}
-  if(s.markStyle!=='none'){
-    let bs=25*u;ctx.font='700 '+bs+'px '+mf;
-    while(ctx.measureText(badge).width>R.w-32*u&&bs>10*u){bs-=u;ctx.font='700 '+bs+'px '+mf;}
-    const bw=ctx.measureText(badge).width+32*u,bh=bs+26*u;
-    const bx=align==='center'?R.x+(R.w-bw)/2:align==='right'?R.x+R.w-bw:R.x;
-    if(s.markStyle==='big'){roundRectPath(ctx,bx,R.y,bw,bh,10*u);ctx.fillStyle=rgba(col.accent,.15);ctx.fill();}
-    ctx.fillStyle=col.accent;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(badge,bx+16*u,R.y+bh/2);
-    R.y+=bh+gap;R.h-=bh+gap;
+  let best = -1, bi = 0;
+  for (let i = 0; i < 36; i++) { const w = bins[i].w + 0.5 * (bins[(i + 35) % 36].w + bins[(i + 1) % 36].w); if (w > best) { best = w; bi = i; } }
+  let res;
+  if (colorful / (d.length / 4) < 0.03 || best <= 0) res = [0.58, 0.06];   // copertina quasi bianco e nero: palette neutra
+  else {
+    let sx = 0, sy = 0, ss = 0, w = 0;
+    [bins[(bi + 35) % 36], bins[bi], bins[(bi + 1) % 36]].forEach(b => { sx += b.sx; sy += b.sy; ss += b.ss; w += b.w; });
+    let h = Math.atan2(sy, sx) / (2 * Math.PI); if (h < 0) h += 1;
+    res = [h, ss / w];
   }
-  let textR={...R};
-  if(cover){
-    const side=H===W||s.coverLayout==='thumb';
-    let cw;
-    if(side){
-      cw=Math.min(R.w*(s.coverLayout==='thumb'?.25:.43)*s.coverScale/100,R.h*.8,R.w*.49);
-      const cy=s.valign==='top'?R.y:s.valign==='bottom'?R.y+R.h-cw:R.y+(R.h-cw)/2;
-      const right=s.coverSide==='right';drawCover(ctx,cover,right?R.x+R.w-cw:R.x,cy,cw,cw,s,col);
-      textR={x:right?R.x:R.x+cw+gap,y:R.y,w:R.w-cw-gap,h:R.h};
-    }else{
-      cw=Math.min(R.w*.78*s.coverScale/100,R.h*.54,R.w);
-      const cx=align==='left'?R.x:align==='right'?R.x+R.w-cw:R.x+(R.w-cw)/2;
-      drawCover(ctx,cover,cx,R.y,cw,cw,s,col);
-      textR={x:R.x,y:R.y+cw+gap,w:R.w,h:R.h-cw-gap};
+  palCache.set(key, res); return res;
+}
+function makePalette(h, s) {
+  const sat = s < 0.12 ? s : Math.min(0.85, Math.max(0.45, s));
+  return {
+    pill: hslToHex(h, sat * 0.95, 0.28),                       // riempimento di badge, voto, serie, etichette
+    hi: hslToHex(h, Math.min(1, sat * 1.05), 0.46),            // puntini e dettagli luminosi
+    box: hslToHex(h, Math.min(0.4, sat * 0.5), 0.08),          // riquadri date
+    fg: hslToHex(h, Math.min(0.25, sat * 0.3), 0.93),          // testi
+    bg: hslToHex(h, Math.min(0.4, sat * 0.5), 0.1)             // base dello sfondo
+  };
+}
+
+/* ================= icone e stelle ================= */
+function starPath(ctx, cx, cy, R) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? R * 0.5 : R, a = -Math.PI / 2 + i * Math.PI / 5;
+    const px = cx + r * Math.cos(a), py = cy + r * Math.sin(a);
+    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+}
+// frac: 0 = vuota, 0.5 = mezza stella, 1 = piena
+function drawStar(ctx, cx, cy, R, frac, fill, empty) {
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = R * 0.2;
+  ctx.fillStyle = ctx.strokeStyle = empty; starPath(ctx, cx, cy, R * 0.9); ctx.fill(); ctx.stroke();
+  if (frac > 0) {
+    if (frac < 1) { ctx.beginPath(); ctx.rect(cx - R * 1.3, cy - R * 1.3, R * 0.3 + frac * 2 * R, R * 2.6); ctx.clip(); }
+    ctx.fillStyle = ctx.strokeStyle = fill; starPath(ctx, cx, cy, R * 0.9); ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+}
+function iconBooks(ctx, x, y, s, color) {
+  ctx.save(); ctx.fillStyle = color;
+  roundRectPath(ctx, x, y, s * 0.24, s, s * 0.06); ctx.fill();
+  roundRectPath(ctx, x + s * 0.3, y, s * 0.24, s, s * 0.06); ctx.fill();
+  ctx.translate(x + s * 0.66, y + s * 0.1); ctx.rotate(-0.22);
+  roundRectPath(ctx, 0, 0, s * 0.24, s * 0.95, s * 0.06); ctx.fill();
+  ctx.restore();
+}
+function iconBookmark(ctx, x, y, w, h, color) {
+  ctx.save(); ctx.fillStyle = color; ctx.beginPath();
+  ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w / 2, y + h * 0.74); ctx.lineTo(x, y + h); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function iconCalendar(ctx, x, y, s, color) {
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = s * 0.09;
+  roundRectPath(ctx, x + s * 0.05, y + s * 0.14, s * 0.9, s * 0.8, s * 0.12); ctx.stroke();
+  ctx.fillRect(x + s * 0.05, y + s * 0.14, s * 0.9, s * 0.24);
+  ctx.fillRect(x + s * 0.27, y, s * 0.09, s * 0.26); ctx.fillRect(x + s * 0.64, y, s * 0.09, s * 0.26);
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) ctx.fillRect(x + s * (0.22 + c * 0.22), y + s * (0.52 + r * 0.19), s * 0.12, s * 0.1);
+  ctx.restore();
+}
+
+/* ================= sfondo sfocato ================= */
+function drawBlurBg(ctx, img, W, H, div) {
+  const ar = img.width / img.height, car = W / H;
+  let sw, sh, sx, sy;
+  if (ar > car) { sh = img.height; sw = sh * car; sx = (img.width - sw) / 2; sy = 0; } else { sw = img.width; sh = sw / car; sx = 0; sy = (img.height - sh) / 2; }
+  const a = document.createElement('canvas'); a.width = Math.max(8, Math.round(W / 8)); a.height = Math.max(8, Math.round(H / 8));
+  const ax = a.getContext('2d'); ax.imageSmoothingQuality = 'high'; ax.drawImage(img, sx, sy, sw, sh, 0, 0, a.width, a.height);
+  const b = document.createElement('canvas'); b.width = Math.max(4, Math.round(W / div)); b.height = Math.max(4, Math.round(H / div));
+  const bx = b.getContext('2d'); bx.imageSmoothingQuality = 'high'; bx.drawImage(a, 0, 0, b.width, b.height);
+  ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  const pad = Math.max(W, H) * 0.04; ctx.drawImage(b, -pad, -pad, W + 2 * pad, H + 2 * pad); ctx.restore();
+}
+
+/* ================= dati: voto, date, serie ================= */
+function parseVoto(v) {
+  const n = parseFloat(String(v ?? '').replace(',', '.').trim());
+  if (!isFinite(n) || n <= 0) return null;
+  return Math.min(5, Math.round(n * 2) / 2);
+}
+function cleanVal(v) { const t = String(v ?? '').trim(); return !t || t === '/' || t === '-' ? '' : t; }
+function parseDate(v) {
+  const t = String(v ?? '').trim(); if (!t || t === '/') return null; let m;
+  if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t))) return { y: +m[1], m: +m[2], d: +m[3] };
+  if ((m = /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/.exec(t))) return { y: m[3].length === 2 ? 2000 + +m[3] : +m[3], m: +m[2], d: +m[1] };
+  if (/^\d{5}(\.\d+)?$/.test(t)) { const dt = new Date(Math.round((+t - 25569) * 86400000)); return { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate() }; }
+  return null;
+}
+const MESI = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
+function fmtDate(p, mode) {
+  const dd = String(p.d).padStart(2, '0');
+  return dd + '.' + (mode === 'mon' ? MESI[p.m - 1] : String(p.m).padStart(2, '0')) + '.' + p.y;
+}
+function typoFix(t) { return String(t).replace(/\.\.\./g, '…').replace(/'/g, '’').replace(/ - /g, ' – '); }
+
+/* ================= disegno della cartolina ================= */
+async function renderCard(canvas, item, s, scale = 1) {
+  const [w, h] = sizeOf(s), W = Math.round(w * scale), H = Math.round(h * scale), u = W / 1080, DW = 1080, DH = h;
+  const ff = fam(s.font);
+  await ensureFonts(['400 30px ' + ff, '700 30px ' + ff, 'italic 700 30px ' + ff]);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d'); ctx.setTransform(u, 0, 0, u, 0, 0);
+  const key = bookKey(item.t), cover = s.coverOn ? covers.get(key) : null;
+  const [hue, sat] = (cover && s.autoPal) ? coverHS(key, cover) : hsFromHex(s.accent);
+  const P = makePalette(hue, sat);
+  const FG = P.fg, FG85 = rgba(P.fg, 0.85), FG75 = rgba(P.fg, 0.75);
+  const mf = (wt, sz, it) => (it ? 'italic ' : '') + wt + ' ' + sz + 'px ' + ff;
+
+  /* sfondo: copertina sfocata + velatura + dissolvenze nere in alto e in basso */
+  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, DW, DH);
+  if (cover) drawBlurBg(ctx, cover, DW, DH, 8 + 4 * s.blur);
+  else {
+    const g = ctx.createRadialGradient(DW * .5, DH * .35, 0, DW * .5, DH * .5, DH * .8);
+    g.addColorStop(0, hslToHex(hue, Math.min(.5, sat * .6), .22)); g.addColorStop(1, hslToHex(hue, Math.min(.4, sat * .5), .07));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, DW, DH);
+  }
+  ctx.fillStyle = 'rgba(0,0,0,' + (s.veil / 100) + ')'; ctx.fillRect(0, 0, DW, DH);
+  let g = ctx.createLinearGradient(0, 0, 0, 280); g.addColorStop(0, 'rgba(0,0,0,.92)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, DW, 280);
+  g = ctx.createLinearGradient(0, DH - 420, 0, DH); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.95)');
+  ctx.fillStyle = g; ctx.fillRect(0, DH - 420, DW, 420);
+
+  /* dati */
+  const num = String(item.num ?? '').trim(), numOK = /^\d{1,3}$/.test(num);
+  const voto = parseVoto(item.v), serie = cleanVal(item.s), vol = cleanVal(item.vol);
+  const d1 = parseDate(item.i), d2 = parseDate(item.f);
+  const raw1 = cleanVal(item.i), raw2 = cleanVal(item.f);
+  const showDates = !!(raw1 || raw2);
+  const maxTW = DW - 140;
+  const segsW = segs => segs.reduce((a, sg) => { ctx.font = sg.f; return a + ctx.measureText(sg.t).width; }, 0);
+  const fitSize = (mk, from, to) => { let z = from; while (z > to && segsW(mk(z)) > maxTW) z--; return z; };
+
+  /* titolo (massimo due righe, bilanciate) */
+  let title = typoFix(String(item.t || '').trim()); if (s.titleUpper) title = title.toLocaleUpperCase('it');
+  let ts = 60, tl = [];
+  for (; ts >= 34; ts -= 2) { ctx.font = mf(700, ts); tl = cardLines(ctx, title, maxTW); if (tl.length <= 2) break; }
+  if (tl.length > 2) { ts = 34; ctx.font = mf(700, ts); tl = cardLines(ctx, title, maxTW); }
+  if (tl.length === 2) { let lo = maxTW * 0.4, hi = maxTW; for (let k = 0; k < 12; k++) { const mid = (lo + hi) / 2; if (cardLines(ctx, title, mid).length <= 2) hi = mid; else lo = mid; } tl = cardLines(ctx, title, hi); }
+  const titleH = tl.length * ts * 1.16;
+
+  /* autore e narratore */
+  const au = typoFix(String(item.a || '').trim()), na = typoFix(String(item.n || '').trim());
+  const authSegs = z => { const a = []; if (au) a.push({ t: au, f: mf(700, z), c: FG }); if (na) { if (a.length) a.push({ t: '  •  ', f: mf(400, z), c: P.hi }); a.push({ t: 'Letto da ', f: mf(400, z), c: FG85 }, { t: na, f: mf(700, z, true), c: FG }); } return a; };
+  let aLines = [];
+  if (au || na) {
+    const z = fitSize(authSegs, 42, 28);
+    if (segsW(authSegs(z)) <= maxTW) aLines = [{ segs: authSegs(z), sz: z }];
+    else {
+      const m1 = q => [{ t: au, f: mf(700, q), c: FG }], m2 = q => [{ t: 'Letto da ', f: mf(400, q), c: FG85 }, { t: na, f: mf(700, q, true), c: FG }];
+      if (au) { const q = fitSize(m1, 40, 22); aLines.push({ segs: m1(q), sz: q }); }
+      if (na) { const q = fitSize(m2, 36, 22); aLines.push({ segs: m2(q), sz: q }); }
     }
   }
-  const title=prepareText(item.t,{...s,markStyle:'none'}).join('\n');
-  const author=s.authorUpper?String(item.a).toUpperCase():String(item.a||'');
-  const metadata=[author,item.n?'Letto da '+item.n:'',item.d?'Durata: '+durationLabel(item.d):''].filter(Boolean);
-  const calc=(ts,ms)=>{
-    ctx.font=qs+'700 '+ts+'px '+qf;let lines=cardLines(ctx,title,textR.w);
-    if(s.balance&&lines.length>1){let low=textR.w*.5,high=textR.w;for(let k=0;k<12;k++){const mid=(low+high)/2;if(cardLines(ctx,title,mid).length<=lines.length)high=mid;else low=mid;}lines=cardLines(ctx,title,high);}
-    const ml=metadata.map((v,i)=>{ctx.font=(i===0&&s.titleItalic&&fontInfo(s.mFont).it?'italic ':'')+'400 '+ms+'px '+mf;return cardLines(ctx,v,textR.w);});
-    const titleH=lines.length*ts*s.lh,metaH=ml.reduce((a,l)=>a+l.length*ms*1.4,0)+Math.max(0,ml.length-1)*ms*.4;
-    const sep=s.rule==='none'?18*u:36*u;
-    return {lines,ml,titleH,metaH,sep,total:titleH+sep+metaH};
+  const aH = aLines.reduce((a, l) => a + l.sz * 1.25, 0);
+
+  /* durata e genere */
+  const durTxt = cleanVal(item.d) ? durationLabel(cleanVal(item.d)) : '';
+  let genre = cleanVal(item.g); if (genre && s.genreMode === 'first') genre = genre.split(',')[0].trim();
+  genre = typoFix(genre);
+  const durSegs = z => { const a = []; if (durTxt) a.push({ t: 'Durata:  ', f: mf(400, z), c: FG75 }, { t: durTxt, f: mf(400, z), c: FG }); if (genre) { if (a.length) a.push({ t: '  •  ', f: mf(400, z), c: P.hi }); a.push({ t: genre, f: mf(400, z), c: FG }); } return a; };
+  const hasDur = !!(durTxt || genre);
+  const dSz = hasDur ? fitSize(durSegs, 36, 22) : 0, dH = dSz * 1.25;
+
+  /* riga della serie */
+  const labFont = mf(400, 24), serTitleFont = z => mf(700, z);
+  const labW = t => { ctx.font = labFont; return spacedWidth(ctx, t, 4); };
+  const volW = () => { if (!vol) return 0; const l = labW('VOLUME'); ctx.font = mf(700, 46); return 26 + 24 + 14 + l + 20 + ctx.measureText(vol).width + 30; };
+  const serW = z => { const l = labW('SERIE'); ctx.font = serTitleFont(z); return 26 + 38 + 16 + l + 22 + ctx.measureText(typoFix(serie)).width + 30; };
+  let sz = 38; if (serie) while (sz > 20 && serW(sz) + (vol ? 27 + volW() : 0) > DW - 100) sz--;
+
+  /* composizione verticale: i blocchi assenti spariscono e lo spazio si redistribuisce */
+  const baseCw = Math.round(DW * (DH > 1500 ? 0.6 : 0.4417));
+  const build = cw => {
+    const L = []; if (numOK) L.push({ k: 'badge', h: 94, gap: 0, wt: 0 });
+    L.push({ k: 'cover', h: cw, gap: numOK ? 13 : 0, wt: 0.5 });
+    L.push({ k: 'title', h: titleH, gap: 16, wt: 1 });
+    if (aLines.length) L.push({ k: 'author', h: aH, gap: 15, wt: 0 });
+    if (hasDur) L.push({ k: 'dur', h: dH, gap: 12, wt: 0 });
+    if (voto != null) L.push({ k: 'voto', h: 110, gap: 11, wt: 1.2 });
+    if (serie) L.push({ k: 'serie', h: 85, gap: 52, wt: 1.5 });
+    if (showDates) { L.push({ k: 'phead', h: 36, gap: 32, wt: 1.5 }); L.push({ k: 'dates', h: 115, gap: 20, wt: 0.3 }); }
+    return L;
   };
-  let ts=W*s.maxSize/100,ms=29*u*s.metaScale/100,L=calc(ts,ms);
-  while(L.total>textR.h&&ts>12*u){ts*=.95;ms*=.95;L=calc(ts,ms);}
-  const overflow=L.total>textR.h||textR.w<40*u;
-  let y=textR.y+(s.valign==='center'?(textR.h-L.total)/2:s.valign==='bottom'?textR.h-L.total:0);
-  y=Math.max(textR.y,y);ctx.textAlign=align;ctx.textBaseline='top';ctx.fillStyle=col.fg;ctx.font=qs+'700 '+ts+'px '+qf;
-  const x=anchor(textR);
-  L.lines.forEach(line=>{ctx.fillText(line,x,y);y+=ts*s.lh;});
-  if(s.footerMode==='bottom')y=Math.max(y,textR.y+textR.h-L.metaH-L.sep);
-  if(s.rule!=='none'){
-    const rw=64*u,rx=align==='center'?x-rw/2:align==='right'?x-rw:x;
-    ctx.fillStyle=col.accent;
-    if(s.rule==='dot'){ctx.beginPath();ctx.arc(align==='center'?x:align==='right'?x-4*u:x+4*u,y+L.sep/2,4*u,0,Math.PI*2);ctx.fill();}
-    else ctx.fillRect(rx,y+L.sep/2,s.rule==='dash'?rw*.5:rw,2*u);
+  const y0 = numOK ? 25 : 44, end = DH - 72;
+  const nat = (L, gs) => L.reduce((a, b) => a + (b.wt ? b.gap * gs : b.gap) + b.h, y0);
+  let cw = baseCw, L = build(cw), gs = 1, overflow = false;
+  for (let i = 0; i < 60; i++) {
+    L = build(cw);
+    if (nat(L, 1) <= end) { gs = 1; break; }
+    if (nat(L, 0.45) <= end) { gs = 0.45; break; }
+    cw -= 12; if (cw < 300) { overflow = true; gs = 0.45; break; }
   }
-  y+=L.sep;
-  L.ml.forEach((lines,i)=>{
-    ctx.font=(i===0&&s.titleItalic&&fontInfo(s.mFont).it?'italic ':'')+'400 '+ms+'px '+mf;ctx.fillStyle=i===0?col.accent:rgba(col.fg,.85);
-    lines.forEach(line=>{ctx.fillText(line,x,y);y+=ms*1.4;});y+=ms*.4;
+  const totW = L.reduce((a, b) => a + b.wt, 0), slack = Math.max(0, end - nat(L, gs));
+  let y = y0; L.forEach(b => { b.gp = (b.wt ? b.gap * gs : b.gap) + (totW ? slack * b.wt / totW : 0); y += b.gp; b.y = y; y += b.h; });
+
+  /* disegno blocchi */
+  const shadowOn = () => { ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 14 * u; ctx.shadowOffsetY = 2 * u; };
+  const shadowOff = () => { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; };
+  const drawSegs = (segs, cx, cy) => {
+    let x = cx - segsW(segs) / 2; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    segs.forEach(sg => { ctx.font = sg.f; ctx.fillStyle = sg.c; ctx.fillText(sg.t, x, cy); x += ctx.measureText(sg.t).width; });
+  };
+  const ruleLine = (xa, xb, yy, dotAtA) => {
+    ctx.save(); ctx.strokeStyle = rgba(P.fg, 0.8); ctx.fillStyle = rgba(P.fg, 0.9); ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(xa, yy); ctx.lineTo(xb, yy); ctx.stroke();
+    ctx.beginPath(); ctx.arc(dotAtA ? xa : xb, yy, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  };
+
+  L.forEach(b => {
+    ctx.save();
+    if (b.k === 'badge') {
+      ctx.fillStyle = P.pill; ctx.beginPath(); ctx.arc(DW / 2, b.y + 47, 47, 0, Math.PI * 2); ctx.fill();
+      let fz = 40; ctx.font = mf(700, fz); while (ctx.measureText(String(+num)).width > 68 && fz > 20) { fz--; ctx.font = mf(700, fz); }
+      ctx.fillStyle = FG; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(+num), DW / 2, b.y + 47 + 2);
+    }
+    if (b.k === 'cover') {
+      const x = (DW - cw) / 2, r = cw * 0.058;
+      if (cover) {
+        ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 40 * u; ctx.shadowOffsetY = 14 * u;
+        roundRectPath(ctx, x, b.y, cw, cw, r); ctx.fillStyle = P.pill; ctx.fill(); shadowOff();
+        ctx.save(); roundRectPath(ctx, x, b.y, cw, cw, r); ctx.clip();
+        const edge = Math.min(cover.width, cover.height);
+        ctx.drawImage(cover, (cover.width - edge) / 2, (cover.height - edge) / 2, edge, edge, x, b.y, cw, cw); ctx.restore();
+        ctx.lineWidth = 5; ctx.strokeStyle = P.pill; roundRectPath(ctx, x + 2.5, b.y + 2.5, cw - 5, cw - 5, r); ctx.stroke();
+      } else {
+        roundRectPath(ctx, x, b.y, cw, cw, r); ctx.fillStyle = rgba(P.fg, 0.07); ctx.fill();
+        ctx.lineWidth = 4; ctx.strokeStyle = P.pill; roundRectPath(ctx, x + 2, b.y + 2, cw - 4, cw - 4, r); ctx.stroke();
+        ctx.fillStyle = rgba(P.fg, 0.45); ctx.font = mf(400, 30); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Copertina non caricata', DW / 2, b.y + cw / 2);
+      }
+    }
+    if (b.k === 'title') {
+      shadowOn(); ctx.fillStyle = rgba(P.fg, 0.92); ctx.font = mf(700, ts); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      tl.forEach((line, i) => ctx.fillText(line, DW / 2, b.y + ts * 1.16 * (i + 0.5)));
+    }
+    if (b.k === 'author') { shadowOn(); let yy = b.y; aLines.forEach(l => { drawSegs(l.segs, DW / 2, yy + l.sz * 0.625); yy += l.sz * 1.25; }); }
+    if (b.k === 'dur') { shadowOn(); drawSegs(durSegs(dSz), DW / 2, b.y + dH / 2); }
+    if (b.k === 'voto') {
+      ctx.font = mf(700, 66); const tw = ctx.measureText('VOTO:').width, R = 33, pitch = 67, starsW = 4 * pitch + 2 * R;
+      const pw = 38 + tw + 28 + starsW + 36, px = (DW - pw) / 2, cy = b.y + 55;
+      ruleLine(72, px - 24, cy, true); ruleLine(px + pw + 24, DW - 72, cy, false);
+      roundRectPath(ctx, px, b.y, pw, 110, 22); ctx.fillStyle = P.pill; ctx.fill();
+      ctx.fillStyle = FG; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('VOTO:', px + 38, cy + 3);
+      const sx0 = px + 38 + tw + 28 + R;
+      for (let i = 0; i < 5; i++) drawStar(ctx, sx0 + i * pitch, cy, R, Math.max(0, Math.min(1, voto - i)), FG, rgba(P.fg, 0.2));
+    }
+    if (b.k === 'serie') {
+      const sw = serW(sz), vw = vol ? volW() : 0, total = sw + (vol ? 27 + vw : 0);
+      let x = (DW - total) / 2; const cy = b.y + 42.5;
+      roundRectPath(ctx, x, b.y, sw, 85, 22); ctx.fillStyle = P.pill; ctx.fill();
+      iconBooks(ctx, x + 26, cy - 19, 38, FG);
+      ctx.font = labFont; ctx.fillStyle = FG75; ctx.textBaseline = 'middle'; drawSpaced(ctx, 'SERIE', x + 26 + 38 + 16, cy + 1, 4, 'left');
+      const tx = x + 26 + 38 + 16 + labW('SERIE') + 22; ctx.font = serTitleFont(sz); ctx.fillStyle = FG; ctx.textAlign = 'left'; ctx.fillText(typoFix(serie), tx, cy + 2);
+      if (vol) {
+        x += sw + 27; roundRectPath(ctx, x, b.y, vw, 85, 22); ctx.fillStyle = P.pill; ctx.fill();
+        iconBookmark(ctx, x + 26, cy - 17, 24, 34, FG);
+        ctx.font = labFont; ctx.fillStyle = FG75; ctx.textBaseline = 'middle'; drawSpaced(ctx, 'VOLUME', x + 26 + 24 + 14, cy + 1, 4, 'left');
+        const vx = x + 26 + 24 + 14 + labW('VOLUME') + 20; ctx.font = mf(700, 46); ctx.fillStyle = FG; ctx.textAlign = 'left'; ctx.fillText(vol, vx, cy + 2);
+      }
+    }
+    if (b.k === 'phead') {
+      const label = 'PERIODO D’ASCOLTO', cy = b.y + 18; ctx.font = mf(400, 30); const lw = spacedWidth(ctx, label, 7);
+      const total = 36 + 18 + lw, x = (DW - total) / 2;
+      iconCalendar(ctx, x, cy - 18, 36, FG);
+      shadowOn(); ctx.fillStyle = FG85; ctx.textBaseline = 'middle'; drawSpaced(ctx, label, x + 36 + 18, cy + 1, 7, 'left'); shadowOff();
+      ruleLine(66, x - 26, cy, true); ruleLine(x + total + 26, DW - 66, cy, false);
+    }
+    if (b.k === 'dates') {
+      const t1 = d1 ? fmtDate(d1, s.dateFmt) : (raw1 || '—');
+      const t2 = d2 ? fmtDate(d2, s.dateFmt) : (raw2 || (raw1 ? 'In corso' : '—'));
+      ctx.font = mf(700, 44); const bw = Math.max(330, Math.max(ctx.measureText(t1).width, ctx.measureText(t2).width) + 64), gp = 30;
+      const x1 = (DW - (2 * bw + gp)) / 2, top = b.y + 17;
+      [[x1, 'INIZIO', t1], [x1 + bw + gp, 'FINE', t2]].forEach(([bx, lab, txt]) => {
+        roundRectPath(ctx, bx, top, bw, 98, 24); ctx.fillStyle = rgba(P.box, 0.92); ctx.fill();
+        ctx.lineWidth = 3.5; ctx.strokeStyle = P.pill; roundRectPath(ctx, bx + 1.75, top + 1.75, bw - 3.5, 98 - 3.5, 23); ctx.stroke();
+        ctx.fillStyle = FG; ctx.font = mf(700, 44); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, bx + bw / 2, top + 51);
+        ctx.font = mf(700, 20); const tw = spacedWidth(ctx, lab, 3.5) + 40;
+        roundRectPath(ctx, bx + bw / 2 - tw / 2, top - 17, tw, 34, 17); ctx.fillStyle = P.pill; ctx.fill();
+        ctx.fillStyle = FG; ctx.textBaseline = 'middle'; drawSpaced(ctx, lab, bx + bw / 2, top + 1, 3.5, 'center');
+      });
+    }
+    ctx.restore();
   });
-  if(s.extra.trim()){
-    const p=s.extraPos,ex=p[1]==='r'?W-pad:p[1]==='l'?pad:W/2;
-    ctx.textAlign=p[1]==='r'?'right':p[1]==='l'?'left':'center';ctx.textBaseline='middle';
-    let fs=Math.min(20*u,pad*.32);ctx.font='400 '+fs+'px '+mf;
-    while(ctx.measureText(s.extra).width>W-2*pad&&fs>5*u){fs*=.95;ctx.font='400 '+fs+'px '+mf;}
-    ctx.fillStyle=rgba(col.fg,.6);ctx.fillText(s.extra,ex,p[0]==='t'?pad/2:H-pad/2);
+
+  /* firma facoltativa */
+  if (s.extra.trim()) {
+    const p = s.extraPos, ex = p[1] === 'r' ? DW - 44 : p[1] === 'l' ? 44 : DW / 2;
+    ctx.textAlign = p[1] === 'r' ? 'right' : p[1] === 'l' ? 'left' : 'center'; ctx.textBaseline = 'middle';
+    let fs = 22; ctx.font = mf(400, fs); while (ctx.measureText(s.extra).width > DW - 88 && fs > 10) { fs--; ctx.font = mf(400, fs); }
+    ctx.fillStyle = rgba(P.fg, 0.6); ctx.fillText(s.extra, ex, p[0] === 't' ? 24 : DH - 26);
   }
-  return {overflow,W,H};
+  return { overflow, W, H };
 }
 
 /* ================= anteprima ================= */
@@ -819,7 +872,7 @@ async function drawPreview() {
   const cv = $('preview'); cv.width = off.width; cv.height = off.height; cv.getContext('2d').drawImage(off, 0, 0);
   $('counter').textContent = (current + 1) + ' di ' + items.length + ' · ' + W + ' × ' + H + ' px';
   const st = $('status');
-  if (r.overflow) { st.textContent = 'Testi al limite: riduci margini, dimensioni della copertina o interlinea e controlla l’anteprima.'; st.className = 'hint warn'; lastOverflow = true; }
+  if (r.overflow) { st.textContent = 'Testi molto lunghi: controlla l’anteprima.'; st.className = 'hint warn'; lastOverflow = true; }
   else if (lastOverflow) { st.textContent = ''; st.className = 'hint'; lastOverflow = false; }
   updateCoverUI();
 }
@@ -827,7 +880,8 @@ async function drawPreview() {
 /* ================= lista ================= */
 function visibleIndices() {
   const f = filter.trim().toLowerCase(); const out = [];
-  items.forEach((it, i) => { if (!f || (it.t + ' ' + it.a + ' ' + it.q).toLowerCase().includes(f)) out.push(i); });
+  const only = $('onlyNum').checked;
+  items.forEach((it, i) => { if (only && !numberLabel(it.num)) return; if (!f || (it.t + ' ' + it.a + ' ' + it.q).toLowerCase().includes(f)) out.push(i); });
   return out;
 }
 function renderList() {
@@ -861,32 +915,34 @@ function renderList() {
 function updateZipLabel() { $('dlZip').textContent = 'Scarica selezionate (' + checked.size + ') in ZIP'; }
 
 /* ================= editor ================= */
+const EDIT_MAP = [['eT', 't'], ['eA', 'a'], ['eN', 'n'], ['eD', 'd'], ['eG', 'g'], ['eV', 'v'], ['eS', 's'], ['eVol', 'vol'], ['eI', 'i'], ['eF', 'f'], ['eNum', 'num']];
 function syncEditor() {
-  const it=items[current]||{};
-  for(const [id,key] of [['eT','t'],['eA','a'],['eN','n'],['eD','d'],['eNum','num']]) $(id).value=it[key]||'';
+  const it = items[current] || {};
+  EDIT_MAP.forEach(([id, key]) => { $(id).value = it[key] || ''; });
 }
-['eT','eA','eN','eD','eNum'].forEach(id=>$(id).addEventListener('input',()=>{
-  if(!items[current])return;
-  const it=items[current],oldKey=bookKey(it.t);
-  Object.assign(it,{t:$('eT').value,a:$('eA').value,n:$('eN').value,d:$('eD').value,num:$('eNum').value});
-  it.q=[it.n,it.d,it.num].join(' · ');
-  if(oldKey!==bookKey(it.t)&&covers.has(oldKey)){const c=covers.get(oldKey);covers.set(bookKey(it.t),c);c.toBlob(blob=>{if(blob){IDB.put(bookKey(it.t),blob);coverURLs.set(bookKey(it.t),URL.createObjectURL(blob));}},'image/jpeg',.92);}
-  $('eNum').setCustomValidity(it.num&&!numberLabel(it.num)?'Inserisci un numero intero da 0 a 999.':'');
-  renderList();schedulePreview();
+EDIT_MAP.forEach(([id]) => $(id).addEventListener('input', () => {
+  if (!items[current]) return;
+  const it = items[current], oldKey = bookKey(it.t);
+  EDIT_MAP.forEach(([i2, key]) => { it[key] = $(i2).value; });
+  it.q = [it.n, it.d, it.num ? '#' + (numberLabel(it.num) || it.num) : ''].filter(Boolean).join(' · ');
+  if (oldKey !== bookKey(it.t) && covers.has(oldKey)) { const c = covers.get(oldKey); covers.set(bookKey(it.t), c); c.toBlob(blob => { if (blob) { IDB.put(bookKey(it.t), blob); coverURLs.set(bookKey(it.t), URL.createObjectURL(blob)); } }, 'image/jpeg', .92); }
+  $('eNum').setCustomValidity(it.num && !numberLabel(it.num) ? 'Inserisci un numero intero da 0 a 999.' : '');
+  renderList(); schedulePreview();
 }));
-$('addItem').addEventListener('click',()=>{
-  items.push({t:'Nuovo audiolibro',a:'',n:'',d:'',num:'',q:'',raw:{}});current=items.length-1;checked.add(current);
-  renderList();syncEditor();drawPreview();
+$('addItem').addEventListener('click', () => {
+  $('onlyNum').checked = false;
+  items.push({ t: 'Nuovo audiolibro', a: '', n: '', d: '', g: '', v: '', s: '', vol: '', i: '', f: '', num: '', q: '', raw: {} }); current = items.length - 1; checked.add(current);
+  renderList(); syncEditor(); drawPreview();
 });
-$('delItem').addEventListener('click',()=>{
-  if(!items.length||!confirm('Eliminare la cartolina corrente?'))return;
-  items.splice(current,1);checked=new Set([...checked].filter(i=>i!==current).map(i=>i>current?i-1:i));current=Math.max(0,Math.min(current,items.length-1));renderList();syncEditor();drawPreview();
+$('delItem').addEventListener('click', () => {
+  if (!items.length || !confirm('Eliminare la cartolina corrente?')) return;
+  items.splice(current, 1); checked = new Set([...checked].filter(i => i !== current).map(i => i > current ? i - 1 : i)); current = Math.max(0, Math.min(current, items.length - 1)); renderList(); syncEditor(); drawPreview();
 });
-$('exportCsv').addEventListener('click',()=>{
-  const rows=items.map(it=>({...it.raw,Titolo:it.t,Autore:it.a,Narratore:it.n,Durata:it.d,'N°':it.num}));
-  const headers=[...new Set(rows.flatMap(Object.keys))],esc=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const csv=[headers.map(esc).join(','),...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\r\n');
-  saveBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'postcard-audiolibri.csv');
+$('exportCsv').addEventListener('click', () => {
+  const rows = items.map(it => ({ ...it.raw, Titolo: it.t, Autore: it.a, Narratore: it.n, Durata: it.d, 'N°': it.num, Genere: it.g, Voto: it.v, Serie: it.s, Volume: it.vol, 'Inizio Ascolto': it.i, 'Fine Ascolto': it.f }));
+  const headers = [...new Set(rows.flatMap(Object.keys))], esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const csv = [headers.map(esc).join(','), ...rows.map(r => headers.map(h => esc(r[h])).join(','))].join('\r\n');
+  saveBlob(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), 'postcard-audiolibri.csv');
 });
 
 /* ================= download ================= */
@@ -1060,17 +1116,18 @@ function loadRows(rows,fileName) {
   const head=rows[0].map(h=>String(h).trim()),norm=h=>h.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
   const find=names=>head.findIndex(h=>names.includes(norm(h)));
   const ti=find(['titolo','title']),ai=find(['autore','author']),ni=find(['narratore','narrator']),di=find(['durata','duration']),numi=find(['n°','nº','n.','numero','n','numero ascolto']);
+  const gi=find(['genere','generi','genre']),vi=find(['voto','rating']),si=find(['serie','series']),voli=find(['volume','vol']),ii=find(['inizio ascolto','inizio']),fi=find(['fine ascolto','fine']);
   if(ti<0){$('csvMsg').textContent='Colonna Titolo non trovata: il file precedente non è stato modificato.';return;}
   const get=(r,i)=>i<0?'':String(r[i]??'').trim();
   const out=rows.slice(1).filter(r=>get(r,ti)).map(r=>{
-    const it={t:get(r,ti),a:get(r,ai),n:get(r,ni),d:get(r,di),num:get(r,numi),raw:Object.fromEntries(head.map((h,i)=>[h,get(r,i)]))};
+    const it={t:get(r,ti),a:get(r,ai),n:get(r,ni),d:get(r,di),num:get(r,numi),g:get(r,gi),v:get(r,vi),s:get(r,si),vol:get(r,voli),i:get(r,ii),f:get(r,fi),raw:Object.fromEntries(head.map((h,k)=>[h,get(r,k)]))};
     it.q=[it.n,it.d,it.num?('#'+(numberLabel(it.num)||it.num)):''].filter(Boolean).join(' · ');return it;
   });
   if(!out.length){$('csvMsg').textContent='Nessun titolo trovato.';return;}
-  items=out;current=0;filter='';$('search').value='';checked=new Set(items.map((it,i)=>numberLabel(it.num)?i:-1).filter(i=>i>=0));
+  items=out;current=0;filter='';$('search').value='';$('onlyNum').checked=true;checked=new Set(items.map((it,k)=>numberLabel(it.num)?k:-1).filter(k=>k>=0));
   if(checked.size)current=[...checked][0];
   const missing=items.filter(it=>!numberLabel(it.num)).length;
-  $('csvMsg').textContent='Caricati '+out.length+' audiolibri da '+fileName+'. Selezionati per lo ZIP quelli con numero ascolto valido.'+(missing?' '+missing+' senza numero valido: etichetta senza numero.':'');
+  $('csvMsg').textContent='Caricati '+out.length+' audiolibri da '+fileName+'. Selezionati per lo ZIP quelli con numero ascolto valido.'+(missing?' '+missing+' senza numero (nascosti dall’elenco, mostrabili togliendo il filtro).':'');
   renderList();syncEditor();drawPreview();
 }
 $('csvFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadDataFile(f); });
@@ -1128,78 +1185,32 @@ stage.addEventListener('drop', async e => {
 
 /* ================= comandi ================= */
 function fillFontSelect(sel) {
-  const groups = {};
-  FONTS.forEach(f => { (groups[f.g] = groups[f.g] || []).push(f); });
-  Object.keys(groups).forEach(g => {
-    const og = document.createElement('optgroup'); og.label = g;
-    groups[g].forEach(f => { const o = document.createElement('option'); o.value = f.n; o.textContent = f.n + (f.it ? '' : '  (senza corsivo)'); o.style.fontFamily = fam(f.n); og.appendChild(o); });
-    sel.appendChild(og);
-  });
+  FONTS.forEach(f => { const o = document.createElement('option'); o.value = f.n; o.textContent = f.n; o.style.fontFamily = fam(f.n); sel.appendChild(o); });
 }
-fillFontSelect($('qFont')); fillFontSelect($('mFont'));
-const FIELDS = ['size', 'cw', 'ch', 'fmt', 'qFont', 'mFont', 'startCase', 'bg', 'bg2', 'fg', 'accent', 'grad', 'footerMode', 'markStyle', 'rule', 'coverLayout', 'extra', 'extraPos'];
-const CHECKS = ['italic', 'authorUpper', 'titleItalic', 'balance', 'typo', 'grain', 'vignette', 'frame', 'coverOn', 'coverShadow', 'autoPal'];
-const RANGES = ['jq', 'maxSize', 'lh', 'metaScale', 'margin', 'coverScale', 'overlay', 'coverRadius'];
-const SEGS = Array.from(document.querySelectorAll('.seg'));
-const FMT = { jq: v => v + '%', maxSize: v => v, lh: v => (+v).toFixed(2), metaScale: v => v + '%', margin: v => v + '%', coverScale: v => v + '%', overlay: v => v + '%', coverRadius: v => v };
+fillFontSelect($('font'));
+const FIELDS = ['size', 'fmt', 'font', 'genreMode', 'dateFmt', 'accent', 'extra', 'extraPos'];
+const CHECKS = ['titleUpper', 'autoPal', 'coverOn'];
+const RANGES = ['jq', 'veil', 'blur'];
+const FMT = { jq: v => v + '%', veil: v => v + '%', blur: v => v };
 function syncInputs() {
-  if (!['1080x1080','1080x1920','1080x1440'].includes(S.size)) S.size='1080x1440';
+  if (!['1080x1350', '1080x1920'].includes(S.size)) S.size = '1080x1350';
   FIELDS.forEach(k => { $(k).value = S[k]; });
   CHECKS.forEach(k => { $(k).checked = !!S[k]; });
   RANGES.forEach(k => { $(k).value = S[k]; });
-  SEGS.forEach(sg => sg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === S[sg.dataset.key])));
   refreshUI();
 }
 function refreshUI() {
   RANGES.forEach(k => { const el = $(k + 'V'); if (el) el.textContent = FMT[k](S[k]); });
-  const custom = S.size === 'custom';
-  const [W, H] = sizeOf(S);
-  if (!custom) { $('cw').value = W; $('ch').value = H; }
-  $('cw').disabled = $('ch').disabled = true;
   $('jqWrap').classList.toggle('hidden', S.fmt !== 'jpeg');
-  const qi = fontInfo(S.qFont).it;
-  $('italic').disabled = !qi; $('italicWrap').classList.toggle('dis', !qi);
-  $('italicNote').textContent = qi ? '' : '(non disponibile per ' + S.qFont + ')';
-  const ti = fontInfo(S.mFont).it;
-  $('titleItalic').disabled = !ti; $('titleItalicWrap').classList.toggle('dis', !ti);
-  $('overlayWrap').classList.toggle('hidden', S.coverLayout !== 'bg');
-  $('coverSideWrap').classList.toggle('hidden', S.coverLayout !== 'side' && S.coverLayout !== 'thumb');
-  $('coverScaleWrap').classList.toggle('hidden', false);
-  $('palToneWrap').classList.toggle('hidden', !S.autoPal);
-  const c = contrast(S.fg, S.bg);
-  $('contrast').textContent = 'Contrasto testo/sfondo: ' + c.toFixed(1) + ':1' + (c < 4.5 ? ' — basso, il testo può risultare poco leggibile' : c < 7 ? ' — buono' : ' — ottimo') + (S.autoPal ? ' (con palette dalla copertina i colori cambiano per libro)' : '');
-  $('contrast').className = c < 4.5 ? 'hint warn' : 'hint';
 }
 function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
 function onChange() {
   FIELDS.forEach(k => { S[k] = $(k).value; });
   CHECKS.forEach(k => { S[k] = $(k).checked; });
   RANGES.forEach(k => { S[k] = parseFloat($(k).value); });
-  S.cw = parseInt(S.cw) || 1080; S.ch = parseInt(S.ch) || 1080;
   save(); refreshUI(); schedulePreview();
 }
 FIELDS.concat(CHECKS, RANGES).forEach(k => { $(k).addEventListener('input', onChange); $(k).addEventListener('change', onChange); });
-SEGS.forEach(sg => sg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-  S[sg.dataset.key] = b.dataset.v; sg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); save(); refreshUI(); schedulePreview();
-})));
-$('rotate').addEventListener('click', () => {
-  const [W, H] = sizeOf(S); const target = H + 'x' + W;
-  const opt = Array.from($('size').options).find(o => o.value === target);
-  if (opt) S.size = target; else { S.size = 'custom'; S.cw = H; S.ch = W; }
-  syncInputs(); save(); schedulePreview();
-});
-PRESETS.forEach(p => {
-  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip';
-  const sw = document.createElement('i'); sw.style.background = 'linear-gradient(135deg,' + p.bg + ' 50%,' + p.accent + ' 50%)';
-  b.appendChild(sw); b.appendChild(document.createTextNode(p.n));
-  b.addEventListener('click', () => { Object.assign(S, { bg: p.bg, bg2: p.bg2, fg: p.fg, accent: p.accent, autoPal: false }); syncInputs(); save(); schedulePreview(); });
-  $('presets').appendChild(b);
-});
-STYLES.forEach(st => {
-  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip txt'; b.textContent = st.n;
-  b.addEventListener('click', () => { Object.assign(S, st.s); syncInputs(); save(); schedulePreview(); });
-  $('styles').appendChild(b);
-});
 
 /* ================= template ================= */
 function getTpls() { try { return JSON.parse(localStorage.getItem(TPL_KEY) || '{}'); } catch (e) { return {}; } }
@@ -1241,6 +1252,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
 });
 $('search').addEventListener('input', e => { filter = e.target.value; renderList(); });
+$('onlyNum').addEventListener('change', () => { const v = visibleIndices(); if (v.length && !v.includes(current)) current = v[0]; renderList(); syncEditor(); drawPreview(); });
 $('all').addEventListener('click', () => { visibleIndices().forEach(i => checked.add(i)); renderList(); });
 $('none').addEventListener('click', () => { visibleIndices().forEach(i => checked.delete(i)); renderList(); });
 const THEMES = ['auto', 'light', 'dark'];
