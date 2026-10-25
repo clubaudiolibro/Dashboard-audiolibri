@@ -831,7 +831,9 @@ async function renderCard(canvas, item, s, scale = 1) {
       [[x1, 'INIZIO', t1], [x1 + bw + gp, 'FINE', t2]].forEach(([bx, lab, txt]) => {
         roundRectPath(ctx, bx, top, bw, 98, 24); ctx.fillStyle = rgba(P.box, 0.92); ctx.fill();
         ctx.lineWidth = 3.5; ctx.strokeStyle = P.pill; roundRectPath(ctx, bx + 1.75, top + 1.75, bw - 3.5, 98 - 3.5, 23); ctx.stroke();
-        ctx.fillStyle = FG; ctx.font = mf(700, 44); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, bx + bw / 2, top + 51);
+        ctx.fillStyle = FG; ctx.font = mf(700, 44); ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        const tm = ctx.measureText(txt); const asc = tm.actualBoundingBoxAscent, desc = tm.actualBoundingBoxDescent;
+        ctx.fillText(txt, bx + bw / 2, top + 49 + (asc - desc) / 2);
         ctx.font = mf(700, 20); const tw = spacedWidth(ctx, lab, 3.5) + 40;
         roundRectPath(ctx, bx + bw / 2 - tw / 2, top - 17, tw, 34, 17); ctx.fillStyle = P.pill; ctx.fill();
         ctx.fillStyle = FG; ctx.textBaseline = 'middle'; drawSpaced(ctx, lab, bx + bw / 2, top + 1, 3.5, 'center');
@@ -947,7 +949,12 @@ $('exportCsv').addEventListener('click', () => {
 
 /* ================= download ================= */
 function ext() { return S.fmt === 'jpeg' ? 'jpg' : 'png'; }
-function fileName(i) { return (numberLabel(items[i].num)||String(i + 1).padStart(3, '0')) + '-' + slug(items[i].t) + '-' + slug(items[i].a).slice(0, 20) + '.' + ext(); }
+function cleanFilePart(t) { return String(t || '').replace(/[\\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function fileName(i) {
+  const it = items[i], n = numberLabel(it.num) || String(i + 1).padStart(3, '0');
+  const title = cleanFilePart(it.t) || 'Senza titolo', au = cleanFilePart(it.a);
+  return n + '_' + title + (au ? ' - ' + au : '') + '.' + ext();
+}
 function saveBlob(blob, name) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
