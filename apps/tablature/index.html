@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Guitar Tab Library</title>
+  <meta name="description" content="Archivio locale e offline di tablature per chitarra.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tab Library">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Librerie da CDN con versione bloccata: il service worker le salva in cache al primo avvio (poi funzionano offline) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" crossorigin="anonymous" defer></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Vai al contenuto</a>
+
+  <header class="app-header">
+    <button type="button" id="btn-menu" class="icon-btn only-mobile" aria-label="Apri menu">☰</button>
+    <a href="../../" id="btn-home" class="icon-btn" aria-label="Torna alla dashboard" title="Torna alla dashboard">⌂</a>
+    <a href="#/archivio" class="brand" aria-label="Guitar Tab Library, home">
+      <img src="icons/icon.svg" alt="" width="30" height="30">
+      <span class="brand-text"><strong>Guitar Tab Library</strong><small id="total-count">—</small></span>
+    </a>
+    <div class="search-wrap">
+      <input type="search" id="search-input" placeholder="Cerca titolo, note, categoria, CAGED, tonalità…" aria-label="Cerca tablature" autocomplete="off">
+    </div>
+    <button type="button" id="btn-new" class="btn primary only-desktop">＋ Nuova tablatura</button>
+    <button type="button" id="btn-theme" class="icon-btn" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">◐</button>
+    <span class="offline-badge" title="Sei offline: l'app funziona comunque">offline</span>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar" aria-label="Navigazione">
+      <div id="sidebar-content"></div>
+    </aside>
+    <div id="drawer-backdrop"></div>
+    <main id="main" tabindex="-1">
+      <noscript><p>Questa applicazione richiede JavaScript.</p></noscript>
+      <div class="empty-state"><p class="muted">Caricamento dell'archivio…</p></div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navigazione principale">
+    <button type="button" data-nav="archive"><span aria-hidden="true">📚</span>Archivio</button>
+    <button type="button" data-nav="categories"><span aria-hidden="true">🗂</span>Categorie</button>
+    <button type="button" data-nav="new" class="fab" aria-label="Nuova tablatura"><span aria-hidden="true">＋</span></button>
+    <button type="button" data-nav="practice"><span aria-hidden="true">▶</span>Pratica</button>
+    <button type="button" data-nav="tools"><span aria-hidden="true">💾</span>Backup/PDF</button>
+  </nav>
+
+  <div class="drop-overlay" aria-hidden="true"><div>Rilascia per importare la tablatura</div></div>
+  <div id="modal-host"></div>
+  <div id="toast-host" aria-live="polite"></div>
+</body>
+</html>
