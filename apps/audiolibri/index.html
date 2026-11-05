@@ -2449,8 +2449,12 @@ const visibleValuesPlugin={id:"visibleValues",afterDatasetsDraw(chart,args,opts)
  const label=opts.hours?fmtDur(value*60):opts.percent?fmt1(value)+"%":fmt1(value);ctx.fillStyle=cssVar("--text");
  if(meta.type==="doughnut"){const total=ds.data.reduce((a,b)=>a+Number(b||0),0);if(value/total<.045)return;const p=el.tooltipPosition();ctx.textAlign="center";ctx.lineWidth=4;ctx.strokeStyle=cssVar("--surface");ctx.strokeText(label,p.x,p.y);ctx.fillText(label,p.x,p.y);return;}
  const horizontal=chart.options.indexAxis==="y",stacked=!!chart.options.scales?.[horizontal?"x":"y"]?.stacked;let x=el.x,y=el.y;
- if(stacked){x=horizontal?(el.x+el.base)/2:el.x;y=horizontal?el.y:(el.y+el.base)/2;const available=horizontal?Math.abs(el.x-el.base):el.width;if(available<ctx.measureText(label).width+8||(!horizontal&&Math.abs(el.y-el.base)<16))return;const bg=el.options.backgroundColor;ctx.fillStyle=typeof bg==="string"&&/^#[0-9a-f]{6}$/i.test(bg)?inkFor(bg):cssVar("--text");ctx.textAlign="center";}
- else if(horizontal){x+=7;ctx.textAlign="left";}else{y-=10;ctx.textAlign="center";}ctx.fillText(label,x,y);
+ let above=false;
+ if(stacked){const tw=ctx.measureText(label).width;x=horizontal?(el.x+el.base)/2:el.x;y=horizontal?el.y:(el.y+el.base)/2;const fitsW=(horizontal?Math.abs(el.x-el.base):el.width)>=tw+8,fitsH=horizontal||Math.abs(el.y-el.base)>=16;
+  if(!(fitsW&&fitsH)){if(horizontal)return;const isTop=!chart.data.datasets.some((d2,dj)=>dj>di&&!chart.getDatasetMeta(dj).hidden&&Number(d2.data[i])>0);if(!isTop)return;y=Math.min(el.y,el.base)-10;above=true;}
+  ctx.textAlign="center";}
+ else if(horizontal){x+=7;ctx.textAlign="left";}else{y-=10;ctx.textAlign="center";}
+ ctx.lineJoin="round";ctx.lineWidth=4;ctx.strokeStyle=cssVar("--surface");ctx.fillStyle=cssVar("--text");ctx.strokeText(label,x,y);ctx.fillText(label,x,y);
  });});ctx.restore();}};
 if(window.Chart)Chart.register(visibleValuesPlugin);
 if(S.prefs.durFmt==="dec")S.prefs.durFmt="hm";
