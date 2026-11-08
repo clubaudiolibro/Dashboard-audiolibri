@@ -127,6 +127,14 @@ export function errorMessage(err) {
   return err.userMessage || err.message || String(err);
 }
 
+/** Titolo da mostrare per una tablatura (anche se il titolo è facoltativo). */
+export function tabTitle(t) {
+  if (!t) return '';
+  if (t.title) return t.title;
+  const orig = String(t.originalName || '').replace(/\.[^.]+$/, '').trim();
+  return orig || 'Senza titolo';
+}
+
 /** Errore con messaggio destinato all'utente. */
 export class UserError extends Error {
   constructor(message) { super(message); this.userMessage = message; }
