@@ -4,6 +4,8 @@ Web app statica (PWA installabile) che raccoglie:
 
 - **Diario degli Audiolibri** — `apps/audiolibri/`
 - **Citazioni in Immagine** — `apps/citazioni/` (accetta CSV e Excel .xlsx; template in `apps/citazioni/template-citazioni.xlsx`)
+- **Postcard audiolibri** — `apps/postcard-audiolibri/`
+- **Guitar Tab Library** — `apps/tablature/` (archivio di tablature per chitarra, offline: i dati restano nel browser in IndexedDB; backup/ripristino in .zip e raccolte PDF. Usa jszip, pdf-lib e PDF.js da jsDelivr con versioni bloccate, salvate in cache dal service worker; dopo la modifica di un file dell'app incrementare `CACHE_VERSION` in `apps/tablature/service-worker.js`)
 
 Nessun build step, nessun backend: i file vengono elaborati nel browser.
 

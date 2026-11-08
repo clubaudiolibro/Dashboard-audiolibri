@@ -48,7 +48,8 @@ async function init() {
 /* ================================================================ ROUTER */
 
 function onRoute() {
-  const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+  let h = location.hash.replace(/^#\/?/, '');
+  try { h = decodeURIComponent(h); } catch { /* hash malformato: uso il testo grezzo */ }
   const [p, arg] = h.split('/');
   if (p === 'categorie') route = { page: 'categories' };
   else if (p === 'strumenti') route = { page: 'tools' };
