@@ -2,10 +2,10 @@
  * Gestione di categorie e tag.
  */
 import { TAG_PALETTE } from '../config.js';
-import { state, onChange, activeCategories, activeTags } from '../store.js';
+import { state, onChange, activeCategories, activeTags, compareTags } from '../store.js';
 import {
   createCategory, updateCategory, reorderCategories, trashCategory, restoreCategory,
-  createTag, updateTag, trashTag, restoreTag, mergeTags, tagUsage, categoryUsage,
+  createTag, updateTag, reorderTags, trashTag, restoreTag, mergeTags, tagUsage, categoryUsage,
 } from '../actions.js';
 import { esc, h } from '../util.js';
 import { openDialog, confirmDialog, promptDialog, toast, toastError } from '../ui.js';
@@ -27,6 +27,7 @@ export function renderTags(el) {
   </section>`);
   el.appendChild(page);
   const list = page.querySelector('.cat-list');
+  let ordering = null; // id della categoria in modalità "ordina tag"
 
   const render = () => {
     const cats = activeCategories();
@@ -37,7 +38,8 @@ export function renderTags(el) {
       return;
     }
     list.innerHTML = cats.map((c, i) => {
-      const ct = tags.filter((t) => t.category_id === c.id).sort((a, b) => a.name.localeCompare(b.name, 'it'));
+      const ct = tags.filter((t) => t.category_id === c.id).sort(compareTags);
+      const ord = ordering === c.id;
       return `<div class="panel cat" data-cat="${esc(c.id)}">
         <div class="cat-head">
           <h2>${esc(c.name)}</h2>
@@ -45,15 +47,25 @@ export function renderTags(el) {
           <span class="spacer"></span>
           <button type="button" class="icon-btn" data-act="up" title="Sposta su" aria-label="Sposta su" ${i === 0 ? 'disabled' : ''}>↑</button>
           <button type="button" class="icon-btn" data-act="down" title="Sposta giù" aria-label="Sposta giù" ${i === cats.length - 1 ? 'disabled' : ''}>↓</button>
+          <button type="button" class="btn ${ord ? 'primary' : ''}" data-act="ordertags" ${ct.length < 2 ? 'disabled' : ''}>${ord ? 'Fine' : 'Ordina tag'}</button>
           <button type="button" class="btn" data-act="renamecat">Rinomina</button>
           <button type="button" class="btn danger-outline" data-act="delcat">Elimina</button>
         </div>
-        <div class="tag-rows">
-          ${ct.map((t) => `<button type="button" class="tag-row" data-tag="${esc(t.id)}" title="Modifica il tag">
+        ${ord ? `<p class="muted small">Usa le frecce per spostare i tag: questo ordine vale in tutta l'app (filtri, schede, suggerimenti).
+          <button type="button" class="linklike" data-act="sortaz">Metti in ordine alfabetico</button></p>` : ''}
+        <div class="tag-rows ${ord ? 'ordering' : ''}">
+          ${ct.map((t, k) => (ord
+    ? `<span class="tag-row" data-order="${esc(t.id)}">
+              <button type="button" class="icon-btn" data-move="-1" aria-label="Sposta ${esc(t.name)} prima" ${k === 0 ? 'disabled' : ''}>←</button>
+              <span class="dot" style="background:${esc(t.color || DEFAULT_TAG_COLOR)}"></span>
+              <span class="name">${esc(t.name)}</span>
+              <button type="button" class="icon-btn" data-move="1" aria-label="Sposta ${esc(t.name)} dopo" ${k === ct.length - 1 ? 'disabled' : ''}>→</button>
+            </span>`
+    : `<button type="button" class="tag-row" data-tag="${esc(t.id)}" title="Modifica il tag">
               <span class="dot" style="background:${esc(t.color || DEFAULT_TAG_COLOR)}"></span>
               <span class="name">${esc(t.name)}</span>
               <span class="muted small">${tagUsage(t.id)}</span>
-            </button>`).join('')}
+            </button>`)).join('')}
         </div>
         <form class="new-tag" autocomplete="off">
           <input type="text" placeholder="Nuovo tag in «${esc(c.name)}»…" aria-label="Nuovo tag in ${esc(c.name)}">
@@ -90,6 +102,16 @@ export function renderTags(el) {
     const cat = categoryById(catId);
     const tagBtn = e.target.closest('[data-tag]');
     if (tagBtn) { editTagDialog(tagBtn.dataset.tag); return; }
+    const move = e.target.closest('[data-move]');
+    if (move) {
+      const ids = activeTags().filter((t) => t.category_id === catId).sort(compareTags).map((t) => t.id);
+      const id = move.closest('[data-order]').dataset.order;
+      const i = ids.indexOf(id); const j = i + Number(move.dataset.move);
+      if (j < 0 || j >= ids.length) return;
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+      try { await reorderTags(ids); } catch (err) { toastError(err); }
+      return;
+    }
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (!act) return;
     try {
@@ -99,6 +121,13 @@ export function renderTags(el) {
         if (j < 0 || j >= ids.length) return;
         [ids[i], ids[j]] = [ids[j], ids[i]];
         await reorderCategories(ids);
+      }
+      if (act === 'ordertags') { ordering = ordering === catId ? null : catId; render(); return; }
+      if (act === 'sortaz') {
+        const ids = activeTags().filter((t) => t.category_id === catId)
+          .sort((a, b) => a.name.localeCompare(b.name, 'it', { numeric: true })).map((t) => t.id);
+        await reorderTags(ids);
+        return;
       }
       if (act === 'renamecat') {
         const name = await promptDialog('Nuovo nome', { title: 'Rinomina categoria', value: cat.name });

@@ -116,6 +116,7 @@ main { padding: 20px max(16px, env(safe-area-inset-right)) 40px max(16px, env(sa
   font-size: 1.1rem; cursor: pointer; color: var(--muted);
 }
 .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+.icon-btn:disabled { opacity: .3; cursor: default; background: transparent; }
 .linklike { border: 0; background: none; padding: 0; color: var(--accent-dark); text-decoration: underline; font: inherit; cursor: pointer; }
 .row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .stack { display: flex; flex-direction: column; gap: 14px; }
@@ -394,3 +395,6 @@ details.merge select { width: auto; flex: 1; }
 .tthumb { width: 48px; height: 62px; background: #f0eee9; border-radius: 6px; overflow: hidden; flex: none; }
 .tthumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .tinfo { display: flex; flex-direction: column; min-width: 0; }
+
+.tag-rows.ordering .tag-row { cursor: default; padding: 2px 4px; gap: 4px; }
+.tag-rows.ordering .icon-btn { width: 36px; height: 36px; }

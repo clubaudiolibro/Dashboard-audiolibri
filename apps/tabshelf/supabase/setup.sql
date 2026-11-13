@@ -11,7 +11,8 @@
 --   * funzioni: unione di tag, pulizia delle raccolte, versione dello schema
 --   * bucket privato "tabshelf" con regole sui percorsi <user_id>/...
 --
--- Versione dello schema: 1 (vedi tabshelf_schema_version e js/config.js)
+-- Versione dello schema: 2 (vedi tabshelf_schema_version e js/config.js)
+--   v2: ordine manuale dei tag (tags.sort_order)
 -- =====================================================================
 
 
@@ -34,9 +35,13 @@ create table if not exists public.tags (
   category_id uuid not null references public.categories (id) on delete cascade,
   name        text not null,
   color       text,
+  sort_order  integer not null default 0,
   created_at  timestamptz not null default now(),
   deleted_at  timestamptz
 );
+
+-- v2: colonna aggiunta anche ai database creati con la versione 1
+alter table public.tags add column if not exists sort_order integer not null default 0;
 
 create table if not exists public.documents (
   id            uuid primary key default gen_random_uuid(),
@@ -179,7 +184,7 @@ create or replace function public.tabshelf_schema_version()
 returns integer
 language sql stable security invoker
 set search_path = ''
-as $$ select 1 $$;
+as $$ select 2 $$;
 
 -- Sostituisce un tag con un altro dentro i filtri delle raccolte
 -- (target null = rimuove il tag). Il filtro ha la forma

@@ -5,7 +5,7 @@ import { STATUSES } from './config.js';
 import { docActiveTagIds, activeTagIds } from './store.js';
 import { thumbUrl } from './storage.js';
 import { esc, h, formatDate } from './util.js';
-import { tagById, tagChipHtml } from './tagpicker.js';
+import { tagById, tagChipHtml, sortedActiveTags } from './tagpicker.js';
 import { docTitle } from './filter.js';
 
 const statusLabel = (id) => STATUSES.find((s) => s.id === id)?.label || '';
@@ -36,9 +36,10 @@ export function createDocGrid({ selectable = false, layout = 'grid', big = false
     });
   }, { rootMargin: '400px 0px' });
 
+  let rank = new Map();
   const cardHtml = (d, i) => {
     const act = activeTagIds();
-    const tags = showTags ? docActiveTagIds(d.id, act).map(tagById).filter(Boolean) : [];
+    const tags = showTags ? docActiveTagIds(d.id, act).map(tagById).filter(Boolean).sort((a, b) => rank.get(a.id) - rank.get(b.id)) : [];
     return `<div class="doc-card ${selected.has(d.id) ? 'selected' : ''}" role="listitem" data-id="${esc(d.id)}" data-i="${i}">
       ${selectable ? `<label class="sel" title="Seleziona"><input type="checkbox" ${selected.has(d.id) ? 'checked' : ''} aria-label="Seleziona ${esc(docTitle(d))}"></label>` : ''}
       <button type="button" class="thumb" aria-label="Apri ${esc(docTitle(d))}">
@@ -58,6 +59,7 @@ export function createDocGrid({ selectable = false, layout = 'grid', big = false
 
   const render = (list) => {
     docs = list;
+    rank = new Map(sortedActiveTags().map((t, k) => [t.id, k]));
     const ids = new Set(list.map((d) => d.id));
     [...selected].forEach((id) => { if (!ids.has(id)) selected.delete(id); });
     io.disconnect();

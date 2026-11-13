@@ -73,7 +73,8 @@ export async function createTag(categoryId, name, color = null) {
   if (!clean) throw new Error('Scrivi un nome per il tag.');
   const dup = state.tags.find((t) => !t.deleted_at && t.category_id === categoryId && norm(t.name) === norm(clean));
   if (dup) throw new Error(`Esiste già il tag «${dup.name}» in questa categoria.`);
-  const row = check(await sb().from('tags').insert({ category_id: categoryId, name: clean, color }).select().single());
+  const maxOrder = state.tags.filter((t) => t.category_id === categoryId).reduce((m, t) => Math.max(m, t.sort_order || 0), 0);
+  const row = check(await sb().from('tags').insert({ category_id: categoryId, name: clean, color, sort_order: maxOrder + 10 }).select().single());
   state.tags.push(row);
   emit();
   return row;
@@ -92,6 +93,13 @@ export async function updateTag(id, patch) {
   replaceIn(state.tags, row);
   emit();
   return row;
+}
+
+/** Salva un nuovo ordine dei tag di una categoria (array di id). */
+export async function reorderTags(ids) {
+  await Promise.all(ids.map((id, i) => sb().from('tags').update({ sort_order: (i + 1) * 10 }).eq('id', id).then(check)));
+  ids.forEach((id, i) => { const t = state.tags.find((x) => x.id === id); if (t) t.sort_order = (i + 1) * 10; });
+  emit();
 }
 
 export const trashTag = (id) => updateTag(id, { deleted_at: nowIso() });

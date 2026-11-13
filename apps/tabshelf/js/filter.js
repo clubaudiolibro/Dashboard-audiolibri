@@ -8,7 +8,7 @@
  *  - stato (scelta multipla), voto minimo, ricerca su titolo/artista/note/nome file.
  */
 import { STATUSES } from './config.js';
-import { state, activeCategories, activeTags, activeTagIds, activeDocuments, docActiveTagIds } from './store.js';
+import { state, activeCategories, activeTags, activeTagIds, activeDocuments, docActiveTagIds, compareTags } from './store.js';
 import { esc, h, norm, debounce } from './util.js';
 import { DEFAULT_TAG_COLOR } from './tagpicker.js';
 
@@ -166,7 +166,7 @@ export function createFilterPanel({ filter, onChange, showSearch = true, showSor
     if (!cats.length) { wrap.innerHTML = '<p class="muted small">Nessun tag ancora: creali nella pagina Tag.</p>'; return; }
     wrap.innerHTML = cats.map((c) => `<div class="fp-group">
       <div class="fp-label">${esc(c.name)}</div>
-      <div class="fp-chips">${tags.filter((t) => t.category_id === c.id).sort((a, b) => a.name.localeCompare(b.name, 'it'))
+      <div class="fp-chips">${tags.filter((t) => t.category_id === c.id).sort(compareTags)
         .map((t) => `<button type="button" class="chip tag" data-tag="${esc(t.id)}" style="--c:${esc(t.color || DEFAULT_TAG_COLOR)}">${esc(t.name)}</button>`).join('')}</div>
     </div>`).join('');
   };

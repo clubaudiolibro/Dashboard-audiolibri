@@ -6,7 +6,7 @@ import { state, activeTagIds } from './store.js';
 import { addTags, removeTags, updateDocuments, trashDocuments, restoreDocuments } from './actions.js';
 import { esc, h } from './util.js';
 import { openDialog, confirmDialog, toast, toastError } from './ui.js';
-import { createTagPicker, tagById, tagChipHtml } from './tagpicker.js';
+import { createTagPicker, tagChipHtml, sortedActiveTags } from './tagpicker.js';
 
 const n = (k) => (k === 1 ? '1 documento' : `${k} documenti`);
 
@@ -36,7 +36,7 @@ export async function bulkRemoveTags(ids) {
   if (!present.size) { toast('I documenti selezionati non hanno tag da togliere.'); return null; }
   const chosen = new Set();
   const body = h(`<div class="stack"><p>Tocca i tag da togliere da ${n(ids.length)}:</p>
-    <div class="chips pick">${[...present].map(tagById).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name, 'it'))
+    <div class="chips pick">${sortedActiveTags().filter((t) => present.has(t.id))
       .map((t) => tagChipHtml(t, { withCategory: true })).join('')}</div></div>`);
   body.querySelector('.pick').addEventListener('click', (e) => {
     const c = e.target.closest('[data-tag]');

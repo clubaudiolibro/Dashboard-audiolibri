@@ -2,7 +2,7 @@
  * tagpicker.js — Campo per scegliere i tag con autocompletamento e creazione al volo.
  * Scorciatoia: scrivendo "Categoria: nome" il tag viene creato direttamente in quella categoria.
  */
-import { state, activeCategories, activeTags } from './store.js';
+import { state, activeCategories, activeTags, compareTags } from './store.js';
 import { createTag, createCategory, findTag } from './actions.js';
 import { esc, h, norm } from './util.js';
 import { openDialog, toastError } from './ui.js';
@@ -26,7 +26,7 @@ export function tagChipHtml(tag, { removable = false, withCategory = false, extr
 /** Tag attivi ordinati per categoria e nome. */
 export function sortedActiveTags() {
   const order = new Map(activeCategories().map((c, i) => [c.id, i]));
-  return activeTags().sort((a, b) => (order.get(a.category_id) - order.get(b.category_id)) || a.name.localeCompare(b.name, 'it'));
+  return activeTags().sort((a, b) => (order.get(a.category_id) - order.get(b.category_id)) || compareTags(a, b));
 }
 
 /**

@@ -5,10 +5,10 @@
  */
 
 /** Versione dell'app (mostrata nelle impostazioni). */
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.2.1';
 
 /** Versione dello schema del database: deve coincidere con tabshelf_schema_version() in supabase/setup.sql. */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Nome del bucket privato di Supabase Storage. */
 export const BUCKET = 'tabshelf';

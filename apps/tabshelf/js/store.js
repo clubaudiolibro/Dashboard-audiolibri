@@ -61,6 +61,11 @@ export function activeTags() {
   return state.tags.filter((t) => !t.deleted_at && cats.has(t.category_id));
 }
 
+/** Confronto per l'ordine dei tag dentro una categoria (ordine manuale, poi alfabetico). */
+export function compareTags(a, b) {
+  return ((a.sort_order || 0) - (b.sort_order || 0)) || a.name.localeCompare(b.name, 'it');
+}
+
 /** Set degli id dei tag attivi. */
 export function activeTagIds() {
   return new Set(activeTags().map((t) => t.id));
