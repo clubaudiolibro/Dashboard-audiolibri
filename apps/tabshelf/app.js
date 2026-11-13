@@ -12,8 +12,8 @@ import { state, loadAll, onChange, unclassifiedDocuments } from './js/store.js';
 import { esc, h, errorMessage } from './js/util.js';
 import { toast, toastError } from './js/ui.js';
 import { renderSettings } from './js/views/settings.js';
-import { renderPlaceholder } from './js/views/placeholder.js';
 import { renderLibrary } from './js/views/library.js';
+import { renderVisualizza } from './js/views/visualizza.js';
 import { renderUpload, addFiles } from './js/views/upload.js';
 import { renderTags } from './js/views/tags.js';
 import { renderTrash } from './js/views/trash.js';
@@ -29,7 +29,7 @@ export const session = { user: null, config: null };
 
 /** Sezioni dell'app: nome nell'indirizzo -> funzione che disegna la pagina. */
 const ROUTES = {
-  visualizza: (el) => renderPlaceholder(el, 'Visualizza', 'La griglia con i filtri, le raccolte preferite e lo schermo intero arriveranno nella fase 3.'),
+  visualizza: (el) => renderVisualizza(el),
   carica: (el) => renderUpload(el),
   'da-classificare': (el) => renderLibrary(el, { mode: 'unclassified' }),
   libreria: (el) => renderLibrary(el, { mode: 'all' }),

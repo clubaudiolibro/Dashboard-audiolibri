@@ -4,12 +4,13 @@
 import { STATUSES, IMAGES } from '../config.js';
 import { state, docActiveTagIds } from '../store.js';
 import { updateDocument, setDocumentTags, trashDocuments, restoreDocuments } from '../actions.js';
-import { thumbUrl, signedUrl, downloadBlob, makePaths, uploadFile, removeFiles, primeThumb } from '../storage.js';
+import { thumbUrl, downloadBlob, makePaths, uploadFile, removeFiles, primeThumb } from '../storage.js';
 import { esc, h, formatBytes, formatDate } from '../util.js';
 import { openDialog, confirmDialog, toast, toastError } from '../ui.js';
 import { createTagPicker } from '../tagpicker.js';
 import { editImage, encode, resizeCanvas } from '../images.js';
 import { docTitle } from '../filter.js';
+import { openViewer } from '../viewer.js';
 
 export function statusSegHtml(current) {
   return `<div class="seg status-seg" role="radiogroup" aria-label="Stato">
@@ -34,7 +35,7 @@ export function openDocSheet(docId) {
     <div class="ds-preview">
       <div class="ds-thumb"><img alt=""></div>
       <div class="row-actions">
-        <button type="button" class="btn" data-act="open">Apri il file</button>
+        <button type="button" class="btn" data-act="open">Apri a schermo intero</button>
         ${doc.file_type === 'image' ? '<button type="button" class="btn" data-act="edit">Ruota / ritaglia</button>' : ''}
       </div>
       <dl class="facts small">
@@ -76,14 +77,7 @@ export function openDocSheet(docId) {
     });
   });
 
-  body.querySelector('[data-act=open]').onclick = async () => {
-    // La finestra va aperta subito (altrimenti il browser la blocca), poi le diamo l'indirizzo.
-    const w = window.open('', '_blank');
-    try {
-      const url = await signedUrl(doc.file_path);
-      if (w) { w.opener = null; w.location.href = url; } else location.href = url;
-    } catch (e) { w?.close(); toastError(e); }
-  };
+  body.querySelector('[data-act=open]').onclick = () => openViewer([state.documents.find((x) => x.id === doc.id) || doc], 0);
 
   const editBtn = body.querySelector('[data-act=edit]');
   if (editBtn) {

@@ -106,6 +106,35 @@ async function flushSigned() {
   }
 }
 
+/** Dimentica l'URL firmato di un file e ne chiede uno nuovo (es. dopo un errore di caricamento). */
+export function refreshSignedUrl(path) {
+  signed.delete(path);
+  return signedUrl(path);
+}
+
+/** Contenuto di un file (ArrayBuffer) tramite URL firmato, con una piccola memoria per prec./succ. */
+const bufferCache = new Map();
+export async function fileArrayBuffer(path) {
+  if (bufferCache.has(path)) {
+    const v = bufferCache.get(path); bufferCache.delete(path); bufferCache.set(path, v);
+    return v;
+  }
+  const p = (async () => {
+    let url = await signedUrl(path);
+    let res = await fetch(url, { referrerPolicy: 'no-referrer' });
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      url = await refreshSignedUrl(path);
+      res = await fetch(url, { referrerPolicy: 'no-referrer' });
+    }
+    if (!res.ok) throw new Error(`File non disponibile (${res.status}).`);
+    return res.arrayBuffer();
+  })();
+  bufferCache.set(path, p);
+  p.catch(() => bufferCache.delete(path));
+  while (bufferCache.size > 4) bufferCache.delete(bufferCache.keys().next().value);
+  return p;
+}
+
 /** Scarica un file come Blob (per PDF, modifiche e backup). */
 export async function downloadBlob(path) {
   const { data, error } = await bucket().download(path);

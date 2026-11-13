@@ -17,7 +17,8 @@ export function loadPdfjs() {
 /** Apre un PDF da Blob/ArrayBuffer. Ricorda di chiamare closePdf() alla fine. */
 export async function openPdf(data) {
   const lib = await loadPdfjs();
-  const buf = data instanceof Blob ? await data.arrayBuffer() : data;
+  // copia: PDF.js "consuma" il buffer che riceve, e quello originale può servire ancora
+  const buf = data instanceof Blob ? await data.arrayBuffer() : data.slice(0);
   return lib.getDocument({ data: new Uint8Array(buf), isEvalSupported: false }).promise;
 }
 
