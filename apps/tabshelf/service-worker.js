@@ -15,7 +15,7 @@
  * "tabshelf-app-"; all'attivazione vengono cancellate solo quelle vecchie con questo
  * prefisso (mai le cache delle altre app, né la cache delle miniature "tabshelf-thumbs-…").
  */
-const CACHE_VERSION = 'tabshelf-app-v1';
+const CACHE_VERSION = 'tabshelf-app-v2';
 const APP_CACHE_PREFIX = 'tabshelf-app-';
 
 const CORE = [
@@ -35,8 +35,20 @@ const CORE = [
   './js/sb.js',
   './js/storage.js',
   './js/store.js',
+  './js/actions.js',
+  './js/images.js',
+  './js/pdf.js',
+  './js/tagpicker.js',
+  './js/filter.js',
+  './js/docgrid.js',
+  './js/bulk.js',
   './js/views/placeholder.js',
   './js/views/settings.js',
+  './js/views/library.js',
+  './js/views/docsheet.js',
+  './js/views/upload.js',
+  './js/views/tags.js',
+  './js/views/trash.js',
   '../../assets/css/app-nav.css',
 ];
 

@@ -13,6 +13,14 @@ import { esc, h, errorMessage } from './js/util.js';
 import { toast, toastError } from './js/ui.js';
 import { renderSettings } from './js/views/settings.js';
 import { renderPlaceholder } from './js/views/placeholder.js';
+import { renderLibrary } from './js/views/library.js';
+import { renderUpload, addFiles } from './js/views/upload.js';
+import { renderTags } from './js/views/tags.js';
+import { renderTrash } from './js/views/trash.js';
+import { SPACE } from './js/config.js';
+import { formatBytes } from './js/util.js';
+import { setBanner } from './js/ui.js';
+import { spaceUsage } from './js/store.js';
 
 const main = document.getElementById('main');
 const nav = document.getElementById('main-nav');
@@ -22,11 +30,11 @@ export const session = { user: null, config: null };
 /** Sezioni dell'app: nome nell'indirizzo -> funzione che disegna la pagina. */
 const ROUTES = {
   visualizza: (el) => renderPlaceholder(el, 'Visualizza', 'La griglia con i filtri, le raccolte preferite e lo schermo intero arriveranno nella fase 3.'),
-  carica: (el) => renderPlaceholder(el, 'Carica', 'Il caricamento di immagini e PDF arriverà nella fase 2.'),
-  'da-classificare': (el) => renderPlaceholder(el, 'Da classificare', 'L\'elenco dei documenti senza tag arriverà nella fase 2.'),
-  libreria: (el) => renderPlaceholder(el, 'Libreria', 'La libreria completa con ricerca e azioni in blocco arriverà nella fase 2.'),
-  tag: (el) => renderPlaceholder(el, 'Tag', 'La gestione di categorie e tag arriverà nella fase 2.'),
-  cestino: (el) => renderPlaceholder(el, 'Cestino', 'Il cestino arriverà nella fase 2.'),
+  carica: (el) => renderUpload(el),
+  'da-classificare': (el) => renderLibrary(el, { mode: 'unclassified' }),
+  libreria: (el) => renderLibrary(el, { mode: 'all' }),
+  tag: (el) => renderTags(el),
+  cestino: (el) => renderTrash(el),
   impostazioni: (el) => renderSettings(el, { session, onSignOut: doSignOut, onDisconnect: doDisconnect }),
 };
 
@@ -131,7 +139,33 @@ function updateBadges() {
   const b = document.getElementById('badge-unclassified');
   b.textContent = String(n);
   b.classList.toggle('zero', n === 0);
+  updateSpaceBanner();
 }
+
+/** Avviso quando il cestino o lo spazio totale superano le soglie (js/config.js). */
+function updateSpaceBanner() {
+  const sp = spaceUsage();
+  const msgs = [];
+  if (sp.trash > SPACE.trashWarnBytes) {
+    msgs.push(`Il cestino occupa <strong>${formatBytes(sp.trash)}</strong>: <a href="#/cestino">svuotalo</a> per liberare spazio.`);
+  }
+  if (sp.total > SPACE.quotaBytes * SPACE.quotaWarnRatio) {
+    msgs.push(`Stai usando <strong>${formatBytes(sp.total)}</strong> su ${formatBytes(SPACE.quotaBytes)} disponibili nel piano gratuito.`);
+  }
+  setBanner('space', msgs.length ? `⚠ ${msgs.join(' ')}` : '');
+}
+
+/* File trascinati in qualsiasi pagina: si va in "Carica" (invece di aprirli nel browser). */
+window.addEventListener('dragover', (e) => {
+  if (session.user && [...(e.dataTransfer?.types || [])].includes('Files')) e.preventDefault();
+});
+window.addEventListener('drop', (e) => {
+  if (!session.user || !e.dataTransfer?.files?.length) return;
+  e.preventDefault();
+  if (main.dataset.route === 'carica') return; // ci pensa la pagina Carica
+  addFiles(e.dataTransfer.files);
+  location.hash = '#/carica';
+});
 
 /* ================================================================ SCHERMATE DI ACCESSO */
 

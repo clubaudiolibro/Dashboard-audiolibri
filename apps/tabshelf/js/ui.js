@@ -17,6 +17,7 @@ export function toast(message, { type = 'info', duration, action } = {}) {
   el.querySelector('.toast-close').onclick = close;
   if (action) el.querySelector('.toast-action').onclick = () => { close(); action.onClick(); };
   host.appendChild(el);
+  while (host.children.length > 3) host.firstElementChild.remove(); // al massimo 3 notifiche visibili
   const ms = duration ?? (type === 'error' ? 7000 : action ? 8000 : 3500);
   if (ms > 0) setTimeout(close, ms);
   return close;
