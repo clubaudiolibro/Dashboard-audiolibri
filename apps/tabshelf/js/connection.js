@@ -38,6 +38,8 @@ export function validateConfig(rawUrl, rawKey) {
   let parsed;
   try { parsed = new URL(url); } catch { throw new Error('Il Project URL non è un indirizzo valido.'); }
   if (parsed.protocol !== 'https:') throw new Error('Il Project URL deve iniziare con https://');
+  // Il pannello di Supabase a volte mostra l'indirizzo con /rest/v1/ in fondo: lo togliamo noi.
+  parsed = new URL(parsed.origin + parsed.pathname.replace(/\/(rest|auth|storage)\/v1\/?$/i, '/'));
   if (parsed.pathname !== '/' && parsed.pathname !== '') {
     throw new Error('Incolla solo l\'indirizzo del progetto, senza percorsi (es. https://xxxx.supabase.co).');
   }
