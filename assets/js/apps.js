@@ -74,6 +74,7 @@ const APPS = [
           version, text (descrizione brevissima).
    ===================================================================== */
 const CHANGELOG = [
+  { date: "2026-11-14", app: "toolbox", version: "1.1", text: "Nuova icona del sito (valigetta della Toolbox)." },
   { date: "2026-11-14", app: "toolbox", version: "1.0", text: "Versione degli strumenti sulle card e registro delle versioni." },
   { date: "2026-11-14", app: "tabshelf", version: "1.0", text: "Prima versione: tag in categorie, caricamento dal PC, visualizzazione per tablet, raccolte preferite, backup. Sostituisce Guitar Tab Library." },
   { date: "2026-11-14", app: "audiolibri", version: "1.0", text: "Versione di partenza registrata." },
