@@ -20,6 +20,7 @@ export function renderLibrary(el, { mode = 'all' } = {}) {
     <div class="page-head">
       <h1>${unclassified ? 'Da classificare' : 'Libreria'}</h1>
       <span class="count muted" aria-live="polite"></span>
+      ${unclassified ? '' : '<a class="btn" href="#/impostazioni/backup" title="Crea un backup .zip di tutta la libreria">⬇ Backup</a>'}
       <div class="seg" role="group" aria-label="Vista">
         <button type="button" class="btn" data-layout="grid" aria-pressed="${layout === 'grid'}">Griglia</button>
         <button type="button" class="btn" data-layout="list" aria-pressed="${layout === 'list'}">Elenco</button>

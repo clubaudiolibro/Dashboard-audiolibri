@@ -7,7 +7,9 @@ import { checkSchema } from '../sb.js';
 import { storageSelfTest, clearLocalCache, localCacheInfo } from '../storage.js';
 import { state, activeDocuments, activeCategories, activeTags, spaceUsage } from '../store.js';
 import { esc, h, copyText, formatBytes, errorMessage } from '../util.js';
-import { toast, openDialog } from '../ui.js';
+import { toast, toastError, openDialog } from '../ui.js';
+import { runBackup } from '../backup.js';
+import { spaceSummaryHtml } from './trash.js';
 
 export function renderSettings(el, { session, onSignOut, onDisconnect }) {
   const host = (() => { try { return new URL(session.config.url).host; } catch { return '—'; } })();
@@ -40,9 +42,22 @@ export function renderSettings(el, { session, onSignOut, onDisconnect }) {
       <ul class="checklist" data-out="verify"></ul>
     </div>
 
+    <div class="panel" id="backup">
+      <h2>Backup</h2>
+      <p>Crea un file <strong>.zip</strong> con tutti i documenti (esclusi quelli nel cestino), un elenco
+        <strong>documenti.csv</strong> apribile in Excel e il file <strong>tabshelf-dati.json</strong> con tag,
+        categorie, associazioni e raccolte. Consigliato dal PC.</p>
+      <div class="row-actions"><button type="button" class="btn primary" data-act="backup">Crea backup</button></div>
+      <div class="backup-progress" hidden>
+        <div class="progress"><div class="bar"></div></div>
+        <p class="muted small" data-out="backup"></p>
+      </div>
+    </div>
+
     <div class="panel">
       <h2>Dati e spazio</h2>
       <dl class="facts" data-out="facts"></dl>
+      <div data-out="space"></div>
     </div>
 
     <div class="panel">
@@ -74,6 +89,26 @@ export function renderSettings(el, { session, onSignOut, onDisconnect }) {
     <dt>Tag</dt><dd>${activeTags().length}</dd>
     <dt>Raccolte preferite</dt><dd>${state.collections.length}</dd>
     <dt>Spazio occupato</dt><dd>${formatBytes(sp.total)} (di cui nel cestino ${formatBytes(sp.trash)})</dd>`;
+  page.querySelector('[data-out=space]').innerHTML = spaceSummaryHtml();
+
+  const bBtn = page.querySelector('[data-act=backup]');
+  bBtn.onclick = async () => {
+    const box = page.querySelector('.backup-progress');
+    const bar = box.querySelector('.bar'); const txt = box.querySelector('[data-out=backup]');
+    bBtn.disabled = true; box.hidden = false; bar.style.width = '0%'; txt.textContent = 'Preparazione…';
+    try {
+      const r = await runBackup((p) => { bar.style.width = `${Math.round(p.percent)}%`; txt.textContent = p.text; });
+      if (!r) { box.hidden = true; return; }
+      txt.textContent = r.failed.length
+        ? `Backup creato con ${r.files - r.failed.length} documenti su ${r.files}: ${r.failed.length} file non scaricati (elencati in FILE-MANCANTI.txt).`
+        : `Backup creato: ${r.files} documenti${r.savedAs === 'download' ? ' (lo trovi nella cartella Download)' : ''}.`;
+      toast('Backup completato.', { type: r.failed.length ? 'warn' : 'ok' });
+    } catch (e) {
+      txt.textContent = `Backup non riuscito: ${errorMessage(e)}`;
+      toastError(e, 'Backup non riuscito');
+    } finally { bBtn.disabled = false; }
+  };
+  if (location.hash.includes('backup')) setTimeout(() => page.querySelector('#backup').scrollIntoView({ block: 'start' }), 50);
 
   const cacheOut = page.querySelector('[data-out=cache]');
   const refreshCache = () => localCacheInfo().then((i) => { cacheOut.textContent = `Miniature salvate: ${i.count}`; });

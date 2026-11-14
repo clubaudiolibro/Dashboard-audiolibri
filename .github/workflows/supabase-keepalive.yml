@@ -1,0 +1,46 @@
+# Tiene attivo il progetto Supabase di TabShelf.
+# Nel piano gratuito Supabase mette in pausa i progetti senza attività per 7 giorni:
+# ogni 3 giorni questo workflow fa una richiesta leggerissima (funzione tabshelf_ping,
+# che non legge né scrive dati).
+#
+# Richiede due "secrets" del repository (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL       il Project URL (https://<id-progetto>.supabase.co)
+#   SUPABASE_ANON_KEY  la chiave PUBBLICA (publishable o anon), MAI quella secret/service_role
+# Se mancano, il workflow termina senza errore.
+#
+# Attenzione: GitHub disattiva i workflow programmati dopo 60 giorni senza attività
+# nel repository (nessun commit). In quel caso va riattivato dalla scheda Actions.
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"   # ogni 3 giorni alle 06:17 UTC
+  workflow_dispatch: {}       # avviabile a mano dalla scheda Actions
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Richiesta leggera all'API REST di Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Secrets SUPABASE_URL e/o SUPABASE_ANON_KEY non impostati: nulla da fare."
+            exit 0
+          fi
+          URL="${SUPABASE_URL%/}"
+          URL="${URL%/rest/v1}"
+          STATUS=$(curl -sS -o /tmp/risposta.txt -w "%{http_code}" --max-time 30 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            "$URL/rest/v1/rpc/tabshelf_ping" || true)
+          echo "Risposta di Supabase: HTTP $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Supabase non ha risposto correttamente (HTTP $STATUS). Il progetto potrebbe essere in pausa: riattivalo dal pannello di Supabase."
+            exit 1
+          fi
+          echo "Progetto Supabase attivo."

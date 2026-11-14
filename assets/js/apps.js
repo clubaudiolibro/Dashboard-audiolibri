@@ -48,13 +48,13 @@ const APPS = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16M17 9h1M17 13h1"/><rect x="6" y="8" width="5" height="5" rx="1"/></svg>'
   },
   {
-    id: "tablature",
-    title: "Guitar Tab Library",
-    description: "Archivio locale e offline delle tue tablature: categorie, CAGED, tonalità, modalità pratica, backup e raccolte PDF.",
-    url: "./apps/tablature/index.html",
+    id: "tabshelf",
+    title: "TabShelf",
+    description: "Libreria di tablature con tag e filtri: carichi dal PC, studi dal tablet.",
+    url: "./apps/tabshelf/index.html",
     category: "chitarra",
     featured: false,
-    tags: ["Offline", "Immagini / PDF", "Backup ZIP"],
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 9h18M3 13h18M3 17h18M3 21h18"/><circle cx="9" cy="9" r="1.6" fill="currentColor"/><circle cx="15" cy="17" r="1.6" fill="currentColor"/></svg>'
+    tags: ["Tag", "Immagini / PDF", "PC + tablet"],
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="3" height="13" rx="1"/><rect x="8.5" y="7" width="3" height="11" rx="1"/><path d="M3 21h18"/><path d="M17 16V6l3 1"/><circle cx="15.5" cy="16" r="1.6"/></svg>'
   }
 ];

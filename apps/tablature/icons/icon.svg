@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#2f5bd8"/>
-  <g stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity=".92"><path d="M84 130h344M84 178h344M84 226h344M84 274h344M84 322h344M84 370h344"/></g>
-  <g fill="#2f5bd8"><rect x="132" y="204" width="64" height="44" rx="10"/><rect x="236" y="300" width="64" height="44" rx="10"/><rect x="340" y="108" width="64" height="44" rx="10"/></g>
-  <g fill="#ffffff" font-family="ui-monospace,Menlo,Consolas,monospace" font-weight="700" font-size="44" text-anchor="middle"><text x="164" y="248">5</text><text x="268" y="344">3</text><text x="372" y="152">7</text></g></svg>
