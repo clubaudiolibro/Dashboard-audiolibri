@@ -68,6 +68,11 @@
     open.setAttribute("aria-hidden", "true");
     open.appendChild(el("span", null, "Apri"));
     open.insertAdjacentHTML("beforeend", ARROW);
+    if (app.version) {
+      const v = el("span", "app-ver", "v" + app.version);
+      v.title = "Versione " + app.version;
+      open.appendChild(v);
+    }
 
     a.append(top, body, open);
     return a;
@@ -81,6 +86,26 @@
     grid.textContent = "";
     feat.forEach(app => grid.appendChild(card(app)));
     sec.hidden = feat.length === 0;
+  }
+
+  /* ---------- Registro delle versioni ---------- */
+  function renderChangelog() {
+    const list = document.getElementById("changelog-list");
+    const log = (typeof CHANGELOG !== "undefined" && Array.isArray(CHANGELOG)) ? CHANGELOG : [];
+    if (!list) return;
+    if (!log.length) { list.closest("details").hidden = true; return; }
+    const names = {};
+    LIST.forEach(a => { names[a.id] = a.title; });
+    names.toolbox = "Toolbox";
+    list.textContent = "";
+    log.forEach(e => {
+      const li = el("li");
+      const d = new Date(e.date + "T12:00:00");
+      li.appendChild(el("time", "log-date", isNaN(d) ? e.date : d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })));
+      li.appendChild(el("strong", null, (names[e.app] || e.app) + " v" + e.version));
+      li.appendChild(el("span", null, e.text));
+      list.appendChild(li);
+    });
   }
 
   /* ---------- Filtri + griglia ---------- */
@@ -148,6 +173,7 @@
 
     renderFeatured();
     renderFilters();
+    renderChangelog();
 
     const b = document.getElementById("btn-install");
     if (b) b.addEventListener("click", async () => {

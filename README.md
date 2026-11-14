@@ -22,9 +22,19 @@ Tutti i percorsi sono relativi: il sito funziona sia nella root del dominio sia 
 - Diario: l'ultimo CSV caricato viene ricordato in questo browser (opzione «Memorizza il CSV in questo browser», attiva di default, disattivabile dalle Impostazioni del Diario). Un nuovo CSV sostituisce il precedente.
 - Citazioni: ricorda impostazioni, template e copertine; le citazioni si caricano a ogni sessione.
 
+## Versioni e registro delle versioni
+- Ogni strumento ha una versione (campo `version` in `assets/js/apps.js`), mostrata sulla sua card nella homepage.
+- **Regola: ogni aggiornamento di uno strumento deve incrementare la sua versione** (`1.0` → `1.1` per
+  modifiche piccole, → `2.0` per cambiamenti grandi) **e aggiungere una riga in cima a `CHANGELOG`**, sempre in
+  `assets/js/apps.js` (data, id dello strumento, versione, descrizione brevissima). Le modifiche alla homepage
+  stessa usano l'id `toolbox`.
+- In fondo alla homepage, «Registro delle versioni» mostra questo storico.
+- TabShelf ha la sua versione anche in `apps/tabshelf/js/config.js` (`APP_VERSION`, visibile nelle Impostazioni
+  e nei backup): va tenuta uguale a quella di `apps.js`.
+
 ## Aggiungere un nuovo strumento
 1. Crea `apps/<id>/index.html`.
-2. Aggiungi una voce in `assets/js/apps.js` (id, title, description, url, icon, tags).
+2. Aggiungi una voce in `assets/js/apps.js` (id, title, description, url, icon, tags, version `"1.0"`) e una riga in `CHANGELOG`.
 3. (Consigliato) nell'`<head>` del nuovo strumento includi manifest, icone e `assets/css/app-nav.css` con percorsi `../../`, e nell'header il link `.home-link` verso `../../index.html`.
 
 ## TabShelf
@@ -121,7 +131,7 @@ FILE-MANCANTI.txt     (solo se qualche file non è stato scaricato)
 ```json
 {
   "app": "TabShelf",
-  "app_version": "1.0.0",
+  "app_version": "1.0",
   "schema_version": 2,
   "exported_at": "2026-01-31T10:00:00.000Z",
   "categories":    [{ "id": "…", "name": "Genere", "sort_order": 10, "created_at": "…" }],

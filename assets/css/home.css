@@ -123,10 +123,19 @@ main{flex:1}
 }
 .app-open svg{width:16px;height:16px;transition:transform .18s}
 .app-card:hover .app-open svg{transform:translateX(3px)}
+.app-ver{margin-left:auto;font-size:.74rem;font-weight:500;color:var(--faint);font-variant-numeric:tabular-nums}
 
 /* Footer */
 .home-footer{border-top:1px solid var(--border);font-size:.8rem;color:var(--faint)}
-.home-footer .wrap{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;padding-top:18px;padding-bottom:22px}
+.home-footer .wrap{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;align-items:flex-start;padding-top:18px;padding-bottom:22px}
+.logbook{max-width:640px}
+.logbook summary{cursor:pointer;color:var(--muted)}
+.logbook summary:hover{color:var(--text)}
+.logbook ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.logbook li{display:flex;flex-wrap:wrap;gap:2px 8px;line-height:1.45}
+.logbook .log-date{color:var(--faint);font-variant-numeric:tabular-nums}
+.logbook strong{color:var(--muted);font-weight:600}
+.logbook li span{color:var(--muted);flex-basis:100%}
 
 /* Smartphone */
 @media (max-width:640px){
