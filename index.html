@@ -17,10 +17,14 @@
   try{var t=localStorage.getItem("toolbox.theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}
 </script>
 <link rel="stylesheet" href="assets/css/home.css">
+<script src="assets/js/toolbox-config.js" defer></script>
+<script src="assets/js/toolbox-auth.js" defer></script>
 <script src="assets/js/apps.js" defer></script>
 <script src="assets/js/home.js" defer></script>
+<script src="assets/js/home-login.js" defer></script>
 </head>
-<body>
+<body class="locked">
+<script>try{var s=JSON.parse(localStorage.getItem("tabshelf.auth")||"null");if(s&&(s.access_token||s.refresh_token))document.body.classList.remove("locked")}catch(e){}</script>
 <header class="home-header">
   <div class="wrap">
     <div class="brand">
@@ -31,6 +35,9 @@
     </div>
     <div class="header-actions">
       <button class="btn-icon" id="btn-theme" type="button" title="Tema" aria-label="Tema"></button>
+      <button class="btn-icon" id="btn-logout" type="button" hidden title="Esci" aria-label="Esci">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
       <button class="btn-install" id="btn-install" type="button" hidden title="Installa come app su questo dispositivo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
         Installa
@@ -38,6 +45,22 @@
     </div>
   </div>
 </header>
+
+<main id="login-main" class="login-main" hidden>
+  <form id="login-form" class="login-card" autocomplete="on" novalidate>
+    <h1>Accedi</h1>
+    <p class="login-note">Accesso personale alla Toolbox.</p>
+    <div id="login-config" class="login-config" hidden>
+      <p class="login-hint">Primo accesso su questo dispositivo: incolla i dati del progetto Supabase (chiave pubblica, mai quella segreta).</p>
+      <label>Project URL <input type="url" id="login-url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://xxxx.supabase.co"></label>
+      <label>Chiave pubblica <input type="text" id="login-key" autocapitalize="off" spellcheck="false" placeholder="sb_publishable_..."></label>
+    </div>
+    <label>Email <input type="email" id="login-email" autocomplete="username" autocapitalize="off" required></label>
+    <label>Password <input type="password" id="login-password" autocomplete="current-password" required></label>
+    <p id="login-error" class="login-error" role="alert" hidden></p>
+    <button id="login-submit" class="btn-primary" type="submit">Accedi</button>
+  </form>
+</main>
 
 <main id="main">
   <div class="wrap">

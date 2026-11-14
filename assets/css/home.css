@@ -147,3 +147,23 @@ main{flex:1}
   .btn-install{padding:0;width:38px;font-size:0;gap:0}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- Accesso ---------- */
+body.locked #main,body.locked .home-footer{display:none}
+.login-main{flex:1;display:grid;place-items:center;padding:32px 20px}
+.login-main[hidden]{display:none}
+.login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 24px;display:flex;flex-direction:column;gap:14px}
+.login-card h1{margin:0;font-family:var(--font-serif);font-size:1.5rem;font-weight:600;letter-spacing:-.01em}
+.login-note{margin:0;color:var(--muted);font-size:.92rem}
+.login-card label{display:flex;flex-direction:column;gap:6px;font-size:.88rem;color:var(--muted)}
+.login-card input{font:inherit;font-size:1rem;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.65em .8em;min-height:44px}
+.login-card input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.login-config{display:flex;flex-direction:column;gap:14px;padding:12px;border:1px dashed var(--border);border-radius:12px}
+.login-config[hidden],.login-error[hidden]{display:none}
+.login-hint{margin:0;font-size:.82rem;color:var(--faint)}
+.login-error{margin:0;color:#a3352f;font-size:.9rem}
+:root[data-theme="dark"] .login-error{color:#e08a80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .login-error{color:#e08a80}}
+.btn-primary{cursor:pointer;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:600;min-height:44px;padding:.6em 1em}
+.btn-primary:disabled{opacity:.6;cursor:default}
+.btn-icon[hidden]{display:none}

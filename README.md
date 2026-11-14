@@ -1,4 +1,4 @@
-# Dashboard Audiolibri
+# Toolbox Alessandro
 
 Web app statica (PWA installabile) che raccoglie:
 
@@ -9,7 +9,18 @@ Web app statica (PWA installabile) che raccoglie:
 - `apps/tablature/` — contiene solo il reindirizzamento a TabShelf della vecchia *Guitar Tab Library* (vedi «Vecchia Guitar Tab Library»)
 
 Nessun build step e nessun framework: HTML, CSS e JavaScript (moduli ES) con percorsi relativi.
-Gli strumenti elaborano i file nel browser; solo TabShelf salva dati online, nel progetto Supabase personale dell'utente.
+Gli strumenti elaborano i file nel browser. I dati online (TabShelf e archivio audiolibri sincronizzato da Notion) stanno nel progetto Supabase personale e si vedono solo dopo il login.
+
+## Accesso (login unico)
+- Il login con email e password si fa **una sola volta nella home**; poi tutte le app si aprono senza altre richieste. Se si apre un'app direttamente senza sessione, si viene rimandati alla home e poi riportati all'app.
+- Gli utenti sono quelli del progetto Supabase (gli stessi di TabShelf): non si creano account in più. Le nuove registrazioni vanno tenute disattivate.
+- `assets/js/toolbox-auth.js` gestisce client e sessione (stessi nomi di memoria di TabShelf, `tabshelf.config` e `tabshelf.auth`); `assets/js/toolbox-guard.js` è il controllo d'ingresso delle singole app.
+- URL del progetto e chiave **pubblica** (mai la secret/service_role) si possono scrivere in `assets/js/toolbox-config.js`; se restano vuoti li chiede la schermata di accesso, una volta per dispositivo.
+- Il login protegge la navigazione; la protezione vera dei dati è RLS su Supabase (nessun dato sta in questa repo pubblica).
+
+## Archivio audiolibri nel cloud
+Ogni notte alle 03:00 la repo privata `dashboard-audiolibri-automation` copia il database Notion nella tabella Supabase `audiolibri`. Il Diario degli Audiolibri la legge all'apertura (`apps/audiolibri/cloud.js`) e usa la stessa importazione del CSV. Se il cloud non risponde restano i dati ricordati nel browser, e il caricamento manuale del CSV funziona sempre.
+Preparazione del database: `supabase/audiolibri.sql` (una volta sola, nel SQL Editor di Supabase).
 
 ## Pubblicazione su GitHub Pages
 1. Carica il contenuto di questa cartella nella root del repository (es. `dashboard-audiolibri`).
@@ -35,7 +46,8 @@ Tutti i percorsi sono relativi: il sito funziona sia nella root del dominio sia 
 ## Aggiungere un nuovo strumento
 1. Crea `apps/<id>/index.html`.
 2. Aggiungi una voce in `assets/js/apps.js` (id, title, description, url, icon, tags, version `"1.0"`) e una riga in `CHANGELOG`.
-3. (Consigliato) nell'`<head>` del nuovo strumento includi manifest, icone e `assets/css/app-nav.css` con percorsi `../../`, e nell'header il link `.home-link` verso `../../index.html`.
+3. Per richiedere l'accesso dalla home, nell'`<head>` aggiungi `<script src="../../assets/js/toolbox-guard.js"></script>`. Se lo strumento ha dati online: crea la tabella in `supabase/<nome>.sql` con RLS attiva, nessun permesso ad `anon` e una policy per `authenticated`; nel frontend usa `await Toolbox.getClient()` (`assets/js/toolbox-auth.js`).
+4. (Consigliato) nell'`<head>` del nuovo strumento includi manifest, icone e `assets/css/app-nav.css` con percorsi `../../`, e nell'header il link `.home-link` verso `../../index.html`.
 
 ## TabShelf
 
