@@ -23,9 +23,9 @@ Ogni notte alle 03:00 la repo privata `dashboard-audiolibri-automation` copia il
 Preparazione del database: `supabase/audiolibri.sql` (una volta sola, nel SQL Editor di Supabase).
 
 ## Pubblicazione su GitHub Pages
-1. Carica il contenuto di questa cartella nella root del repository (es. `dashboard-audiolibri`).
+1. Carica il contenuto di questa cartella nella root del repository (es. `toolkit`).
 2. Settings → Pages → Source: *Deploy from a branch* → branch `main`, cartella `/ (root)`.
-3. Apri `https://<utente>.github.io/dashboard-audiolibri/`.
+3. Apri `https://<utente>.github.io/toolkit/`.
 
 Tutti i percorsi sono relativi: il sito funziona sia nella root del dominio sia in una sottocartella.
 
